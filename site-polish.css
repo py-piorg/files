@@ -157,3 +157,12 @@ section{padding:104px 0;}
 .gallery-filter button{border-radius:3px;background:transparent;border-color:#d9d4d2;color:var(--ink);}
 .gallery-filter button.active{background:var(--ink);border-color:var(--ink);}
 @media(max-width:560px){.hero{min-height:640px}.hero h1{font-size:42px}.hero p{font-size:16px}section{padding:72px 0}.section-head{margin-bottom:34px}}
+/* Glass navigation: reserve translucency for interface chrome, keep content opaque. */
+.site-header{background:rgba(255,255,255,.72);border-color:rgba(23,20,22,.12);}
+.site-header:after{content:"";position:absolute;inset:0;pointer-events:none;border-bottom:1px solid rgba(255,255,255,.7);}
+.header-inner{position:relative;z-index:1;}
+.main-nav a{transition:opacity .2s ease,color .2s ease;}
+.main-nav a:hover,.main-nav a.active{color:var(--wine);}
+.gallery-filter{position:sticky;top:88px;z-index:5;padding:8px;width:max-content;max-width:100%;border:1px solid rgba(23,20,22,.1);border-radius:8px;background:rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
+@supports not ((backdrop-filter:blur(1px))){.site-header,.gallery-filter{background:#fff;}}
+@media(prefers-reduced-motion:reduce){.site-header,.gallery-filter{backdrop-filter:none;-webkit-backdrop-filter:none;}}
