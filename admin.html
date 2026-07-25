@@ -220,6 +220,23 @@ table.dt tr:hover td{background:var(--panel-2);}
   .stat-grid{grid-template-columns:1fr 1fr;}
 }
 
+/* Modern operations-console pass */
+:root{--bg:#f5f2f1;--panel:#fff;--panel-2:#faf7f6;--panel-3:#f0e9e9;--border:#e8dfe0;--text:#24181b;--text-dim:#75676a;--text-faint:#a19497;--wine:#681126;--wine-500:#a5223b;--gold:#c7963e;--safe:#258348;--safe-pale:#e7f5ec;--warn:#b97612;--warn-pale:#fff4dc;--danger:#bd3e3e;--danger-pale:#fdeaea}
+body{background:var(--bg);color:var(--text);font-size:13px}
+a{color:var(--wine-500)}h1,h2,h3,h4{color:var(--text)}p{color:var(--text-dim)}
+.login-screen{background:radial-gradient(circle at 18% 12%,#fff7f2 0,#f5f2f1 48%,#eee5e4 100%)}
+.login-card{max-width:460px;background:rgba(255,255,255,.9);border:1px solid #e4d8da;border-radius:18px;padding:42px;box-shadow:0 30px 90px rgba(66,17,29,.15)}
+.login-logo img{height:64px}.login-logo b{color:var(--wine);font-size:18px}.login-logo span{color:var(--text-dim)}
+.field label{color:var(--text-dim)}.field select,.field input,.field textarea{background:#fff;border-color:#ded1d3;color:var(--text);padding:13px 14px;border-radius:7px}.field select:focus,.field input:focus,.field textarea:focus{border-color:var(--wine-500);box-shadow:0 0 0 4px rgba(165,34,59,.1)}
+.btn{border-radius:7px;padding:12px 17px}.btn-primary{background:var(--wine-500);box-shadow:0 9px 20px rgba(165,34,59,.18)}.btn-primary:hover{background:var(--wine)}.btn-ghost{background:#fff;color:var(--text);border-color:var(--border)}.btn-ghost:hover{background:var(--panel-3)}
+.shell{background:var(--bg)}.sidebar{width:256px;background:#fff;border-right:1px solid var(--border);box-shadow:8px 0 28px rgba(59,15,27,.04)}.sidebar-top{padding:23px 22px 19px;border-color:var(--border)}.sidebar-top img{height:38px;width:38px;object-fit:contain}.sidebar-top b{color:var(--wine);font-size:14px;letter-spacing:.05em}.sidebar-context{padding:18px 22px;border-color:var(--border);background:#fffaf9}.sidebar-context .ctx-label{color:var(--text-faint)}.sidebar-context .ctx-val{color:var(--text)}.sidebar-context .ctx-role{background:var(--wine-100);color:var(--wine)}
+.navlist{padding:17px 13px}.navlist button{color:var(--text-dim);padding:11px 13px;border-radius:7px}.navlist button:hover{background:var(--panel-2);color:var(--text)}.navlist button.active{background:var(--wine-500);color:#fff;box-shadow:0 8px 16px rgba(165,34,59,.16)}.navlist .navcount{color:var(--text-faint)}.sidebar-bottom{padding:16px 18px;border-color:var(--border)}
+.main{padding:32px 42px 70px}.view-head{margin-bottom:26px}.view-head h2{font-size:28px;letter-spacing:-.03em}.view-head p{font-size:13px}.panel,.stat-card{background:#fff;border-color:var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(59,15,27,.045)}.panel{padding:22px 24px}.panel h3{font-size:15px;color:var(--text)}.notice{background:#fff9ed;border-color:#e8cb87;color:var(--text-dim);border-radius:8px}.notice b{color:#986b18}.stat-grid{gap:16px;margin-bottom:28px}.stat-card{padding:19px 20px}.stat-card .n{color:var(--wine);font-size:29px}.stat-card .l{color:var(--text-dim)}.stat-card .n.safe{color:var(--safe)}.stat-card .n.warn{color:var(--warn)}.stat-card .n.danger{color:var(--danger)}
+table.dt th{color:var(--text-faint);border-color:var(--border)}table.dt td{color:var(--text);border-color:var(--border)}table.dt tr:hover td{background:#fff9f8}.mono{color:var(--text-dim)}.empty-row td{color:var(--text-faint)}.badge-safe{background:var(--safe-pale);color:var(--safe)}.badge-warn{background:var(--warn-pale);color:var(--warn)}.badge-danger{background:var(--danger-pale);color:var(--danger)}.badge-neutral{background:var(--panel-3);color:var(--text-dim)}
+.avatar{background:linear-gradient(135deg,var(--wine-500),var(--wine));}.toast{background:var(--text);border-color:var(--text);box-shadow:0 15px 35px rgba(0,0,0,.18)}
+@media(max-width:920px){.main{padding:74px 18px 55px}.sidebar{box-shadow:12px 0 35px rgba(45,8,18,.14)}}
+@media(max-width:700px){.login-screen{padding:16px;align-items:flex-start;padding-top:44px}.login-card{padding:30px 22px;border-radius:14px}.login-note{font-size:11px}.main{padding:70px 12px 42px}.view-head h2{font-size:24px}.view-actions{width:100%}.view-actions .btn{width:100%}.stat-grid{grid-template-columns:1fr 1fr;gap:10px}.stat-card{padding:14px}.stat-card .n{font-size:23px}.stat-card .l{font-size:9px;line-height:1.35}.panel{padding:17px 14px;margin-bottom:16px}.panel h3{font-size:14px}.two-col{gap:14px}.table-wrap{margin:0 -14px;padding:0 14px}table.dt{min-width:640px}.form-grid{gap:10px}.form-grid .span2{grid-column:auto}.field input,.field select,.field textarea{font-size:16px}.mobile-toggle{top:12px;left:auto;right:12px}}
+
 </style>
 </head>
 <body>
@@ -228,7 +245,7 @@ table.dt tr:hover td{background:var(--panel-2);}
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
-      <img src="images/logo.png" alt="Triple A Gas logo" onerror="this.style.display='none'">
+<img src="images/offical_logo.png" alt="Triple A Gas logo">
       <b>TRIPLE A GAS</b>
       <span>Staff Portal</span>
     </div>
@@ -267,7 +284,7 @@ table.dt tr:hover td{background:var(--panel-2);}
 <div class="shell" id="shell" style="display:none;">
   <aside class="sidebar">
     <div class="sidebar-top">
-      <img src="images/logo.png" alt="" style="height:28px;" onerror="this.style.display='none'">
+<img src="images/offical_logo.png" alt="" style="height:28px;">
       <b>TRIPLE A GAS</b>
     </div>
     <div class="sidebar-context">
