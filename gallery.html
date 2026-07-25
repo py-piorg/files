@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery | Triple A Gas</title>
+<meta name="description" content="Photos from Triple A Gas stations across Ghana.">
+<link rel="icon" href="images/logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================
+   TRIPLE A GAS — shared stylesheet (v2)
+   Palette: wine red & white, matched to the real station signage.
+=========================================================== */
+
+:root{
+  /* brand — wine red & white */
+  --wine-900:   #3E0B14;   /* deepest — footer, dark panels */
+  --wine-700:   #6E1524;   /* header, primary dark surfaces */
+  --wine:       #8E1B2C;   /* primary brand red */
+  --wine-500:   #A8283A;   /* CTA / buttons */
+  --wine-300:   #C96A78;   /* light accents on dark */
+  --wine-100:   #F7E7EA;   /* pale tint backgrounds */
+  --gold:       #C79A3D;   /* secondary accent — badges, safety highlights */
+  --gold-pale:  #F8EFDB;
+  --safe:       #2E7D32;
+  --safe-pale:  #E4F1E5;
+
+  /* neutrals (warm, matched to wine undertone) */
+  --ink:        #221417;
+  --steel-700:  #4A3A3D;
+  --steel-500:  #7A6669;
+  --steel-300:  #D9C9CC;
+  --steel-100:  #F3EBEC;
+  --cloud:      #FAF6F7;
+  --paper:      #FFFFFF;
+
+  --display: 'Archivo Expanded', sans-serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --radius: 12px;
+  --container: 1180px;
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:var(--body);
+  color:var(--steel-700);
+  background:var(--cloud);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block;}
+a{color:var(--wine);text-decoration:none;}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);margin:0 0 14px;letter-spacing:-.01em;}
+p{margin:0 0 16px;}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 24px;}
+section{padding:72px 0;}
+.section-tight{padding:48px 0;}
+.eyebrow{
+  font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--wine-500);display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.eyebrow::before{content:"";width:24px;height:2px;background:var(--wine-500);display:inline-block;}
+.section-head{max-width:640px;margin-bottom:40px;}
+.section-head h2{font-size:32px;}
+.section-head p{color:var(--steel-500);font-size:16px;margin-bottom:0;}
+
+/* ---------- motion ---------- */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:none;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes floatPulse{0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.25);}50%{box-shadow:0 8px 30px rgba(37,211,102,.55);}}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease), transform .7s var(--ease);}
+.reveal.in-view{opacity:1;transform:none;}
+.reveal-delay-1.in-view{transition-delay:.08s;}
+.reveal-delay-2.in-view{transition-delay:.16s;}
+.reveal-delay-3.in-view{transition-delay:.24s;}
+.reveal-delay-4.in-view{transition-delay:.32s;}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--body);font-weight:700;font-size:15px;
+  padding:14px 26px;border-radius:9px;border:none;cursor:pointer;
+  text-decoration:none;transition:transform .16s var(--ease), box-shadow .16s var(--ease), background .16s ease;
+  position:relative;overflow:hidden;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(0);}
+.btn-primary{background:var(--wine-500);color:#fff;box-shadow:0 6px 18px rgba(168,40,58,.32);}
+.btn-primary:hover{background:var(--wine);box-shadow:0 10px 24px rgba(168,40,58,.4);}
+.btn-secondary{background:var(--wine-900);color:#fff;}
+.btn-secondary:hover{background:var(--wine-700);}
+.btn-ghost{background:transparent;color:var(--wine-700);border:1.5px solid var(--wine-700);}
+.btn-ghost:hover{background:var(--wine-100);}
+.btn-ghost.on-dark{color:#fff;border-color:rgba(255,255,255,.6);}
+.btn-ghost.on-dark:hover{background:rgba(255,255,255,.12);}
+.btn-whatsapp{background:#25D366;color:#0b3b23;}
+.btn-whatsapp:hover{background:#20bd5a;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;}
+
+/* ---------- header ---------- */
+.site-header{
+  position:sticky;top:0;z-index:50;background:rgba(62,11,20,.97);
+  backdrop-filter:blur(6px);
+  animation:fadeIn .5s ease;
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand img{height:42px;width:auto;}
+.brand-text{font-family:var(--display);font-weight:800;color:#fff;font-size:16px;letter-spacing:.02em;}
+.main-nav{display:flex;align-items:center;gap:28px;}
+.main-nav a{color:#F0DEE1;font-weight:600;font-size:14px;position:relative;padding:4px 0;transition:color .15s ease;}
+.main-nav a::after{content:"";position:absolute;left:0;bottom:-4px;width:0;height:2px;background:var(--gold);transition:width .2s var(--ease);}
+.main-nav a:hover{color:#fff;}
+.main-nav a:hover::after, .main-nav a.active::after{width:100%;}
+.main-nav a.active{color:#fff;}
+.header-cta{display:flex;align-items:center;gap:10px;}
+.header-phone{color:#fff;font-family:var(--mono);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.nav-toggle{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;}
+
+@media (max-width:920px){
+  .main-nav{position:fixed;top:70px;left:0;right:0;bottom:0;background:var(--wine-900);
+    flex-direction:column;align-items:flex-start;padding:24px;gap:4px;
+    transform:translateX(-100%);transition:transform .25s var(--ease);overflow-y:auto;}
+  .main-nav.open{transform:translateX(0);}
+  .main-nav a{padding:12px 8px;width:100%;border-bottom:1px solid rgba(255,255,255,.08);}
+  .nav-toggle{display:block;}
+  .header-cta .btn-ghost-label{display:none;}
+}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative;color:#fff;min-height:560px;display:flex;align-items:flex-end;
+  background-size:cover;background-position:center;overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(30,6,10,.35) 0%, rgba(24,5,9,.6) 55%, rgba(15,3,6,.94) 100%);
+}
+.hero-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:heroZoom 14s ease-out forwards;}
+@keyframes heroZoom{from{transform:scale(1.08);}to{transform:scale(1);}}
+.hero-inner{position:relative;padding:70px 0 56px;max-width:600px;animation:fadeInUp .8s var(--ease) .1s both;}
+.hero .eyebrow{color:var(--gold);}
+.hero .eyebrow::before{background:var(--gold);}
+.hero h1{font-size:46px;line-height:1.08;color:#fff;margin-bottom:16px;}
+.hero p{font-size:17px;color:rgba(255,255,255,.86);max-width:460px;}
+@media (max-width:640px){.hero h1{font-size:32px;}}
+
+.page-hero{
+  position:relative;color:#fff;min-height:280px;display:flex;align-items:flex-end;
+  background-size:cover;background-position:center;overflow:hidden;
+}
+.page-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(30,6,10,.45) 0%, rgba(15,3,6,.88) 100%);}
+.page-hero-inner{position:relative;padding:56px 0 34px;animation:fadeInUp .7s var(--ease) both;}
+.page-hero h1{color:#fff;font-size:34px;margin-bottom:6px;}
+.page-hero p{color:rgba(255,255,255,.85);margin-bottom:0;max-width:560px;}
+
+/* ---------- trust strip ---------- */
+.trust-strip{background:var(--wine-900);color:#fff;padding:26px 0;}
+.trust-grid{display:flex;gap:36px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+.trust-item{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#EAD3D7;}
+.trust-item svg{flex-shrink:0;}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:24px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-5{grid-template-columns:repeat(5,1fr);}
+@media (max-width:1000px){.grid-5{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:880px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr;}}
+
+.card{background:var(--paper);border:1px solid var(--steel-100);border-radius:var(--radius);padding:24px;transition:box-shadow .2s var(--ease), transform .2s var(--ease);}
+.card-shadow{box-shadow:0 4px 24px rgba(62,11,20,.08);}
+.card-hover:hover{box-shadow:0 14px 32px rgba(62,11,20,.14);transform:translateY(-4px);}
+
+.prod-card{background:var(--paper);border:1px solid var(--steel-100);border-radius:var(--radius);padding:26px 22px;text-align:center;transition:box-shadow .2s var(--ease), transform .2s var(--ease);}
+.prod-card:hover{box-shadow:0 14px 32px rgba(62,11,20,.14);transform:translateY(-4px);}
+.prod-card .cyl-icon{width:40px;height:56px;margin:0 auto 16px;background:var(--wine-500);border-radius:9px 9px 4px 4px;position:relative;transition:transform .2s var(--ease);}
+.prod-card:hover .cyl-icon{transform:scale(1.08);}
+.prod-card .cyl-icon::before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:16px;height:11px;background:var(--steel-700);border-radius:3px 3px 0 0;}
+.prod-card h4{font-size:18px;margin-bottom:4px;}
+.prod-card .cyl-note{font-size:13px;color:var(--steel-500);margin-bottom:14px;}
+.prod-card .cyl-price{font-family:var(--mono);font-weight:600;color:var(--wine-500);font-size:15px;}
+
+.safety-card{border-left:3px solid var(--gold);background:var(--gold-pale);border-radius:8px;padding:20px 22px;transition:transform .2s var(--ease);}
+.safety-card:hover{transform:translateX(3px);}
+.safety-card h4{font-size:15px;margin-bottom:6px;}
+.safety-card p{font-size:13.5px;color:var(--steel-700);margin-bottom:0;}
+
+.photo-frame{border-radius:var(--radius);overflow:hidden;position:relative;}
+.photo-frame img{width:100%;height:100%;object-fit:cover;transition:transform .5s var(--ease);}
+.photo-frame:hover img{transform:scale(1.06);}
+.photo-caption{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;
+  background:linear-gradient(0deg, rgba(15,3,6,.78), rgba(15,3,6,0));color:#fff;font-size:12.5px;font-weight:600;}
+
+/* placeholder photo (for locations without real images yet) */
+.photo-placeholder{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(135deg, var(--wine-100) 0%, #fff 60%, var(--wine-100) 100%);
+  color:var(--wine-500);
+}
+.photo-placeholder svg{opacity:.7;}
+.photo-placeholder span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--wine-500);}
+
+/* ---------- station / location card ---------- */
+.station-card{background:var(--paper);border:1px solid var(--steel-100);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s var(--ease), transform .2s var(--ease);}
+.station-card:hover{box-shadow:0 14px 32px rgba(62,11,20,.14);transform:translateY(-4px);}
+.station-card .station-photo{height:170px;}
+.station-body{padding:20px 22px;}
+.station-body h4{font-size:16px;margin-bottom:6px;}
+.station-meta{font-size:13px;color:var(--steel-500);margin-bottom:14px;}
+.station-meta div{display:flex;gap:8px;margin-bottom:4px;}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em;}
+.badge-safe{background:var(--safe-pale);color:var(--safe);}
+.badge-wine{background:var(--wine-100);color:var(--wine-700);}
+.badge-gold{background:var(--gold-pale);color:#8a6a10;}
+
+/* ---------- forms ---------- */
+.form-field{margin-bottom:16px;}
+.form-field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--ink);}
+.form-field input, .form-field select, .form-field textarea{
+  width:100%;padding:13px 14px;border:1.5px solid var(--steel-300);border-radius:9px;
+  font-family:var(--body);font-size:15px;background:#fff;color:var(--ink);
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus{
+  outline:none;border-color:var(--wine-500);box-shadow:0 0 0 3px rgba(168,40,58,.15);
+}
+.form-field textarea{resize:vertical;min-height:110px;}
+
+/* ---------- notice / placeholder marker ---------- */
+.placeholder{background:var(--wine-100);color:var(--wine-700);padding:1px 6px;border-radius:4px;font-weight:700;font-size:.95em;}
+.build-note{
+  background:var(--wine-100);border:1px dashed var(--wine-500);border-radius:10px;
+  padding:16px 18px;font-size:13.5px;color:var(--wine-700);margin:0 0 40px;
+}
+
+/* ---------- leadership ---------- */
+.lead-card{text-align:center;}
+.lead-avatar{
+  width:84px;height:84px;border-radius:50%;margin:0 auto 14px;
+  background:linear-gradient(135deg, var(--wine-500), var(--wine-900));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--display);font-weight:800;font-size:22px;
+  transition:transform .2s var(--ease);
+}
+.lead-card:hover .lead-avatar{transform:scale(1.06) rotate(-2deg);}
+.lead-card h4{font-size:15px;margin-bottom:2px;}
+.lead-card span{font-size:12.5px;color:var(--steel-500);}
+
+/* ---------- footer ---------- */
+.site-footer{background:var(--ink);color:var(--steel-300);padding-top:56px;}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;padding-bottom:40px;}
+@media (max-width:800px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:520px){.footer-grid{grid-template-columns:1fr;}}
+.footer-grid h5{color:#fff;font-family:var(--body);font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
+.footer-grid ul{list-style:none;margin:0;padding:0;}
+.footer-grid li{margin-bottom:9px;font-size:13.5px;}
+.footer-grid a{color:var(--steel-300);}
+.footer-grid a:hover{color:#fff;}
+.footer-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.footer-brand img{height:36px;}
+.footer-brand span{font-family:var(--display);font-weight:800;color:#fff;font-size:15px;}
+.footer-social{display:flex;gap:10px;margin-top:16px;}
+.footer-social a{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;transition:background .15s ease, transform .15s ease;}
+.footer-social a:hover{background:var(--wine-500);transform:translateY(-2px);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding:18px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--steel-500);}
+
+/* ---------- whatsapp float ---------- */
+.wa-float{
+  position:fixed;bottom:22px;right:22px;z-index:60;
+  background:#25D366;color:#fff;width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  animation:floatPulse 2.6s ease-in-out infinite;
+  transition:transform .15s ease;
+}
+.wa-float:hover{transform:scale(1.08);}
+
+/* ---------- misc ---------- */
+.divider{height:1px;background:var(--steel-100);margin:56px 0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+@media (max-width:880px){.two-col{grid-template-columns:1fr;gap:28px;}}
+.stat-block b{font-family:var(--display);font-size:30px;color:var(--wine-500);display:block;}
+.stat-block span{font-size:12px;color:var(--steel-500);text-transform:uppercase;letter-spacing:.06em;}
+
+/* ---------- FAQ accordion ---------- */
+.faq-item{background:var(--paper);border:1px solid var(--steel-100);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.faq-item summary{
+  padding:18px 22px;cursor:pointer;font-weight:700;font-size:15px;color:var(--ink);
+  list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary::after{content:"+";font-size:20px;color:var(--wine-500);flex-shrink:0;transition:transform .2s var(--ease);}
+.faq-item[open] summary::after{transform:rotate(45deg);}
+.faq-item .faq-a{padding:0 22px 20px;font-size:14px;color:var(--steel-700);}
+
+/* ---------- gallery ---------- */
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media (max-width:900px){.gallery-grid{grid-template-columns:repeat(2,1fr);}}
+.gallery-item{border-radius:10px;overflow:hidden;position:relative;cursor:pointer;aspect-ratio:1;}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease);}
+.gallery-item:hover img{transform:scale(1.08);}
+.gallery-item .gtag{position:absolute;bottom:0;left:0;right:0;padding:10px 12px;font-size:11.5px;font-weight:600;color:#fff;
+  background:linear-gradient(0deg, rgba(15,3,6,.8), rgba(15,3,6,0));}
+.gallery-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.gallery-filter button{all:unset;cursor:pointer;padding:8px 16px;border-radius:100px;font-size:12.5px;font-weight:600;background:var(--paper);color:var(--steel-700);border:1px solid var(--steel-300);}
+.gallery-filter button.active{background:var(--wine-500);color:#fff;border-color:var(--wine-500);}
+
+/* ---------- lightbox ---------- */
+.lightbox{position:fixed;inset:0;background:rgba(10,2,4,.92);z-index:100;display:none;align-items:center;justify-content:center;padding:40px;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:90vw;max-height:85vh;border-radius:8px;}
+.lightbox-close{position:absolute;top:24px;right:28px;color:#fff;font-size:32px;background:none;border:none;cursor:pointer;}
+.lightbox-caption{position:absolute;bottom:24px;left:0;right:0;text-align:center;color:#fff;font-size:13px;}
+
+/* ---------- 404 ---------- */
+.error-page{min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:60px 24px;}
+.error-page .code{font-family:var(--display);font-weight:900;font-size:96px;color:var(--wine-100);line-height:1;}
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="index.html" class="brand">
+      <img src="images/logo.png" alt="Triple A Gas logo">
+      <span class="brand-text">TRIPLE A GAS</span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+<a href="about.html">About</a>
+<a href="products.html">Products</a>
+<a href="find-us.html">Find a Station</a>
+<a href="safety.html">Safety</a>
+<a href="contact.html">Contact</a>
+
+    </nav>
+    <div class="header-cta">
+      <span class="header-phone">&#9742; <span class="placeholder" style="background:transparent;color:#F0DEE1;padding:0;">+233 XX XXX XXXX</span></span>
+      <a href="tel:+233000000000" class="btn btn-primary" style="padding:10px 18px;font-size:13.5px;">Call Now</a>
+    </div>
+    <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+  </div>
+</header>
+
+<section class="page-hero" style="background-image:url('images/forecourt-wide.jpg');">
+  <div class="wrap page-hero-inner">
+    <div class="eyebrow" style="color:#C79A3D;">Gallery</div>
+    <h1>See our stations</h1>
+    <p>Accra head office photos are real; branch photos are placeholders until we have confirmed shots for each site.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="gallery-filter reveal" id="galleryFilter">
+      <button class="active" data-filter="all">All</button>
+      <button data-filter="accra">Accra</button>
+      <button data-filter="antoa">Antoa</button>
+      <button data-filter="bonwire">Bonwire</button>
+      <button data-filter="bogoso">Bogoso</button>
+      <button data-filter="prestea">Prestea</button>
+    </div>
+    <div class="gallery-grid reveal" id="galleryGrid">
+      <div class="gallery-item" data-loc="accra"><img src="images/station-front.jpg" alt="Accra HQ — station front"></div>
+<div class="gallery-item" data-loc="accra"><img src="images/station-tanker.jpg" alt="Accra HQ — bulk tanker"></div>
+<div class="gallery-item" data-loc="accra"><img src="images/entrance-gate.jpg" alt="Accra HQ — entrance"></div>
+<div class="gallery-item" data-loc="accra"><img src="images/forecourt-wide.jpg" alt="Accra HQ — forecourt"></div>
+<div class="gallery-item" data-loc="antoa"><img src="images/branch-01.jpg" alt="Antoa — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="antoa"><img src="images/branch-05.jpg" alt="Antoa — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="antoa"><img src="images/branch-09.jpg" alt="Antoa — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="bonwire"><img src="images/branch-02.jpg" alt="Bonwire — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="bonwire"><img src="images/branch-06.jpg" alt="Bonwire — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="bonwire"><img src="images/branch-10.jpg" alt="Bonwire — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="bogoso"><img src="images/branch-03.jpg" alt="Bogoso — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="bogoso"><img src="images/branch-07.jpg" alt="Bogoso — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="prestea"><img src="images/branch-04.jpg" alt="Prestea — placeholder photo"><span class="gtag">Placeholder</span></div>
+<div class="gallery-item" data-loc="prestea"><img src="images/branch-08.jpg" alt="Prestea — placeholder photo"><span class="gtag">Placeholder</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<script>
+(function(){
+  var filterBtns = document.querySelectorAll('#galleryFilter button');
+  var items = document.querySelectorAll('#galleryGrid .gallery-item');
+  filterBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      filterBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var f = btn.dataset.filter;
+      items.forEach(function(it){
+        it.style.display = (f === 'all' || it.dataset.loc === f) ? '' : 'none';
+      });
+    });
+  });
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lightboxImg');
+  var lbCap = document.getElementById('lightboxCaption');
+  items.forEach(function(it){
+    it.addEventListener('click', function(){
+      lbImg.src = it.querySelector('img').src;
+      lbCap.textContent = it.querySelector('img').alt;
+      lb.classList.add('open');
+    });
+  });
+  document.getElementById('lightboxClose').addEventListener('click', function(){ lb.classList.remove('open'); });
+  lb.addEventListener('click', function(e){ if (e.target === lb) lb.classList.remove('open'); });
+})();
+</script>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="reveal">
+        <div class="footer-brand">
+          <img src="images/logo.png" alt="Triple A Gas logo">
+          <span>TRIPLE A GAS</span>
+        </div>
+        <p style="color:#8A7679;font-size:13.5px;max-width:260px;">Reliable LPG cylinder refills, exchange, and taxi/vehicle gas refueling across 5 locations in Ghana. Est. 2005 &middot; Accra HQ.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Instagram">ig</a>
+          <a href="#" aria-label="WhatsApp">wa</a>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-1">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="products.html">Products &amp; Pricing</a></li>
+          <li><a href="safety.html">Safety</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <h5>Locations</h5>
+        <ul>
+          <li><a href="accra.html">Accra</a></li>
+<li><a href="antoa.html">Antoa</a></li>
+<li><a href="bonwire.html">Bonwire</a></li>
+<li><a href="bogoso.html">Bogoso</a></li>
+<li><a href="prestea.html">Prestea</a></li>
+
+        </ul>
+      </div>
+      <div class="reveal reveal-delay-3">
+        <h5>Staff</h5>
+        <ul>
+          <li><a href="portal-login.html">Staff Portal Login &rarr;</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom wrap" style="padding-left:0;padding-right:0;">
+      <span>&copy; 2026 Triple A Gas. Est. 2005. All rights reserved.</span>
+      <span><span class="placeholder">[NPA license no.]</span> &middot; Licensed LPG Marketing Company</span>
+    </div>
+  </div>
+</footer>
+<div class="wa-float" title="Chat on WhatsApp">&#9742;</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // mobile nav toggle
+  var toggle = document.querySelector('.nav-toggle');
+  var nav = document.querySelector('.main-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function () {
+      nav.classList.toggle('open');
+    });
+    nav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { nav.classList.remove('open'); });
+    });
+  }
+
+  // scroll-reveal animation
+  var revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && revealEls.length) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add('in-view'); });
+  }
+
+  // sticky header shadow on scroll
+  var header = document.querySelector('.site-header');
+  if (header) {
+    window.addEventListener('scroll', function () {
+      header.style.boxShadow = window.scrollY > 10 ? '0 6px 20px rgba(0,0,0,.18)' : 'none';
+    });
+  }
+});
+
+</script>
+</body>
+</html>

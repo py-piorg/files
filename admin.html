@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Portal | Triple A Gas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================
+   TRIPLE A GAS — ADMIN PORTAL stylesheet
+   Dark, dense, status-color-driven. Shares brand tokens with
+   the public site (wine red / gold) but inverted for low glare.
+=========================================================== */
+
+:root{
+  --wine:        #8E1B2C;
+  --wine-500:    #A8283A;
+  --wine-300:    #C96A78;
+  --gold:        #C79A3D;
+  --safe:        #3FA24A;
+  --safe-pale:   #163420;
+  --warn:        #D99A2B;
+  --warn-pale:   #3A2C10;
+  --danger:      #D6473C;
+  --danger-pale: #3A1616;
+
+  --bg:          #15181B;
+  --panel:       #1D2226;
+  --panel-2:     #232A2F;
+  --panel-3:     #2A3238;
+  --border:      #333B41;
+  --text:        #E7EBED;
+  --text-dim:    #8D9AA1;
+  --text-faint:  #5C6870;
+
+  --display: 'Archivo Expanded', sans-serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --radius: 10px;
+  --ease: cubic-bezier(.2,.8,.2,1);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:var(--body);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-size:14px;
+}
+a{color:var(--wine-300);text-decoration:none;}
+h1,h2,h3,h4{font-family:var(--display);color:#fff;margin:0 0 8px;letter-spacing:-.01em;}
+p{margin:0 0 10px;color:var(--text-dim);}
+button{font-family:var(--body);}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-thumb{background:var(--panel-3);border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ---------- login screen ---------- */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%, #241318 0%, #15181B 60%);padding:24px;}
+.login-card{width:100%;max-width:400px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:34px 30px;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:fadeInUp .5s var(--ease) both;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+.login-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:22px;}
+.login-logo img{height:52px;margin-bottom:10px;}
+.login-logo b{font-family:var(--display);font-weight:800;font-size:16px;color:#fff;letter-spacing:.03em;}
+.login-logo span{font-family:var(--mono);font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.field select, .field input, .field textarea{
+  width:100%;padding:11px 13px;background:var(--panel-2);border:1.5px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--body);font-size:14px;transition:border-color .15s ease;
+}
+.field select:focus, .field input:focus, .field textarea:focus{outline:none;border-color:var(--wine-500);}
+.field textarea{resize:vertical;min-height:80px;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:8px;border:none;cursor:pointer;
+  transition:transform .12s var(--ease), background .15s ease, box-shadow .15s ease;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--wine-500);color:#fff;}
+.btn-primary:hover{background:var(--wine);}
+.btn-block{width:100%;}
+.btn-ghost{background:var(--panel-2);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--panel-3);}
+.btn-sm{padding:7px 12px;font-size:12.5px;}
+.btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid rgba(214,71,60,.4);}
+.btn-danger-ghost:hover{background:var(--danger-pale);}
+
+.login-note{font-size:11.5px;color:var(--text-faint);text-align:center;margin-top:16px;line-height:1.6;}
+
+/* ---------- shell ---------- */
+.shell{display:flex;height:100vh;overflow:hidden;}
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.sidebar-top{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.sidebar-top img{height:32px;}
+.sidebar-top b{font-family:var(--display);font-weight:800;font-size:13.5px;color:#fff;}
+.sidebar-context{padding:14px 18px;border-bottom:1px solid var(--border);}
+.sidebar-context .ctx-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);margin-bottom:3px;}
+.sidebar-context .ctx-val{font-size:13px;font-weight:600;color:#fff;}
+.sidebar-context .ctx-role{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:100px;background:var(--panel-3);color:var(--gold);}
+
+.navlist{list-style:none;margin:0;padding:12px;flex:1;overflow-y:auto;}
+.navlist li{margin-bottom:2px;}
+.navlist button{
+  all:unset;display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:8px;
+  cursor:pointer;color:var(--text-dim);font-size:13.5px;font-weight:600;transition:background .12s ease, color .12s ease;
+}
+.navlist button:hover{background:var(--panel-2);color:var(--text);}
+.navlist button.active{background:var(--wine-500);color:#fff;}
+.navlist .navicon{width:17px;height:17px;flex-shrink:0;}
+.navlist .navcount{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+.navlist button.active .navcount{color:rgba(255,255,255,.75);}
+
+.sidebar-bottom{padding:14px 18px;border-top:1px solid var(--border);}
+
+.main{flex:1;overflow-y:auto;padding:28px 34px 60px;}
+.view{display:none;animation:fadeIn .25s ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+.view-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;gap:16px;flex-wrap:wrap;}
+.view-head h2{font-size:22px;margin-bottom:4px;}
+.view-head p{margin-bottom:0;font-size:13px;max-width:520px;}
+.view-actions{display:flex;gap:10px;}
+
+/* ---------- cards / stat grid ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+@media (max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.stat-card .n{font-family:var(--mono);font-weight:600;font-size:26px;color:#fff;}
+.stat-card .n.safe{color:var(--safe);} .stat-card .n.warn{color:var(--warn);} .stat-card .n.danger{color:var(--danger);}
+.stat-card .l{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:22px;}
+.panel h3{font-size:14.5px;margin-bottom:14px;}
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+@media (max-width:1000px){.two-col{grid-template-columns:1fr;}}
+
+/* ---------- gauges ---------- */
+.gauge{position:relative;width:74px;height:74px;flex-shrink:0;}
+.gauge svg{width:100%;height:100%;}
+.gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;font-size:14px;color:#fff;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto;}
+table.dt{width:100%;border-collapse:collapse;font-size:13px;}
+table.dt th{
+  text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);
+  padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;font-weight:600;
+}
+table.dt td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+table.dt tr:last-child td{border-bottom:none;}
+table.dt tr:hover td{background:var(--panel-2);}
+.mono{font-family:var(--mono);color:var(--text-dim);font-size:12.5px;}
+.empty-row td{text-align:center;color:var(--text-faint);padding:30px 12px;font-style:italic;}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.03em;}
+.badge-safe{background:var(--safe-pale);color:var(--safe);}
+.badge-warn{background:var(--warn-pale);color:var(--warn);}
+.badge-danger{background:var(--danger-pale);color:var(--danger);}
+.badge-neutral{background:var(--panel-3);color:var(--text-dim);}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* ---------- forms in panels ---------- */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:700px){.form-grid{grid-template-columns:1fr;}}
+.form-grid .span2{grid-column:1 / -1;}
+
+/* ---------- activity feed ---------- */
+.feed{list-style:none;margin:0;padding:0;}
+.feed li{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+.feed li:last-child{border-bottom:none;}
+.feed .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.feed .dot.safe{background:var(--safe);} .feed .dot.warn{background:var(--warn);} .feed .dot.danger{background:var(--danger);} .feed .dot.neutral{background:var(--text-faint);}
+.feed .t{color:var(--text-faint);font-family:var(--mono);font-size:10.5px;flex-shrink:0;width:44px;}
+
+/* ---------- staff / lead avatars ---------- */
+.avatar{
+  width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg, var(--wine-500), #4a0e18);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--display);font-weight:700;font-size:12px;flex-shrink:0;
+}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;bottom:24px;right:24px;background:var(--panel-3);border:1px solid var(--border);
+  color:#fff;padding:13px 18px;border-radius:10px;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,.4);
+  display:flex;align-items:center;gap:10px;z-index:200;transform:translateY(20px);opacity:0;transition:all .25s var(--ease);pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast .dot{width:8px;height:8px;border-radius:50%;background:var(--safe);}
+
+/* ---------- notice ---------- */
+.notice{background:var(--panel-2);border:1px dashed var(--border);border-radius:10px;padding:14px 16px;font-size:12.5px;color:var(--text-dim);margin-bottom:20px;}
+.notice b{color:var(--gold);}
+
+/* ---------- misc ---------- */
+.pill-select{display:flex;gap:6px;flex-wrap:wrap;}
+.pill-select button{
+  all:unset;cursor:pointer;padding:7px 13px;border-radius:100px;font-size:12px;font-weight:600;
+  background:var(--panel-2);color:var(--text-dim);border:1px solid var(--border);
+}
+.pill-select button.active{background:var(--wine-500);color:#fff;border-color:var(--wine-500);}
+
+.mobile-toggle{display:none;}
+@media (max-width:920px){
+  .sidebar{position:fixed;left:-240px;top:0;bottom:0;z-index:40;transition:left .2s var(--ease);}
+  .sidebar.open{left:0;}
+  .mobile-toggle{display:flex;position:fixed;top:14px;left:14px;z-index:41;background:var(--panel-3);color:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;}
+  .main{padding:70px 16px 60px;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="images/logo.png" alt="Triple A Gas logo" onerror="this.style.display='none'">
+      <b>TRIPLE A GAS</b>
+      <span>Staff Portal</span>
+    </div>
+    <form id="loginForm">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" id="loginName" placeholder="e.g. Efua Owusu">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select id="loginRole">
+          <option>Owner / Head Office</option>
+          <option selected>Station Manager</option>
+          <option>Driver</option>
+          <option>Safety Officer</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Outlet</label>
+        <select id="loginOutlet">
+          <option>Accra</option>
+          <option>Antoa</option>
+          <option>Bonwire</option>
+          <option>Bogoso</option>
+          <option>Prestea</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+    </form>
+    <p class="login-note">This is a working prototype login — it doesn't check a real password yet. Pick any name/role/outlet to explore the portal as that user. Real authentication needs a backend before this handles actual staff accounts.</p>
+  </div>
+</div>
+
+<!-- ================= SHELL ================= -->
+<button class="mobile-toggle" aria-label="Toggle menu">&#9776;</button>
+<div class="shell" id="shell" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <img src="images/logo.png" alt="" style="height:28px;" onerror="this.style.display='none'">
+      <b>TRIPLE A GAS</b>
+    </div>
+    <div class="sidebar-context">
+      <div class="ctx-label">Signed in as</div>
+      <div class="ctx-val" id="ctxName">—</div>
+      <div class="ctx-label" style="margin-top:8px;">Outlet</div>
+      <div class="ctx-val" id="ctxOutlet">—</div>
+      <span class="ctx-role" id="ctxRole">—</span>
+    </div>
+    <ul class="navlist">
+      <li><button data-view="dashboard" class="active"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</button></li>
+      <li><button data-view="deliveries"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="7" width="13" height="10" rx="1.5"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg>Delivery Log</button></li>
+      <li><button data-view="inventory"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 3V1.5a3 3 0 016 0V3"/></svg>Inventory</button></li>
+      <li><button data-view="inspections"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Inspections</button></li>
+      <li><button data-view="shiftnotes"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v13H8l-4 4z"/></svg>Shift Notes</button></li>
+      <li data-role-hide-driver><button data-view="staff"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-4 3.5-6 6.5-6s5.5 2 6.5 6"/><circle cx="18" cy="8" r="2.5"/><path d="M16 14.2c2.5.3 4 2 4.8 5.8"/></svg>Staff Directory</button></li>
+      <li data-role-hide-driver><button data-view="presence"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="14" height="11" rx="2"/><path d="M17 10l4-2.5v9L17 14"/></svg>Presence Log</button></li>
+      <li data-role-hide-driver><button data-view="compliance"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Compliance</button></li>
+      <li data-role-hide-driver><button data-view="reports"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>Reports</button></li>
+    </ul>
+    <div class="sidebar-bottom">
+      <button class="btn btn-ghost btn-block btn-sm" id="logoutBtn">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view active" id="view-dashboard">
+      <div class="view-head"><div><h2>Dashboard</h2><p>Live snapshot across your scope — updates as log entries come in.</p></div></div>
+      <div class="notice"><b>Prototype note:</b> all data on this portal lives in your browser's memory for this session only — refreshing the page resets it to the sample data below. This build is for testing the workflow; a real backend (database + auth) is the next step before it holds live station data.</div>
+      <div class="stat-grid" id="dashStats"></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Recent Activity</h3>
+          <ul class="feed" id="dashFeed"></ul>
+        </div>
+        <div class="panel">
+          <h3>Health Gauges</h3>
+          <div style="display:flex;flex-direction:column;gap:20px;" id="dashGauges"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DELIVERIES ============ -->
+    <section class="view" id="view-deliveries">
+      <div class="view-head"><div><h2>Delivery Log</h2><p>Every cylinder or bulk delivery, timestamped and attributed automatically.</p></div></div>
+      <div class="panel">
+        <h3>Log a Delivery</h3>
+        <form id="deliveryForm">
+          <div class="form-grid">
+            <div class="field"><label>Outlet</label><select name="outlet" id="deliveryOutletSelect"></select></div>
+            <div class="field"><label>Driver</label><input type="text" name="driver" placeholder="Driver name"></div>
+            <div class="field"><label>Cylinder Size</label><select name="size" id="deliverySizeSelect"></select></div>
+            <div class="field"><label>Quantity</label><input type="number" name="qty" min="1" value="1"></div>
+            <div class="field span2"><label>Customer</label><input type="text" name="customer" placeholder="Customer name / area"></div>
+            <div class="field"><label>Status</label>
+              <select name="status"><option value="done">Done</option><option value="in_transit">In Transit</option></select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px;">Save Delivery</button>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Log</h3>
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Time</th><th>Outlet</th><th>Driver</th><th>Cylinders</th><th>Customer</th><th>Status</th></tr></thead>
+          <tbody id="deliveryTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ INVENTORY ============ -->
+    <section class="view" id="view-inventory">
+      <div class="view-head"><div><h2>Cylinder Inventory</h2><p>Stock by outlet and size. Adjust counts as cylinders move.</p></div></div>
+      <div class="panel">
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Outlet</th><th>Size</th><th>Qty</th><th>Status</th><th style="text-align:right;">Adjust</th></tr></thead>
+          <tbody id="inventoryTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ INSPECTIONS ============ -->
+    <section class="view" id="view-inspections">
+      <div class="view-head"><div><h2>Safety Inspections</h2><p>Scheduled and ad-hoc inspection records, per cylinder, tank, or equipment item.</p></div></div>
+      <div class="panel">
+        <h3>Log an Inspection</h3>
+        <form id="inspectionForm">
+          <div class="form-grid">
+            <div class="field"><label>Outlet</label><select name="outlet" id="inspectionOutletSelect"></select></div>
+            <div class="field"><label>Item Inspected</label><input type="text" name="item" placeholder="e.g. Bulk tank #04"></div>
+            <div class="field"><label>Inspector</label><input type="text" name="inspector" placeholder="Inspector name"></div>
+            <div class="field"><label>Result</label>
+              <select name="result"><option value="pass">Pass</option><option value="due">Due</option><option value="overdue">Overdue</option></select>
+            </div>
+            <div class="field span2"><label>Next Due Date</label><input type="date" name="nextDue"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px;">Save Inspection</button>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Records</h3>
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Time</th><th>Outlet</th><th>Item</th><th>Inspector</th><th>Result</th><th>Next Due</th></tr></thead>
+          <tbody id="inspectionTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ SHIFT NOTES ============ -->
+    <section class="view" id="view-shiftnotes">
+      <div class="view-head"><div><h2>Shift Notes</h2><p>Handover notes between shifts — issues, low stock, anything the next person should know.</p></div></div>
+      <div class="panel">
+        <h3>New Note</h3>
+        <form id="shiftNoteForm">
+          <div class="form-grid">
+            <div class="field"><label>Outlet</label><select name="outlet" id="shiftOutletSelect"></select></div>
+            <div class="field span2"><label>Note</label><textarea name="note" placeholder="What should the next shift know?"></textarea></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px;">Save Note</button>
+        </form>
+      </div>
+      <div id="shiftNoteList"></div>
+    </section>
+
+    <!-- ============ STAFF DIRECTORY ============ -->
+    <section class="view" id="view-staff">
+      <div class="view-head"><div><h2>Staff Directory</h2><p>Roles, outlet assignment, and Presence Log consent status.</p></div></div>
+      <div class="panel">
+        <h3>Add Staff Member</h3>
+        <form id="staffForm">
+          <div class="form-grid">
+            <div class="field"><label>Name</label><input type="text" name="name" placeholder="Full name"></div>
+            <div class="field"><label>Role</label>
+              <select name="role"><option>Driver</option><option>Station Manager</option><option>Safety Officer</option><option>Owner</option><option>COO</option><option>Secretary</option></select>
+            </div>
+            <div class="field"><label>Outlet</label><select name="outlet" id="staffOutletSelect"></select></div>
+            <div class="field"><label>Presence Consent</label>
+              <select name="consent"><option value="not_enrolled">Not Enrolled</option><option value="enrolled">Enrolled</option><option value="n/a">N/A</option></select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px;">Add Staff</button>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Name</th><th>Role</th><th>Outlet</th><th>Consent</th></tr></thead>
+          <tbody id="staffTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ PRESENCE LOG ============ -->
+    <section class="view" id="view-presence">
+      <div class="view-head">
+        <div><h2>Presence Log</h2><p>Camera-based attendance for consented, enrolled staff only. Low-confidence matches route to review, never auto-logged.</p></div>
+        <div class="view-actions"><button class="btn btn-ghost btn-sm" id="simulateMatchBtn">Simulate Camera Match</button></div>
+      </div>
+      <div class="notice"><b>Compliance reminder:</b> only staff with consent status "Enrolled" in the Staff Directory can be matched. Revoked or not-enrolled staff are excluded from matching entirely — see the Staff Directory tab to manage consent.</div>
+      <div class="panel">
+        <h3>Cameras</h3>
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Camera</th><th>Outlet</th><th>Status</th></tr></thead>
+          <tbody id="cameraTable"></tbody>
+        </table></div>
+      </div>
+      <div class="panel">
+        <h3>Match Events</h3>
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Time</th><th>Outlet</th><th>Worker</th><th>Confidence</th><th>Status</th></tr></thead>
+          <tbody id="presenceTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ COMPLIANCE ============ -->
+    <section class="view" id="view-compliance">
+      <div class="view-head"><div><h2>Data Protection &amp; Compliance</h2><p>Ghana Data Protection Act, 2012 (Act 843) status for the Presence Log system — registration, retention, consent, and data subject requests.</p></div></div>
+      <div class="stat-grid" id="complianceStatusCards"></div>
+
+      <div class="two-col">
+        <div>
+          <div class="panel">
+            <h3>Retention Settings</h3>
+            <p style="font-size:12.5px;margin-bottom:16px;">How long Presence Log data is kept before automatic deletion. Raw camera frames should be kept far shorter than match metadata.</p>
+            <form id="retentionForm">
+              <div class="form-grid">
+                <div class="field"><label>Raw Video / Frames (days)</label><input type="number" name="rawDays" id="retentionRawDays" min="1"></div>
+                <div class="field"><label>Match Metadata (days)</label><input type="number" name="metaDays" id="retentionMetaDays" min="1"></div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm" style="margin-top:4px;">Save Retention Settings</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h3>Consent Audit</h3>
+            <p style="font-size:12.5px;margin-bottom:16px;">Only staff marked <b style="color:var(--gold);">Enrolled</b> in the Staff Directory are eligible for camera matching. Manage consent status from the Staff Directory tab.</p>
+            <div class="table-wrap"><table class="dt">
+              <thead><tr><th>Staff</th><th>Outlet</th><th>Consent</th><th>Matching Eligibility</th></tr></thead>
+              <tbody id="consentAuditTable"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Data Subject Requests</h3>
+          <p style="font-size:12.5px;margin-bottom:16px;">Log and track access, correction, or deletion requests from staff regarding their own data.</p>
+          <form id="dsRequestForm" style="margin-bottom:16px;">
+            <div class="field"><label>Staff / Requester Name</label><input type="text" name="staff" placeholder="Full name"></div>
+            <div class="field"><label>Request Type</label>
+              <select name="type"><option value="access">Access</option><option value="correction">Correction</option><option value="deletion">Deletion</option></select>
+            </div>
+            <div class="field"><label>Note</label><textarea name="note" placeholder="Details of the request"></textarea></div>
+            <button type="submit" class="btn btn-ghost btn-sm btn-block">Log Request</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Request Log</h3>
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Time</th><th>Requester</th><th>Type</th><th>Note</th><th>Status</th><th></th></tr></thead>
+          <tbody id="dsRequestTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ============ REPORTS ============ -->
+    <section class="view" id="view-reports">
+      <div class="view-head"><div><h2>Reports</h2><p>Rolled-up view across all 5 outlets.</p></div></div>
+      <div class="panel">
+        <div class="table-wrap"><table class="dt">
+          <thead><tr><th>Outlet</th><th>Total Stock</th><th>Stock Status</th><th>Deliveries Logged</th><th>Inspections</th></tr></thead>
+          <tbody id="reportsTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span class="msg"></span></div>
+
+<script>
+/* ===========================================================
+   TRIPLE A GAS — ADMIN PORTAL app logic
+   In-memory data store for this prototype session. See the
+   notice banner in the UI: wiring this to a real database is
+   the next step before this goes into daily use.
+=========================================================== */
+
+const OUTLETS = ["Accra", "Antoa", "Bonwire", "Bogoso", "Prestea"];
+const SIZES = ["3kg", "6kg", "13kg", "14.5kg"];
+
+let uidCounter = 1000;
+function uid() { return "T" + (uidCounter++); }
+function pad(n) { return n < 10 ? "0" + n : "" + n; }
+function nowStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function timeOnly() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/* ---------------- seed data (sample/demo — not real records) ---------------- */
+const DB = {
+  staff: [
+    { id: uid(), name: "Akua Adu Mensah", role: "Owner", outlet: "Accra", consent: "n/a" },
+    { id: uid(), name: "Frank Adu Mensah", role: "Owner", outlet: "Accra", consent: "n/a" },
+    { id: uid(), name: "Nana Kwame Owusu Boateng", role: "COO", outlet: "Accra", consent: "n/a" },
+    { id: uid(), name: "Ama Boakye Waa Boating", role: "Secretary", outlet: "Accra", consent: "n/a" },
+    { id: uid(), name: "Kojo Mensah", role: "Driver", outlet: "Accra", consent: "enrolled" },
+    { id: uid(), name: "Efua Owusu", role: "Station Manager", outlet: "Accra", consent: "enrolled" },
+    { id: uid(), name: "Yaw Boateng", role: "Station Manager", outlet: "Antoa", consent: "enrolled" },
+    { id: uid(), name: "Abena Osei", role: "Driver", outlet: "Bonwire", consent: "not_enrolled" },
+    { id: uid(), name: "Kwabena Asante", role: "Station Manager", outlet: "Bogoso", consent: "enrolled" },
+    { id: uid(), name: "Adjoa Mensah", role: "Station Manager", outlet: "Prestea", consent: "revoked" },
+  ],
+  deliveries: [
+    { id: uid(), time: "2026-07-21 07:41", outlet: "Accra", driver: "Kojo Mensah", size: "14.5kg", qty: 2, customer: "A. Mensah — East Legon", status: "done" },
+    { id: uid(), time: "2026-07-21 08:10", outlet: "Antoa", driver: "Yaw Boateng", size: "13kg", qty: 4, customer: "Antoa Chop Bar", status: "done" },
+    { id: uid(), time: "2026-07-21 09:02", outlet: "Bogoso", driver: "Kwabena Asante", size: "6kg", qty: 1, customer: "Walk-in", status: "in_transit" },
+  ],
+  inventory: [
+    { outlet: "Accra", size: "3kg", qty: 22, status: "ok" },
+    { outlet: "Accra", size: "6kg", qty: 38, status: "ok" },
+    { outlet: "Accra", size: "13kg", qty: 14, status: "low" },
+    { outlet: "Accra", size: "14.5kg", qty: 46, status: "ok" },
+    { outlet: "Antoa", size: "3kg", qty: 9, status: "low" },
+    { outlet: "Antoa", size: "6kg", qty: 18, status: "ok" },
+    { outlet: "Antoa", size: "13kg", qty: 12, status: "ok" },
+    { outlet: "Antoa", size: "14.5kg", qty: 20, status: "ok" },
+    { outlet: "Bonwire", size: "3kg", qty: 5, status: "critical" },
+    { outlet: "Bonwire", size: "6kg", qty: 14, status: "ok" },
+    { outlet: "Bonwire", size: "13kg", qty: 10, status: "ok" },
+    { outlet: "Bonwire", size: "14.5kg", qty: 16, status: "ok" },
+    { outlet: "Bogoso", size: "3kg", qty: 11, status: "ok" },
+    { outlet: "Bogoso", size: "6kg", qty: 8, status: "low" },
+    { outlet: "Bogoso", size: "13kg", qty: 15, status: "ok" },
+    { outlet: "Bogoso", size: "14.5kg", qty: 19, status: "ok" },
+    { outlet: "Prestea", size: "3kg", qty: 13, status: "ok" },
+    { outlet: "Prestea", size: "6kg", qty: 10, status: "ok" },
+    { outlet: "Prestea", size: "13kg", qty: 3, status: "critical" },
+    { outlet: "Prestea", size: "14.5kg", qty: 21, status: "ok" },
+  ],
+  inspections: [
+    { id: uid(), time: "2026-07-21 08:15", outlet: "Accra", item: "Bulk tank #04", inspector: "Efua Owusu", result: "due", nextDue: "2026-07-22" },
+    { id: uid(), time: "2026-07-19 10:00", outlet: "Antoa", item: "Forecourt hose set", inspector: "Yaw Boateng", result: "pass", nextDue: "2026-08-19" },
+    { id: uid(), time: "2026-07-15 09:00", outlet: "Prestea", item: "Regulator bank", inspector: "Adjoa Mensah", result: "overdue", nextDue: "2026-07-15" },
+  ],
+  shiftNotes: [
+    { id: uid(), time: "2026-07-21 08:52", outlet: "Accra", staff: "Kwame A.", note: "Low stock on 6kg — reorder before Friday." },
+    { id: uid(), time: "2026-07-20 17:10", outlet: "Bonwire", staff: "Abena Osei", note: "Customer complained about slow refill line at peak hours — may need a second attendant on Saturdays." },
+  ],
+  presence: [
+    { id: uid(), time: "2026-07-21 07:38", outlet: "Accra", worker: "Kojo Mensah", confidence: 96, status: "confirmed" },
+    { id: uid(), time: "2026-07-21 08:05", outlet: "Antoa", worker: "Yaw Boateng", confidence: 91, status: "confirmed" },
+    { id: uid(), time: "2026-07-21 08:47", outlet: "Bogoso", worker: "Unknown", confidence: 54, status: "review" },
+  ],
+  cameras: [
+    { name: "Accra-Forecourt", outlet: "Accra", status: "online" },
+    { name: "Antoa-Forecourt", outlet: "Antoa", status: "online" },
+    { name: "Bonwire-Forecourt", outlet: "Bonwire", status: "offline" },
+    { name: "Bogoso-Forecourt", outlet: "Bogoso", status: "online" },
+    { name: "Prestea-Forecourt", outlet: "Prestea", status: "online" },
+  ],
+  compliance: {
+    dpcRegistered: true,
+    dpcRegNo: "",
+    dpiaComplete: true,
+    dpiaDate: "2026-06-10",
+    rawVideoRetentionDays: 30,
+    matchMetadataRetentionDays: 180,
+  },
+  dsRequests: [
+    { id: uid(), time: "2026-07-10 11:20", staff: "Abena Osei", type: "access", status: "resolved", note: "Requested a copy of her presence log history." },
+    { id: uid(), time: "2026-07-18 09:05", staff: "Adjoa Mensah", type: "deletion", status: "open", note: "Requested deletion of biometric enrollment after consent revoked." },
+  ],
+};
+
+let currentUser = null; // { name, role, outlet }
+
+/* ---------------- helpers ---------------- */
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+function badge(kind, label) {
+  const map = { safe: "badge-safe", warn: "badge-warn", danger: "badge-danger", neutral: "badge-neutral" };
+  return `<span class="badge ${map[kind] || "badge-neutral"}">${esc(label)}</span>`;
+}
+
+function optionList(arr, selected) {
+  return arr.map(v => `<option value="${esc(v)}" ${v === selected ? "selected" : ""}>${esc(v)}</option>`).join("");
+}
+
+function outletOptions(includeAll) {
+  let opts = includeAll ? `<option value="all">All Outlets</option>` : "";
+  return opts + optionList(OUTLETS);
+}
+
+function toast(msg, kind = "safe") {
+  const el = document.getElementById("toast");
+  el.querySelector(".dot").style.background = kind === "safe" ? "var(--safe)" : kind === "warn" ? "var(--warn)" : "var(--danger)";
+  el.querySelector(".msg").textContent = msg;
+  el.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+}
+
+function gaugeSVG(pct, color, size = 74) {
+  const r = 30, c = 2 * Math.PI * r;
+  const offset = c - (Math.min(100, Math.max(0, pct)) / 100) * c;
+  return `<svg viewBox="0 0 74 74">
+    <circle cx="37" cy="37" r="${r}" fill="none" stroke="var(--panel-3)" stroke-width="8"/>
+    <circle cx="37" cy="37" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${offset}" transform="rotate(-90 37 37)"/>
+  </svg>`;
+}
+
+function scopedOutlet() {
+  return currentUser && currentUser.role !== "Owner / Head Office" ? currentUser.outlet : null;
+}
+
+/* ---------------- LOGIN ---------------- */
+function doLogin() {
+  const name = document.getElementById("loginName").value.trim() || "Staff User";
+  const role = document.getElementById("loginRole").value;
+  const outlet = document.getElementById("loginOutlet").value;
+  currentUser = { name, role, outlet };
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("shell").style.display = "flex";
+  document.getElementById("ctxName").textContent = name;
+  document.getElementById("ctxOutlet").textContent = role === "Owner / Head Office" ? "All Outlets" : outlet;
+  document.getElementById("ctxRole").textContent = role;
+  applyRoleVisibility(role);
+  renderAll();
+  showView("dashboard");
+}
+
+function applyRoleVisibility(role) {
+  const driverOnly = role === "Driver";
+  document.querySelectorAll("[data-role-hide-driver]").forEach(el => {
+    el.style.display = driverOnly ? "none" : "";
+  });
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById("shell").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+}
+
+/* ---------------- NAV ---------------- */
+function showView(id) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".navlist button").forEach(b => b.classList.remove("active"));
+  document.getElementById("view-" + id).classList.add("active");
+  document.querySelector(`.navlist button[data-view="${id}"]`).classList.add("active");
+  document.querySelector(".main").scrollTo(0, 0);
+  if (window.innerWidth <= 920) document.querySelector(".sidebar").classList.remove("open");
+}
+
+/* ---------------- RENDER: DASHBOARD ---------------- */
+function renderDashboard() {
+  const scope = scopedOutlet();
+  const inv = DB.inventory.filter(i => !scope || i.outlet === scope);
+  const totalCyl = inv.reduce((a, b) => a + b.qty, 0);
+  const lowCount = inv.filter(i => i.status === "low" || i.status === "critical").length;
+  const dueInspections = DB.inspections.filter(i => (!scope || i.outlet === scope) && i.result !== "pass").length;
+  const overdue = DB.inspections.filter(i => (!scope || i.outlet === scope) && i.result === "overdue").length;
+  const deliveriesToday = DB.deliveries.filter(d => (!scope || d.outlet === scope) && d.time.startsWith("2026-07-21")).length;
+
+  document.getElementById("dashStats").innerHTML = `
+    <div class="stat-card"><div class="n">${totalCyl}</div><div class="l">Cylinders in stock${scope ? "" : " (all outlets)"}</div></div>
+    <div class="stat-card"><div class="n ${lowCount ? "warn" : "safe"}">${lowCount}</div><div class="l">Low / critical stock lines</div></div>
+    <div class="stat-card"><div class="n ${overdue ? "danger" : "safe"}">${dueInspections}</div><div class="l">Inspections due or overdue</div></div>
+    <div class="stat-card"><div class="n safe">${deliveriesToday}</div><div class="l">Deliveries today</div></div>
+  `;
+
+  const compliance = Math.round(100 * (DB.inspections.filter(i => i.result === "pass").length / DB.inspections.length));
+  const stockHealth = Math.round(100 * (inv.filter(i => i.status === "ok").length / Math.max(1, inv.length)));
+  document.getElementById("dashGauges").innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="gauge">${gaugeSVG(stockHealth, stockHealth > 60 ? "var(--safe)" : "var(--warn)")}<div class="gauge-val">${stockHealth}%</div></div>
+      <div><b style="display:block;font-size:13px;color:#fff;">Stock Health</b><span style="font-size:12px;color:var(--text-dim);">Lines at healthy stock levels</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="gauge">${gaugeSVG(compliance, compliance > 60 ? "var(--safe)" : "var(--danger)")}<div class="gauge-val">${compliance}%</div></div>
+      <div><b style="display:block;font-size:13px;color:#fff;">Inspection Compliance</b><span style="font-size:12px;color:var(--text-dim);">Passed of all logged inspections</span></div>
+    </div>
+  `;
+
+  const feedItems = [
+    ...DB.deliveries.map(d => ({ time: d.time.slice(11), kind: "safe", text: `Delivery — ${d.size} ×${d.qty} to ${esc(d.customer)} (${d.outlet})` , outlet: d.outlet})),
+    ...DB.inspections.map(i => ({ time: i.time.slice(11), kind: i.result === "pass" ? "safe" : i.result === "overdue" ? "danger" : "warn", text: `Inspection — ${esc(i.item)} (${i.outlet})`, outlet: i.outlet })),
+    ...DB.shiftNotes.map(n => ({ time: n.time.slice(11), kind: "neutral", text: `Shift note — ${esc(n.note.slice(0, 60))}${n.note.length > 60 ? "…" : ""} (${n.outlet})`, outlet: n.outlet })),
+  ].filter(x => !scope || x.outlet === scope)
+   .sort((a, b) => b.time.localeCompare(a.time)).slice(0, 8);
+
+  document.getElementById("dashFeed").innerHTML = feedItems.length
+    ? feedItems.map(f => `<li><span class="t">${f.time}</span><span class="dot ${f.kind}"></span><span>${f.text}</span></li>`).join("")
+    : `<li style="color:var(--text-faint);">No recent activity.</li>`;
+}
+
+/* ---------------- RENDER: DELIVERIES ---------------- */
+function renderDeliveries() {
+  const scope = scopedOutlet();
+  const rows = DB.deliveries.filter(d => !scope || d.outlet === scope).slice().reverse();
+  const tbody = rows.length ? rows.map(d => `
+    <tr>
+      <td class="mono">${d.time}</td>
+      <td>${esc(d.outlet)}</td>
+      <td>${esc(d.driver)}</td>
+      <td>${esc(d.size)} &times; ${d.qty}</td>
+      <td>${esc(d.customer)}</td>
+      <td>${d.status === "done" ? badge("safe", "Done") : d.status === "in_transit" ? badge("warn", "In Transit") : badge("neutral", d.status)}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="6">No delivery entries yet — add the first one below.</td></tr>`;
+  document.getElementById("deliveryTable").innerHTML = tbody;
+  document.getElementById("deliveryOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
+  document.getElementById("deliverySizeSelect").innerHTML = optionList(SIZES);
+}
+
+function addDelivery(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  DB.deliveries.push({
+    id: uid(), time: nowStr(),
+    outlet: f.outlet.value, driver: f.driver.value.trim() || (currentUser ? currentUser.name : "Staff"),
+    size: f.size.value, qty: parseInt(f.qty.value) || 1,
+    customer: f.customer.value.trim() || "Walk-in", status: f.status.value,
+  });
+  f.reset();
+  renderDeliveries(); renderDashboard();
+  toast("Delivery logged.");
+}
+
+/* ---------------- RENDER: INVENTORY ---------------- */
+function statusBadgeInv(s) {
+  if (s === "ok") return badge("safe", "OK");
+  if (s === "low") return badge("warn", "Low");
+  return badge("danger", "Critical");
+}
+function renderInventory() {
+  const scope = scopedOutlet();
+  const rows = DB.inventory.filter(i => !scope || i.outlet === scope);
+  document.getElementById("inventoryTable").innerHTML = rows.length ? rows.map(i => `
+    <tr>
+      <td>${esc(i.outlet)}</td>
+      <td>${esc(i.size)}</td>
+      <td class="mono">${i.qty}</td>
+      <td>${statusBadgeInv(i.status)}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',-1)">&minus;</button>
+        <button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',1)">+</button>
+      </td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="5">No inventory rows for this scope.</td></tr>`;
+}
+function adjustStock(outlet, size, delta) {
+  const row = DB.inventory.find(i => i.outlet === outlet && i.size === size);
+  if (!row) return;
+  row.qty = Math.max(0, row.qty + delta);
+  row.status = row.qty <= 5 ? "critical" : row.qty <= 12 ? "low" : "ok";
+  renderInventory(); renderDashboard();
+}
+
+/* ---------------- RENDER: INSPECTIONS ---------------- */
+function resultBadge(r) {
+  if (r === "pass") return badge("safe", "Pass");
+  if (r === "due") return badge("warn", "Due");
+  return badge("danger", "Overdue");
+}
+function renderInspections() {
+  const scope = scopedOutlet();
+  const rows = DB.inspections.filter(i => !scope || i.outlet === scope).slice().reverse();
+  document.getElementById("inspectionTable").innerHTML = rows.length ? rows.map(i => `
+    <tr>
+      <td class="mono">${i.time}</td>
+      <td>${esc(i.outlet)}</td>
+      <td>${esc(i.item)}</td>
+      <td>${esc(i.inspector)}</td>
+      <td>${resultBadge(i.result)}</td>
+      <td class="mono">${i.nextDue}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="6">No inspections logged yet — add the first one below.</td></tr>`;
+  document.getElementById("inspectionOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
+}
+function addInspection(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  DB.inspections.push({
+    id: uid(), time: nowStr(), outlet: f.outlet.value, item: f.item.value.trim() || "Unnamed item",
+    inspector: f.inspector.value.trim() || (currentUser ? currentUser.name : "Staff"),
+    result: f.result.value, nextDue: f.nextDue.value || "—",
+  });
+  f.reset();
+  renderInspections(); renderDashboard();
+  toast(f.result.value === "overdue" ? "Inspection logged — flagged overdue." : "Inspection logged.", f.result.value === "overdue" ? "danger" : "safe");
+}
+
+/* ---------------- RENDER: SHIFT NOTES ---------------- */
+function renderShiftNotes() {
+  const scope = scopedOutlet();
+  const rows = DB.shiftNotes.filter(n => !scope || n.outlet === scope).slice().reverse();
+  document.getElementById("shiftNoteList").innerHTML = rows.length ? rows.map(n => `
+    <div class="panel" style="margin-bottom:12px;padding:14px 16px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-faint);margin-bottom:8px;">
+        <span class="mono">${n.time} &middot; ${esc(n.outlet)}</span>
+        <span>${esc(n.staff)}</span>
+      </div>
+      <div style="font-size:13.5px;color:var(--text);">${esc(n.note)}</div>
+    </div>`).join("") : `<p style="color:var(--text-faint);font-style:italic;">No shift notes yet — leave one for the next shift below.</p>`;
+  document.getElementById("shiftOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
+}
+function addShiftNote(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const text = f.note.value.trim();
+  if (!text) { toast("Note can't be empty.", "warn"); return; }
+  DB.shiftNotes.push({ id: uid(), time: nowStr(), outlet: f.outlet.value, staff: currentUser ? currentUser.name : "Staff", note: text });
+  f.reset();
+  renderShiftNotes(); renderDashboard();
+  toast("Shift note saved.");
+}
+
+/* ---------------- RENDER: STAFF DIRECTORY ---------------- */
+function consentBadge(c) {
+  if (c === "enrolled") return badge("safe", "Enrolled");
+  if (c === "not_enrolled") return badge("neutral", "Not Enrolled");
+  if (c === "revoked") return badge("danger", "Revoked");
+  return badge("neutral", "N/A");
+}
+function initials(name) { return name.split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase(); }
+function renderStaff() {
+  const scope = scopedOutlet();
+  const rows = DB.staff.filter(s => !scope || s.outlet === scope);
+  document.getElementById("staffTable").innerHTML = rows.length ? rows.map(s => `
+    <tr>
+      <td style="display:flex;align-items:center;gap:10px;"><div class="avatar">${initials(s.name)}</div>${esc(s.name)}</td>
+      <td>${esc(s.role)}</td>
+      <td>${esc(s.outlet)}</td>
+      <td>${consentBadge(s.consent)}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="4">No staff on file for this scope.</td></tr>`;
+  document.getElementById("staffOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
+}
+function addStaff(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  DB.staff.push({ id: uid(), name: f.name.value.trim() || "New Staff", role: f.role.value, outlet: f.outlet.value, consent: f.consent.value });
+  f.reset();
+  renderStaff();
+  toast("Staff member added.");
+}
+
+/* ---------------- RENDER: PRESENCE LOG ---------------- */
+function presenceBadge(s) {
+  if (s === "confirmed") return badge("safe", "Confirmed");
+  if (s === "review") return badge("warn", "Needs Review");
+  return badge("neutral", s);
+}
+function renderPresence() {
+  const scope = scopedOutlet();
+  const rows = DB.presence.filter(p => !scope || p.outlet === scope).slice().reverse();
+  document.getElementById("presenceTable").innerHTML = rows.length ? rows.map(p => `
+    <tr>
+      <td class="mono">${p.time}</td>
+      <td>${esc(p.outlet)}</td>
+      <td>${esc(p.worker)}</td>
+      <td class="mono">${p.confidence}%</td>
+      <td>${presenceBadge(p.status)}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="5">No presence events yet.</td></tr>`;
+
+  document.getElementById("cameraTable").innerHTML = DB.cameras
+    .filter(c => !scope || c.outlet === scope)
+    .map(c => `<tr>
+      <td class="mono">${esc(c.name)}</td>
+      <td>${esc(c.outlet)}</td>
+      <td>${c.status === "online" ? badge("safe", "Online") : badge("danger", "Offline")}</td>
+    </tr>`).join("");
+}
+function simulateMatch() {
+  const scope = scopedOutlet();
+  const pool = DB.staff.filter(s => (!scope || s.outlet === scope) && s.consent === "enrolled");
+  if (!pool.length) { toast("No consented staff enrolled for this outlet.", "warn"); return; }
+  const worker = pool[Math.floor(Math.random() * pool.length)];
+  const confidence = Math.floor(70 + Math.random() * 29);
+  DB.presence.push({
+    id: uid(), time: nowStr(), outlet: worker.outlet, worker: worker.name,
+    confidence, status: confidence >= 85 ? "confirmed" : "review",
+  });
+  renderPresence();
+  toast(`Simulated match: ${worker.name} at ${worker.outlet} (${confidence}%).`, confidence >= 85 ? "safe" : "warn");
+}
+
+/* ---------------- RENDER: COMPLIANCE ---------------- */
+function reqStatusBadge(s) {
+  if (s === "resolved") return badge("safe", "Resolved");
+  if (s === "open") return badge("warn", "Open");
+  return badge("neutral", s);
+}
+function reqTypeLabel(t) {
+  return { access: "Access Request", deletion: "Deletion Request", correction: "Correction Request" }[t] || t;
+}
+function renderCompliance() {
+  const c = DB.compliance;
+  document.getElementById("complianceStatusCards").innerHTML = `
+    <div class="stat-card">
+      <div class="n ${c.dpcRegistered ? "safe" : "danger"}">${c.dpcRegistered ? "Registered" : "Not Registered"}</div>
+      <div class="l">DPC Data Controller Status</div>
+    </div>
+    <div class="stat-card">
+      <div class="n ${c.dpiaComplete ? "safe" : "warn"}">${c.dpiaComplete ? "Complete" : "Pending"}</div>
+      <div class="l">DPIA — Presence Log (as of ${c.dpiaDate})</div>
+    </div>
+    <div class="stat-card">
+      <div class="n">${DB.staff.filter(s => s.consent === "enrolled").length}</div>
+      <div class="l">Staff enrolled with active consent</div>
+    </div>
+    <div class="stat-card">
+      <div class="n ${DB.dsRequests.some(r => r.status === "open") ? "warn" : "safe"}">${DB.dsRequests.filter(r => r.status === "open").length}</div>
+      <div class="l">Open data subject requests</div>
+    </div>
+  `;
+
+  document.getElementById("retentionRawDays").value = c.rawVideoRetentionDays;
+  document.getElementById("retentionMetaDays").value = c.matchMetadataRetentionDays;
+
+  const consentRows = DB.staff.filter(s => s.consent !== "n/a");
+  document.getElementById("consentAuditTable").innerHTML = consentRows.length ? consentRows.map(s => `
+    <tr>
+      <td style="display:flex;align-items:center;gap:10px;"><div class="avatar">${initials(s.name)}</div>${esc(s.name)}</td>
+      <td>${esc(s.outlet)}</td>
+      <td>${consentBadge(s.consent)}</td>
+      <td>${s.consent === "enrolled" ? badge("safe", "Eligible for matching") : badge("neutral", "Excluded from matching")}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="4">No staff enrolled in the Presence Log system.</td></tr>`;
+
+  const rows = DB.dsRequests.slice().reverse();
+  document.getElementById("dsRequestTable").innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td class="mono">${r.time}</td>
+      <td>${esc(r.staff)}</td>
+      <td>${reqTypeLabel(r.type)}</td>
+      <td>${esc(r.note)}</td>
+      <td>${reqStatusBadge(r.status)}</td>
+      <td style="text-align:right;">${r.status === "open" ? `<button class="btn btn-ghost btn-sm" onclick="resolveRequest('${r.id}')">Mark Resolved</button>` : ""}</td>
+    </tr>`).join("") : `<tr class="empty-row"><td colspan="6">No data subject requests logged.</td></tr>`;
+}
+function saveRetention(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  DB.compliance.rawVideoRetentionDays = parseInt(f.rawDays.value) || DB.compliance.rawVideoRetentionDays;
+  DB.compliance.matchMetadataRetentionDays = parseInt(f.metaDays.value) || DB.compliance.matchMetadataRetentionDays;
+  renderCompliance();
+  toast("Retention settings saved for this session.");
+}
+function addDsRequest(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const staffName = f.staff.value.trim();
+  if (!staffName) { toast("Enter a staff/data subject name.", "warn"); return; }
+  DB.dsRequests.push({ id: uid(), time: nowStr(), staff: staffName, type: f.type.value, status: "open", note: f.note.value.trim() || "—" });
+  f.reset();
+  renderCompliance();
+  toast("Request logged.", "warn");
+}
+function resolveRequest(id) {
+  const r = DB.dsRequests.find(x => x.id === id);
+  if (r) { r.status = "resolved"; renderCompliance(); toast("Request marked resolved."); }
+}
+
+/* ---------------- RENDER: REPORTS ---------------- */
+function renderReports() {
+  const rows = OUTLETS.map(o => {
+    const inv = DB.inventory.filter(i => i.outlet === o);
+    const stock = inv.reduce((a, b) => a + b.qty, 0);
+    const lowLines = inv.filter(i => i.status !== "ok").length;
+    const deliveries = DB.deliveries.filter(d => d.outlet === o).length;
+    const overdue = DB.inspections.filter(i => i.outlet === o && i.result === "overdue").length;
+    return { o, stock, lowLines, deliveries, overdue };
+  });
+  document.getElementById("reportsTable").innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.o}</td>
+      <td class="mono">${r.stock}</td>
+      <td>${r.lowLines ? badge("warn", r.lowLines + " low") : badge("safe", "Healthy")}</td>
+      <td class="mono">${r.deliveries}</td>
+      <td>${r.overdue ? badge("danger", r.overdue + " overdue") : badge("safe", "0 overdue")}</td>
+    </tr>`).join("");
+}
+
+/* ---------------- RENDER ALL ---------------- */
+function renderAll() {
+  renderDashboard();
+  renderDeliveries();
+  renderInventory();
+  renderInspections();
+  renderShiftNotes();
+  renderStaff();
+  renderPresence();
+  renderCompliance();
+  renderReports();
+}
+
+/* ---------------- INIT ---------------- */
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("loginForm").addEventListener("submit", function (e) { e.preventDefault(); doLogin(); });
+  document.getElementById("deliveryForm").addEventListener("submit", addDelivery);
+  document.getElementById("inspectionForm").addEventListener("submit", addInspection);
+  document.getElementById("shiftNoteForm").addEventListener("submit", addShiftNote);
+  document.getElementById("staffForm").addEventListener("submit", addStaff);
+  document.getElementById("retentionForm").addEventListener("submit", saveRetention);
+  document.getElementById("dsRequestForm").addEventListener("submit", addDsRequest);
+  document.getElementById("simulateMatchBtn").addEventListener("click", simulateMatch);
+  document.querySelectorAll(".navlist button[data-view]").forEach(btn => {
+    btn.addEventListener("click", () => showView(btn.dataset.view));
+  });
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+  const toggle = document.querySelector(".mobile-toggle");
+  if (toggle) toggle.addEventListener("click", () => document.querySelector(".sidebar").classList.toggle("open"));
+});
+
+</script>
+</body>
+</html>
