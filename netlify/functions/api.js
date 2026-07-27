@@ -25,7 +25,7 @@ function initFirestore() {
 }
 
 async function readAllCollections(db) {
-  const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests'];
+  const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests', 'purchases'];
   const out = {};
   for (const name of collections) {
     try {
@@ -170,6 +170,27 @@ exports.handler = async function (event, context) {
       await db.collection('settings').doc('compliance').set(payload, { merge: true });
       const doc = (await db.collection('settings').doc('compliance').get()).data();
       return { statusCode: 200, body: JSON.stringify({ success: true, data: doc }) };
+    }
+
+    // POST /api/purchases
+    if (method === 'POST' && route.startsWith('/api/purchases')) {
+      const nowStr = formatNow();
+      const parsedQty = parseInt(body.qty) || 1;
+      const parsedUnitPrice = parseFloat(body.unitPrice) || 0;
+      const doc = {
+        ...body,
+        qty: parsedQty,
+        unitPrice: parsedUnitPrice,
+        amount: parseFloat((parsedQty * parsedUnitPrice).toFixed(2)),
+        time: nowStr,
+        createdAt: adminLib.firestore.FieldValue.serverTimestamp()
+      };
+      const ref = await db.collection('purchases').add(doc);
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // POST /api/ds-requests

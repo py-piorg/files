@@ -82,7 +82,8 @@ const SEED_DATA = {
   dsRequests: [
     { id: "r1", time: "2026-07-15 11:20", staff: "Abena Osei", type: "access", status: "resolved", note: "Requested a copy of her presence log history." },
     { id: "r2", time: "2026-07-22 09:05", staff: "Adjoa Mensah", type: "deletion", status: "open", note: "Requested deletion of biometric enrollment after consent revoked." }
-  ]
+  ],
+  purchases: []
 };
 
 // Database persistence wrapper
@@ -95,7 +96,12 @@ class DatabaseStore {
     try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        const seeded = JSON.parse(JSON.stringify(SEED_DATA));
+        const merged = { ...seeded, ...parsed };
+        if (!Array.isArray(merged.purchases)) merged.purchases = [];
+        this.save(merged);
+        return merged;
       }
     } catch (err) {
       console.error("Error loading database file, re-initializing:", err);
@@ -168,7 +174,13 @@ class DatabaseStore {
     this.save();
     return request;
   }
-
+ 
+  addPurchase(purchase) {
+   this.data.purchases.push(purchase);
+   this.save();
+   return purchase;
+  }
+ 
   resolveDsRequest(id) {
     const req = this.data.dsRequests.find(r => r.id === id);
     if (req) {
