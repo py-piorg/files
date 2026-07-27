@@ -44,6 +44,16 @@ async function readAllCollections(db) {
   return out;
 }
 
+function formatNow(d) {
+  const now = d ? (d instanceof Date ? d : d.toDate ? d.toDate() : new Date(d)) : new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${day} ${hh}:${mm}`;
+}
+
 exports.handler = async function (event, context) {
   // Determine route path. Redirect passes ?path=/api/xxx
   const qs = event.queryStringParameters || {};
@@ -74,9 +84,14 @@ exports.handler = async function (event, context) {
 
     // POST /api/deliveries
     if (method === 'POST' && route.startsWith('/api/deliveries')) {
-      const doc = { ...body, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
+      const nowStr = formatNow();
+      const doc = { ...body, time: nowStr, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
       const ref = await db.collection('deliveries').add(doc);
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...doc } }) };
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // POST /api/inventory/adjust
@@ -100,30 +115,50 @@ exports.handler = async function (event, context) {
 
     // POST /api/inspections
     if (method === 'POST' && route.startsWith('/api/inspections')) {
-      const doc = { ...body, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
+      const nowStr = formatNow();
+      const doc = { ...body, time: nowStr, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
       const ref = await db.collection('inspections').add(doc);
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...doc } }) };
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // POST /api/shift-notes
     if (method === 'POST' && route.startsWith('/api/shift-notes')) {
-      const doc = { ...body, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
+      const nowStr = formatNow();
+      const doc = { ...body, time: nowStr, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
       const ref = await db.collection('shiftNotes').add(doc);
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...doc } }) };
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // POST /api/staff
     if (method === 'POST' && route.startsWith('/api/staff')) {
-      const doc = { ...body, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
+      const nowStr = formatNow();
+      const doc = { ...body, time: nowStr, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
       const ref = await db.collection('staff').add(doc);
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...doc } }) };
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // POST /api/presence
     if (method === 'POST' && route.startsWith('/api/presence')) {
-      const doc = { ...body, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
+      const nowStr = formatNow();
+      const doc = { ...body, time: nowStr, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
       const ref = await db.collection('presence').add(doc);
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...doc } }) };
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // POST /api/compliance
@@ -139,9 +174,14 @@ exports.handler = async function (event, context) {
 
     // POST /api/ds-requests
     if (method === 'POST' && route.startsWith('/api/ds-requests')) {
-      const doc = { ...body, status: 'open', createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
+      const nowStr = formatNow();
+      const doc = { ...body, status: 'open', time: nowStr, createdAt: adminLib.firestore.FieldValue.serverTimestamp() };
       const ref = await db.collection('dsRequests').add(doc);
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...doc } }) };
+      const snap = await ref.get();
+      const saved = snap.data() || {};
+      if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
+      if (!saved.time) saved.time = nowStr;
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
     }
 
     // PATCH /api/ds-requests/:id/resolve
