@@ -201,7 +201,8 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .overlay.show{ display:block; pointer-events:auto; }
 
 /* Menu button fixed position (hidden by default) */
-#menuBtn{ display:none; position:fixed; top:12px; left:12px; z-index:1101; }
+#menuBtn{ display:none; position:fixed; top:12px; left:12px; z-index:1200; border:none; background:var(--panel-solid); color:var(--text); padding:8px 10px; border-radius:10px; font-size:18px; box-shadow:0 6px 18px rgba(0,0,0,0.5); }
+#menuBtn:active{ transform:scale(.98); }
 
 /* Responsive: make sidebar dismissible on small screens */
 @media (max-width: 900px) {
@@ -211,13 +212,13 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     top:0;
     bottom:0;
     width:240px;
-    z-index:1000;
+    z-index:1100;
     transition:left .25s var(--ease);
   }
   .sidebar.open{ left:0; }
   .main{ padding-left:20px; }
-  #menuBtn{ display:block; }
-  .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:900; }
+  #menuBtn{ display:block !important; }
+  .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; }
   .overlay.show{ display:block; }
   .sidebar .sidebar-top b{ display:none; }
   .navlist button{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
