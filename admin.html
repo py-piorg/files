@@ -195,9 +195,31 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
   padding:3px 10px;border-radius:100px;background:rgba(63,162,74,0.15);color:var(--safe);border:1px solid rgba(63,162,74,0.3);
 }
+
+/* Responsive: make sidebar dismissible on small screens */
+@media (max-width: 900px) {
+  .sidebar{
+    position:fixed;
+    left:-260px;
+    top:0;
+    bottom:0;
+    width:240px;
+    z-index:1000;
+    transition:left .25s var(--ease);
+  }
+  .sidebar.open{ left:0; }
+  .main{ padding-left:20px; }
+  #menuBtn{ display:block; }
+  .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:900; }
+  .overlay.show{ display:block; }
+  .sidebar .sidebar-top b{ display:none; }
+  .navlist button{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+}
 </style>
 </head>
 <body>
+<button id="menuBtn" class="btn btn-ghost btn-sm" style="display:none;">☰</button>
+<div id="overlay" class="overlay"></div>
 
 <!-- LOGIN SCREEN -->
 <div id="loginScreen" class="login-screen">
@@ -528,6 +550,17 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 </div>
 
 <script>
+// Mobile sidebar toggle (small, self-contained)
+(function(){
+  const menu = document.getElementById('menuBtn');
+  const overlay = document.getElementById('overlay');
+  const sidebar = document.querySelector('.sidebar');
+  if (!menu || !overlay || !sidebar) return;
+  menu.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 900) { sidebar.classList.remove('open'); overlay.classList.remove('show'); } });
+})();
+
 const OUTLETS = ["Accra", "Antoa", "Bonwire", "Bogoso", "Prestea"];
 const SIZES = ["3kg", "6kg", "13kg", "14.5kg"];
 
