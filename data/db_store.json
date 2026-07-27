@@ -121,6 +121,16 @@
       "qty": 5,
       "customer": "Test Customer",
       "status": "done"
+    },
+    {
+      "id": "d_1785191903030_4yfk",
+      "time": "2026-07-27 18:38",
+      "outlet": "Accra",
+      "driver": "Test Driver",
+      "size": "14.5kg",
+      "qty": 5,
+      "customer": "Test Customer",
+      "status": "done"
     }
   ],
   "inventory": [
@@ -133,7 +143,7 @@
     {
       "outlet": "Accra",
       "size": "6kg",
-      "qty": 38,
+      "qty": 36,
       "status": "ok"
     },
     {
@@ -145,7 +155,7 @@
     {
       "outlet": "Accra",
       "size": "14.5kg",
-      "qty": 40,
+      "qty": 36,
       "status": "ok"
     },
     {
@@ -290,6 +300,15 @@
       "inspector": "Inspector K.",
       "result": "pass",
       "nextDue": "2026-08-30"
+    },
+    {
+      "id": "i_1785191903040_yu7y",
+      "time": "2026-07-27 18:38",
+      "outlet": "Antoa",
+      "item": "Valve Unit #1",
+      "inspector": "Inspector K.",
+      "result": "pass",
+      "nextDue": "2026-08-30"
     }
   ],
   "shiftNotes": [
@@ -317,6 +336,13 @@
     {
       "id": "n_1785179624636_4fff",
       "time": "2026-07-27 15:13",
+      "outlet": "Bonwire",
+      "staff": "Abena",
+      "note": "All pumps fully operational."
+    },
+    {
+      "id": "n_1785191903044_qtkb",
+      "time": "2026-07-27 18:38",
       "outlet": "Bonwire",
       "staff": "Abena",
       "note": "All pumps fully operational."
@@ -427,6 +453,58 @@
       "amount": 70,
       "paymentMethod": "cash",
       "notes": "inventory test"
+    },
+    {
+      "id": "pu_1785191682700_tg4j",
+      "time": "2026-07-27 18:34",
+      "outlet": "Antoa",
+      "cashier": "Test Cashier",
+      "customer": "Walk-in",
+      "item": "3kg cylinder",
+      "qty": 2,
+      "unitPrice": 35,
+      "amount": 70,
+      "paymentMethod": "cash",
+      "notes": "inventory fallback test"
+    },
+    {
+      "id": "pu_1785191712737_hlz7",
+      "time": "2026-07-27 18:35",
+      "outlet": "Antoa",
+      "cashier": "Test Cashier",
+      "customer": "Walk-in",
+      "item": "3kg cylinder",
+      "qty": 1,
+      "unitPrice": 35,
+      "amount": 35,
+      "paymentMethod": "cash",
+      "notes": "inventory test 2"
+    },
+    {
+      "id": "pu_1785191812132_6pkd",
+      "time": "2026-07-27 18:36",
+      "outlet": "Accra",
+      "cashier": "API Test",
+      "customer": "Walk-in",
+      "item": "6kg cylinder",
+      "qty": 2,
+      "unitPrice": 75,
+      "amount": 150,
+      "paymentMethod": "cash",
+      "notes": "API inventory update"
+    },
+    {
+      "id": "pu_1785191985696_cnvi",
+      "time": "2026-07-27 18:39",
+      "outlet": "Accra",
+      "cashier": "API Test",
+      "customer": "Walk-in",
+      "item": "14.5 kg cylinder",
+      "qty": 1,
+      "unitPrice": 175,
+      "amount": 175,
+      "paymentMethod": "cash",
+      "notes": "Test auto inventory update for spaced size"
     }
   ]
 }
