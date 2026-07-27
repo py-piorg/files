@@ -54,6 +54,16 @@ function formatNow(d) {
   return `${y}-${m}-${day} ${hh}:${mm}`;
 }
 
+function resolvePurchaseSize(item) {
+  if (!item) return null;
+  const normalized = item.toLowerCase().trim();
+  if (normalized.includes('14.5kg') || normalized.includes('14.5 kg')) return '14.5kg';
+  if (normalized.includes('13kg') || normalized.includes('13 kg')) return '13kg';
+  if (normalized.includes('6kg') || normalized.includes('6 kg')) return '6kg';
+  if (normalized.includes('3kg') || normalized.includes('3 kg')) return '3kg';
+  return null;
+}
+
 exports.handler = async function (event, context) {
   // Determine route path. Redirect passes ?path=/api/xxx
   const qs = event.queryStringParameters || {};
@@ -190,7 +200,21 @@ exports.handler = async function (event, context) {
       const saved = snap.data() || {};
       if (saved.createdAt && saved.createdAt.toDate) saved.time = formatNow(saved.createdAt.toDate());
       if (!saved.time) saved.time = nowStr;
-      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved } }) };
+      let inventoryUpdate = null;
+      const size = resolvePurchaseSize(saved.item);
+      if (size && saved.outlet) {
+        const docId = `${saved.outlet}_${size}`;
+        const invRef = db.collection('inventory').doc(docId);
+        const invSnap = await invRef.get();
+        let newQty = 0;
+        if (invSnap.exists) {
+          newQty = Math.max(0, (parseInt(invSnap.data().qty || 0) - parsedQty));
+        }
+        const newStatus = newQty <= 5 ? 'critical' : newQty <= 12 ? 'low' : 'ok';
+        await invRef.set({ outlet: saved.outlet, size, qty: newQty, status: newStatus, updatedAt: adminLib.firestore.FieldValue.serverTimestamp() }, { merge: true });
+        inventoryUpdate = { outlet: saved.outlet, size, qty: newQty, status: newStatus };
+      }
+      return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved }, inventoryUpdate }) };
     }
 
     // POST /api/ds-requests

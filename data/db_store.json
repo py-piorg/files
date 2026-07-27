@@ -400,5 +400,33 @@
       "status": "open",
       "note": "Requested deletion of biometric enrollment after consent revoked."
     }
+  ],
+  "purchases": [
+    {
+      "id": "pu_1785186429344_dmzj",
+      "time": "2026-07-27 17:07",
+      "outlet": "Accra",
+      "cashier": "Test Cashier",
+      "customer": "Demo Customer",
+      "item": "6kg cylinder",
+      "qty": 2,
+      "unitPrice": 75,
+      "amount": 150,
+      "paymentMethod": "cash",
+      "notes": "Smoke test"
+    },
+    {
+      "id": "pu_1785190983330_7r8m",
+      "time": "2026-07-27 18:23",
+      "outlet": "Accra",
+      "cashier": "Test Cashier",
+      "customer": "Walk-in",
+      "item": "6kg cylinder",
+      "qty": 1,
+      "unitPrice": 70,
+      "amount": 70,
+      "paymentMethod": "cash",
+      "notes": "inventory test"
+    }
   ]
 }
