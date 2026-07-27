@@ -175,10 +175,24 @@ class DatabaseStore {
     return request;
   }
  
+  resolvePurchaseSize(item) {
+    if (!item) return null;
+    const normalized = item.toLowerCase().trim();
+    if (normalized.includes('14.5kg') || normalized.includes('14.5 kg')) return '14.5kg';
+    if (normalized.includes('13kg') || normalized.includes('13 kg')) return '13kg';
+    if (normalized.includes('6kg') || normalized.includes('6 kg')) return '6kg';
+    if (normalized.includes('3kg') || normalized.includes('3 kg')) return '3kg';
+    return null;
+  }
+ 
   addPurchase(purchase) {
-   this.data.purchases.push(purchase);
-   this.save();
-   return purchase;
+    this.data.purchases.push(purchase);
+    const size = this.resolvePurchaseSize(purchase.item);
+    if (size) {
+      this.adjustInventory(purchase.outlet, size, -purchase.qty);
+    }
+    this.save();
+    return purchase;
   }
  
   resolveDsRequest(id) {

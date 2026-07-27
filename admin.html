@@ -655,6 +655,28 @@ function updatePurchaseAmount() {
   const display = document.getElementById('purchaseAmount');
   if (display) display.textContent = `GH₵${total}`;
 }
+function resolvePurchaseSize(item) {
+  if (!item) return null;
+  const normalized = item.toLowerCase().trim();
+  if (normalized.includes('14.5kg')) return '14.5kg';
+  if (normalized.includes('13kg')) return '13kg';
+  if (normalized.includes('6kg')) return '6kg';
+  if (normalized.includes('3kg')) return '3kg';
+  if (normalized.includes('14.5')) return '14.5kg';
+  if (normalized.includes('13')) return '13kg';
+  if (normalized.includes('6')) return '6kg';
+  if (normalized.includes('3')) return '3kg';
+  return null;
+}
+function decrementInventoryForPurchase(outlet, item, qty) {
+  const size = resolvePurchaseSize(item);
+  if (!size || !outlet || qty <= 0) return null;
+  const row = DB.inventory.find(i => i.outlet === outlet && i.size === size);
+  if (!row) return null;
+  row.qty = Math.max(0, row.qty - qty);
+  row.status = row.qty <= 5 ? 'critical' : row.qty <= 12 ? 'low' : 'ok';
+  return row;
+}
 function applyPurchasePreset(item, price) {
   const itemInput = document.getElementById('purchaseItem');
   const priceInput = document.getElementById('purchaseUnitPrice');
@@ -1106,10 +1128,24 @@ async function addPurchase(ev) {
     if (json.success) {
       DB.purchases.push(json.data);
       toast("Purchase logged to the database.");
+      if (json.inventoryUpdate) {
+        const idx = DB.inventory.findIndex(i => i.outlet === json.inventoryUpdate.outlet && i.size === json.inventoryUpdate.size);
+        if (idx !== -1) {
+          DB.inventory[idx] = json.inventoryUpdate;
+        } else {
+          DB.inventory.push(json.inventoryUpdate);
+        }
+      }
     }
   } catch (err) {
-    DB.purchases.push({ id: `pu_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload, amount: parseFloat((payload.qty * payload.unitPrice).toFixed(2)) });
-    toast("Purchase logged locally.");
+    const localPurchase = { id: `pu_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload, amount: parseFloat((payload.qty * payload.unitPrice).toFixed(2)) };
+    DB.purchases.push(localPurchase);
+    const updatedRow = decrementInventoryForPurchase(payload.outlet, payload.item, payload.qty);
+    if (updatedRow) {
+      toast("Purchase logged locally and inventory updated.");
+    } else {
+      toast("Purchase logged locally.");
+    }
   }
 
   f.reset();
@@ -1117,6 +1153,7 @@ async function addPurchase(ev) {
   f.outlet.value = defaultOutlet;
   if (currentUser) f.cashier.value = currentUser.name;
   renderPurchases();
+  renderInventory();
   renderDashboard();
 }
 
