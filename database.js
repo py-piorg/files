@@ -130,13 +130,21 @@ class DatabaseStore {
 
   adjustInventory(outlet, size, delta) {
     const row = this.data.inventory.find(i => i.outlet === outlet && i.size === size);
+    const qty = Math.max(0, delta);
+    const statusForQty = q => q <= 5 ? "critical" : q <= 12 ? "low" : "ok";
+
     if (row) {
       row.qty = Math.max(0, row.qty + delta);
-      row.status = row.qty <= 5 ? "critical" : row.qty <= 12 ? "low" : "ok";
+      row.status = statusForQty(row.qty);
       this.save();
       return row;
     }
-    return null;
+
+    const newQty = qty;
+    const newRow = { outlet, size, qty: newQty, status: statusForQty(newQty) };
+    this.data.inventory.push(newRow);
+    this.save();
+    return newRow;
   }
 
   addInspection(inspection) {
@@ -177,11 +185,11 @@ class DatabaseStore {
  
   resolvePurchaseSize(item) {
     if (!item) return null;
-    const normalized = item.toLowerCase().trim();
-    if (normalized.includes('14.5kg') || normalized.includes('14.5 kg')) return '14.5kg';
-    if (normalized.includes('13kg') || normalized.includes('13 kg')) return '13kg';
-    if (normalized.includes('6kg') || normalized.includes('6 kg')) return '6kg';
-    if (normalized.includes('3kg') || normalized.includes('3 kg')) return '3kg';
+    const normalized = item.toLowerCase().replace(/\s+/g, '');
+    if (normalized.includes('14.5kg') || normalized.includes('14.5')) return '14.5kg';
+    if (normalized.includes('13kg') || normalized.includes('13')) return '13kg';
+    if (normalized.includes('6kg') || normalized.includes('6')) return '6kg';
+    if (normalized.includes('3kg') || normalized.includes('3')) return '3kg';
     return null;
   }
  

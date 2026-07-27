@@ -671,10 +671,14 @@ function resolvePurchaseSize(item) {
 function decrementInventoryForPurchase(outlet, item, qty) {
   const size = resolvePurchaseSize(item);
   if (!size || !outlet || qty <= 0) return null;
-  const row = DB.inventory.find(i => i.outlet === outlet && i.size === size);
-  if (!row) return null;
-  row.qty = Math.max(0, row.qty - qty);
-  row.status = row.qty <= 5 ? 'critical' : row.qty <= 12 ? 'low' : 'ok';
+  let row = DB.inventory.find(i => i.outlet === outlet && i.size === size);
+  if (!row) {
+    row = { outlet, size, qty: 0, status: 'critical' };
+    DB.inventory.push(row);
+  } else {
+    row.qty = Math.max(0, row.qty - qty);
+    row.status = row.qty <= 5 ? 'critical' : row.qty <= 12 ? 'low' : 'ok';
+  }
   return row;
 }
 function applyPurchasePreset(item, price) {
@@ -1121,13 +1125,13 @@ async function addPurchase(ev) {
     paymentMethod: f.paymentMethod.value,
     notes: f.notes.value.trim()
   };
+  const matchedSize = resolvePurchaseSize(payload.item);
 
   try {
     const res = await fetch('/api/purchases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const json = await res.json();
     if (json.success) {
       DB.purchases.push(json.data);
-      toast("Purchase logged to the database.");
       if (json.inventoryUpdate) {
         const idx = DB.inventory.findIndex(i => i.outlet === json.inventoryUpdate.outlet && i.size === json.inventoryUpdate.size);
         if (idx !== -1) {
@@ -1135,6 +1139,11 @@ async function addPurchase(ev) {
         } else {
           DB.inventory.push(json.inventoryUpdate);
         }
+        toast("Purchase logged and inventory updated.");
+      } else if (!matchedSize) {
+        toast("Purchase logged, but item size was not recognized for automatic inventory adjustment.", "warn");
+      } else {
+        toast("Purchase logged to the database.");
       }
     }
   } catch (err) {
@@ -1143,6 +1152,8 @@ async function addPurchase(ev) {
     const updatedRow = decrementInventoryForPurchase(payload.outlet, payload.item, payload.qty);
     if (updatedRow) {
       toast("Purchase logged locally and inventory updated.");
+    } else if (!matchedSize) {
+      toast("Purchase logged locally, but item size was not recognized for automatic inventory adjustment.", "warn");
     } else {
       toast("Purchase logged locally.");
     }
