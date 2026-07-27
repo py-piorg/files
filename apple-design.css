@@ -1,0 +1,347 @@
+/* ==========================================================================
+   TRIPLE A GAS — APPLE DESIGN SYSTEM (V3 Modern Overhaul)
+   Inspired by Apple.com aesthetic: Frosted Glass, Bento Grids, Refined Typography,
+   Spacious Layouts, Vibrancy, & Tactile Micro-Interactions.
+   ========================================================================== */
+
+:root {
+  /* Brand Core — Deep Wine & Rich Accents */
+  --apple-wine-900: #2a0810;
+  --apple-wine-800: #420d1a;
+  --apple-wine-700: #6b1428;
+  --apple-wine: #8e1b2c;
+  --apple-wine-500: #a8283a;
+  --apple-wine-300: #d86f7e;
+  --apple-wine-100: #fbf0f2;
+
+  --apple-gold: #d4a347;
+  --apple-gold-light: #f7eed8;
+
+  /* Apple Light Palette */
+  --apple-bg: #f5f5f7;
+  --apple-surface: rgba(255, 255, 255, 0.75);
+  --apple-surface-solid: #ffffff;
+  --apple-text: #1d1d1f;
+  --apple-text-secondary: #6e6e73;
+  --apple-text-tertiary: #86868b;
+
+  --apple-border: rgba(0, 0, 0, 0.08);
+  --apple-border-strong: rgba(0, 0, 0, 0.14);
+
+  /* Glassmorphic Shadows */
+  --apple-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+  --apple-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.06);
+  --apple-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.1);
+  --apple-glass-border: 1px solid rgba(255, 255, 255, 0.6);
+
+  /* Fonts & Radius */
+  --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", sans-serif;
+  --font-display: "Archivo Expanded", var(--font-sf);
+  --font-mono: "IBM Plex Mono", monospace;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 9999px;
+
+  --apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --apple-duration: 0.4s;
+}
+
+/* ---------- Global Reset & Smooth Styling ---------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sf);
+  background-color: var(--apple-bg);
+  color: var(--apple-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
+}
+
+/* Selection Color */
+::selection {
+  background-color: var(--apple-wine);
+  color: #ffffff;
+}
+
+/* ---------- Apple Glass Navigation Header ---------- */
+.site-header, .apple-nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(42, 8, 16, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background var(--apple-duration) var(--apple-ease);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s var(--apple-ease);
+}
+
+.brand:hover img {
+  transform: scale(1.05);
+}
+
+.brand-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.main-nav a {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  padding: 6px 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.main-nav a:hover, .main-nav a.active {
+  color: #ffffff;
+}
+
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--apple-gold);
+  border-radius: 2px;
+  transition: all 0.3s var(--apple-ease);
+  transform: translateX(-50%);
+}
+
+.main-nav a:hover::after, .main-nav a.active::after {
+  width: 100%;
+}
+
+/* ---------- Apple Glass Cards & Surfaces ---------- */
+.glass-card, .surface, .card, .prod-card, .station-card, .feature-card {
+  background: var(--apple-surface) !important;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: var(--apple-shadow-md) !important;
+  border-radius: var(--radius-lg) !important;
+  transition: transform var(--apple-duration) var(--apple-ease), box-shadow var(--apple-duration) var(--apple-ease), border-color 0.3s ease;
+  overflow: hidden;
+}
+
+.glass-card:hover, .card:hover, .prod-card:hover, .station-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--apple-shadow-lg) !important;
+  border-color: rgba(142, 27, 44, 0.25) !important;
+}
+
+/* ---------- Bento Grid Layouts ---------- */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.bento-card {
+  grid-column: span 6;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bento-card.bento-hero {
+  grid-column: span 12;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(251,240,242,0.9)) !important;
+}
+
+.bento-card.bento-sm {
+  grid-column: span 4;
+}
+
+@media (max-width: 900px) {
+  .bento-card, .bento-card.bento-sm {
+    grid-column: span 12;
+  }
+}
+
+/* ---------- Apple Typography & Headers ---------- */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--apple-text);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+}
+
+h1 {
+  font-size: clamp(38px, 5.5vw, 68px);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(26px, 3.5vw, 42px);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--apple-wine-500);
+}
+
+/* ---------- Apple Pill Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sf);
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s var(--apple-ease), box-shadow 0.2s var(--apple-ease), background 0.2s ease;
+}
+
+.btn:hover {
+  transform: scale(1.025);
+}
+
+.btn:active {
+  transform: scale(0.975);
+}
+
+.btn-primary {
+  background: var(--apple-wine-500) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(168, 40, 58, 0.35) !important;
+}
+
+.btn-primary:hover {
+  background: var(--apple-wine) !important;
+  box-shadow: 0 10px 28px rgba(168, 40, 58, 0.5) !important;
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ---------- Photography & Image Enhancements ---------- */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  filter: none !important; /* Fix dull saturation issues! */
+}
+
+.photo-frame img, .station-photo img, .gallery-item img {
+  border-radius: inherit;
+  transition: transform 0.6s var(--apple-ease);
+}
+
+.photo-frame:hover img, .station-card:hover img, .gallery-item:hover img {
+  transform: scale(1.06);
+}
+
+/* ---------- Apple Modern Badges ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sf);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge-safe {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+.badge-warn {
+  background: #fef7e0;
+  color: #b06000;
+}
+
+.badge-danger {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+.badge-neutral {
+  background: #f1f3f4;
+  color: #5f6368;
+}
+
+.badge-gold {
+  background: var(--apple-gold-light);
+  color: #7a540c;
+}
+
+/* ---------- Responsive Mobile Adjustments ---------- */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 0 16px;
+  }
+  .bento-card {
+    padding: 24px;
+  }
+  h1 {
+    font-size: 36px;
+  }
+}
