@@ -105,7 +105,10 @@ button{font-family:var(--body);}
 .btn-sm{padding:8px 14px;font-size:12px;}
 .btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid rgba(224,82,71,.4);}
 .btn-danger-ghost:hover{background:var(--danger-pale);}
-
+ 
+.quick-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.quick-actions .btn{font-size:12px;padding:10px 14px;border-radius:14px;}
+ 
 /* ---------- Shell Layout ---------- */
 .shell{display:flex;height:100vh;overflow:hidden;}
 .sidebar{
@@ -471,16 +474,18 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
       <div class="panel">
         <h3>Log New Purchase</h3>
-        <form id="purchaseForm" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;">
+        <div id="purchaseQuickActions" class="quick-actions"></div>
+        <form id="purchaseForm" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;">
           <div class="field" style="margin:0;"><label>Outlet</label><select id="purchaseOutletSelect" name="outlet"></select></div>
           <div class="field" style="margin:0;"><label>Cashier</label><input type="text" name="cashier" placeholder="Cashier name" required></div>
           <div class="field" style="margin:0;"><label>Customer</label><input type="text" name="customer" placeholder="Walk-in or account"></div>
-          <div class="field" style="margin:0;"><label>Item</label><input type="text" name="item" placeholder="e.g. 6kg cylinder" required></div>
-          <div class="field" style="margin:0;"><label>Quantity</label><input type="number" name="qty" value="1" min="1"></div>
-          <div class="field" style="margin:0;"><label>Unit Price (GH₵)</label><input type="number" name="unitPrice" value="0" min="0" step="0.01"></div>
+          <div class="field" style="margin:0;"><label>Item</label><input type="text" id="purchaseItem" name="item" placeholder="e.g. 6kg cylinder" required></div>
+          <div class="field" style="margin:0;"><label>Quantity</label><input type="number" id="purchaseQty" name="qty" value="1" min="1"></div>
+          <div class="field" style="margin:0;"><label>Unit Price (GH₵)</label><input type="number" id="purchaseUnitPrice" name="unitPrice" value="0" min="0" step="0.01"></div>
           <div class="field" style="margin:0;"><label>Payment Method</label><select name="paymentMethod"><option value="cash">Cash</option><option value="momo">MoMo</option><option value="card">Card</option><option value="transfer">Transfer</option></select></div>
           <div class="field" style="margin:0;"><label>Notes</label><input type="text" name="notes" placeholder="Optional note"></div>
-          <button type="submit" class="btn btn-primary" style="grid-column:span 4;">Save Purchase to Database</button>
+          <div class="field" style="margin:0;grid-column:span 2;"><label>Total Amount</label><div id="purchaseAmount" class="mono" style="padding:12px 14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);">GH₵0.00</div></div>
+          <button type="submit" class="btn btn-primary" style="grid-column:span 5;">Save Purchase to Database</button>
         </form>
       </div>
       <div class="panel">
@@ -605,6 +610,14 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 const OUTLETS = ["Accra", "Antoa", "Bonwire", "Bogoso", "Prestea"];
 const SIZES = ["3kg", "6kg", "13kg", "14.5kg"];
+const PRODUCT_PRESETS = [
+  { label: "3kg cylinder", price: 35 },
+  { label: "6kg cylinder", price: 70 },
+  { label: "13kg cylinder", price: 150 },
+  { label: "14.5kg cylinder", price: 175 },
+  { label: "LPG refill", price: 85 },
+  { label: "Snack pack", price: 25 }
+];
 
 function getDefaultDbState() {
   return {
@@ -634,6 +647,33 @@ function toast(msg, kind = "safe") {
   el.classList.add("show");
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+}
+function updatePurchaseAmount() {
+  const qty = parseInt(document.getElementById('purchaseQty')?.value) || 1;
+  const unitPrice = parseFloat(document.getElementById('purchaseUnitPrice')?.value) || 0;
+  const total = (qty * unitPrice).toFixed(2);
+  const display = document.getElementById('purchaseAmount');
+  if (display) display.textContent = `GH₵${total}`;
+}
+function applyPurchasePreset(item, price) {
+  const itemInput = document.getElementById('purchaseItem');
+  const priceInput = document.getElementById('purchaseUnitPrice');
+  if (itemInput) itemInput.value = item;
+  if (priceInput) priceInput.value = price;
+  updatePurchaseAmount();
+}
+function initPurchaseQuickActions() {
+  const container = document.getElementById('purchaseQuickActions');
+  if (!container) return;
+  container.innerHTML = '';
+  PRODUCT_PRESETS.forEach(p => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-ghost btn-sm';
+    button.textContent = `${p.label} — GH₵${p.price}`;
+    button.addEventListener('click', () => applyPurchasePreset(p.label, p.price));
+    container.appendChild(button);
+  });
 }
 function gaugeSVG(pct, color) {
   const r = 30, c = 2 * Math.PI * r;
@@ -1043,6 +1083,7 @@ function renderPurchases() {
   if (cashierInput && currentUser && !cashierInput.value) {
     cashierInput.value = currentUser.name;
   }
+  updatePurchaseAmount();
 }
 
 async function addPurchase(ev) {
@@ -1134,6 +1175,9 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("inspectionForm").addEventListener("submit", addInspection);
   document.getElementById("shiftNoteForm").addEventListener("submit", addShiftNote);
   document.getElementById("purchaseForm").addEventListener("submit", addPurchase);
+  document.getElementById("purchaseQty").addEventListener("input", updatePurchaseAmount);
+  document.getElementById("purchaseUnitPrice").addEventListener("input", updatePurchaseAmount);
+  initPurchaseQuickActions();
   document.getElementById("staffForm").addEventListener("submit", addStaff);
   document.getElementById("retentionForm").addEventListener("submit", saveRetention);
   document.getElementById("dsRequestForm").addEventListener("submit", addDsRequest);
