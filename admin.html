@@ -196,6 +196,13 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   padding:3px 10px;border-radius:100px;background:rgba(63,162,74,0.15);color:var(--safe);border:1px solid rgba(63,162,74,0.3);
 }
 
+/* Overlay default: avoid accidentally blocking interactions on desktop */
+.overlay{ display:none; pointer-events:none; }
+.overlay.show{ display:block; pointer-events:auto; }
+
+/* Menu button fixed position (hidden by default) */
+#menuBtn{ display:none; position:fixed; top:12px; left:12px; z-index:1101; }
+
 /* Responsive: make sidebar dismissible on small screens */
 @media (max-width: 900px) {
   .sidebar{
