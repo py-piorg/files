@@ -265,7 +265,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;">Sign In to Dashboard</button>
     </form>
     <div class="login-note">
-      Connected to Persistent SQLite Database Backend.
+      Connected to the live admin backend for Netlify and local hosting.
     </div>
   </div>
 </div>
@@ -284,7 +284,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       <div id="ctxOutlet" style="font-size:12px;color:var(--text-dim);">Accra</div>
       <span id="ctxRole" class="ctx-role">Station Manager</span>
       <div style="margin-top:8px;">
-        <span class="db-indicator"><span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> SQLite Active</span>
+        <span class="db-indicator"><span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> Live Backend Active</span>
       </div>
     </div>
     <ul class="navlist">
@@ -294,6 +294,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       <li><button data-view="inspections"><span>Inspections</span></button></li>
       <li><button data-view="shiftNotes"><span>Shift Notes</span></button></li>
       <li><button data-view="staff"><span>Staff Directory</span></button></li>
+      <li><button data-view="cashier"><span>Cashier Purchases</span></button></li>
       <li><button data-view="presence"><span>Presence Log</span></button></li>
       <li><button data-view="compliance"><span>Compliance</span></button></li>
       <li><button data-view="reports"><span>Reports</span></button></li>
@@ -460,6 +461,39 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
     </div>
 
+    <!-- VIEW: CASHIER PURCHASES -->
+    <div id="view-cashier" class="view">
+      <div class="view-head">
+        <div>
+          <h2>Cashier Purchase Logging</h2>
+          <p>Record in-store purchases for receipt-printer integration later and keep them in the shared database.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Log New Purchase</h3>
+        <form id="purchaseForm" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;">
+          <div class="field" style="margin:0;"><label>Outlet</label><select id="purchaseOutletSelect" name="outlet"></select></div>
+          <div class="field" style="margin:0;"><label>Cashier</label><input type="text" name="cashier" placeholder="Cashier name" required></div>
+          <div class="field" style="margin:0;"><label>Customer</label><input type="text" name="customer" placeholder="Walk-in or account"></div>
+          <div class="field" style="margin:0;"><label>Item</label><input type="text" name="item" placeholder="e.g. 6kg cylinder" required></div>
+          <div class="field" style="margin:0;"><label>Quantity</label><input type="number" name="qty" value="1" min="1"></div>
+          <div class="field" style="margin:0;"><label>Unit Price (GH₵)</label><input type="number" name="unitPrice" value="0" min="0" step="0.01"></div>
+          <div class="field" style="margin:0;"><label>Payment Method</label><select name="paymentMethod"><option value="cash">Cash</option><option value="momo">MoMo</option><option value="card">Card</option><option value="transfer">Transfer</option></select></div>
+          <div class="field" style="margin:0;"><label>Notes</label><input type="text" name="notes" placeholder="Optional note"></div>
+          <button type="submit" class="btn btn-primary" style="grid-column:span 4;">Save Purchase to Database</button>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Purchase History</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Timestamp</th><th>Outlet</th><th>Cashier</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Payment</th><th>Notes</th></tr></thead>
+            <tbody id="purchaseTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- VIEW: PRESENCE LOG -->
     <div id="view-presence" class="view">
       <div class="view-head">
@@ -572,11 +606,15 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 const OUTLETS = ["Accra", "Antoa", "Bonwire", "Bogoso", "Prestea"];
 const SIZES = ["3kg", "6kg", "13kg", "14.5kg"];
 
-// Database Object (synced with SQLite REST API server or local fallback)
-let DB = {
-  staff: [], deliveries: [], inventory: [], inspections: [],
-  shiftNotes: [], presence: [], cameras: [], compliance: {}, dsRequests: []
-};
+function getDefaultDbState() {
+  return {
+    staff: [], deliveries: [], inventory: [], inspections: [],
+    shiftNotes: [], presence: [], cameras: [], compliance: {}, dsRequests: [], purchases: []
+  };
+}
+
+// Database Object (synced with the live admin API or local fallback)
+let DB = getDefaultDbState();
 
 let currentUser = null;
 
@@ -610,12 +648,28 @@ function scopedOutlet() {
   return currentUser && currentUser.role !== "Owner / Head Office" ? currentUser.outlet : null;
 }
 
-// Fetch DB State from Backend (Firebase Cloud Firestore / SQLite REST API / Local Fallback)
+// Fetch DB State from Backend (Netlify Function / Firebase fallback)
 async function fetchDatabase() {
-  // 1. Try Firebase Cloud Firestore (Netlify live sync)
+  try {
+    const res = await fetch('/api/data');
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        DB = { ...getDefaultDbState(), ...DB, ...json.data };
+        renderAll();
+        document.querySelectorAll('.db-indicator').forEach(el => {
+          el.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> 🔗 Live Backend Active';
+        });
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Live API unavailable, trying Firebase fallback:", err);
+  }
+
   if (typeof syncFirestoreData === 'function') {
     const synced = await syncFirestoreData((remoteData) => {
-      DB = { ...DB, ...remoteData };
+      DB = { ...getDefaultDbState(), ...DB, ...remoteData };
       renderAll();
     });
     if (synced) {
@@ -624,21 +678,6 @@ async function fetchDatabase() {
       });
       return;
     }
-  }
-
-  // 2. Try Node.js Express REST API (Local SQLite)
-  try {
-    const res = await fetch('/api/data');
-    if (res.ok) {
-      const json = await res.json();
-      if (json.success && json.data) {
-        DB = json.data;
-        renderAll();
-        return;
-      }
-    }
-  } catch (err) {
-    console.warn("API server unreachable, using local fallback:", err);
   }
 }
 
@@ -687,6 +726,7 @@ function renderDashboard() {
     ...DB.deliveries.map(d => ({ time: (d.time || '').slice(11), kind: "safe", text: `Delivery — ${d.size} ×${d.qty} to ${esc(d.customer)} (${d.outlet})`, outlet: d.outlet })),
     ...DB.inspections.map(i => ({ time: (i.time || '').slice(11), kind: i.result === "pass" ? "safe" : i.result === "overdue" ? "danger" : "warn", text: `Inspection — ${esc(i.item)} (${i.outlet})`, outlet: i.outlet })),
     ...DB.shiftNotes.map(n => ({ time: (n.time || '').slice(11), kind: "neutral", text: `Shift note — ${esc((n.note || '').slice(0, 50))}${n.note.length > 50 ? "…" : ""} (${n.outlet})`, outlet: n.outlet })),
+    ...DB.purchases.map(p => ({ time: (p.time || '').slice(11), kind: "safe", text: `Purchase — ${esc(p.item)} ×${p.qty} for GH₵${Number(p.amount || 0).toFixed(2)} (${p.outlet})`, outlet: p.outlet }))
   ].filter(x => !scope || x.outlet === scope)
    .sort((a, b) => b.time.localeCompare(a.time)).slice(0, 6);
 
@@ -979,6 +1019,66 @@ async function resolveRequest(id) {
   renderCompliance();
 }
 
+// Cashier Purchases
+function renderPurchases() {
+  const scope = scopedOutlet();
+  const rows = DB.purchases.filter(p => !scope || p.outlet === scope).slice().reverse();
+  document.getElementById("purchaseTable").innerHTML = rows.length ? rows.map(p => `
+    <tr>
+      <td class="mono">${esc(p.time)}</td>
+      <td>${esc(p.outlet)}</td>
+      <td>${esc(p.cashier)}</td>
+      <td>${esc(p.customer)}</td>
+      <td>${esc(p.item)}</td>
+      <td class="mono">${p.qty}</td>
+      <td class="mono">GH₵${Number(p.amount || 0).toFixed(2)}</td>
+      <td>${esc(p.paymentMethod || 'cash')}</td>
+      <td>${esc(p.notes || '—')}</td>
+    </tr>`).join("") : `<tr><td colspan="9" style="color:var(--text-faint);">No purchases logged yet.</td></tr>`;
+
+  const outletSelect = document.getElementById("purchaseOutletSelect");
+  if (outletSelect) outletSelect.innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
+
+  const cashierInput = document.querySelector('#purchaseForm input[name="cashier"]');
+  if (cashierInput && currentUser && !cashierInput.value) {
+    cashierInput.value = currentUser.name;
+  }
+}
+
+async function addPurchase(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const payload = {
+    outlet: f.outlet.value,
+    cashier: f.cashier.value.trim() || (currentUser ? currentUser.name : 'Staff'),
+    customer: f.customer.value.trim() || 'Walk-in',
+    item: f.item.value.trim(),
+    qty: parseInt(f.qty.value) || 1,
+    unitPrice: parseFloat(f.unitPrice.value) || 0,
+    paymentMethod: f.paymentMethod.value,
+    notes: f.notes.value.trim()
+  };
+
+  try {
+    const res = await fetch('/api/purchases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const json = await res.json();
+    if (json.success) {
+      DB.purchases.push(json.data);
+      toast("Purchase logged to the database.");
+    }
+  } catch (err) {
+    DB.purchases.push({ id: `pu_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload, amount: parseFloat((payload.qty * payload.unitPrice).toFixed(2)) });
+    toast("Purchase logged locally.");
+  }
+
+  f.reset();
+  const defaultOutlet = scopedOutlet() || OUTLETS[0];
+  f.outlet.value = defaultOutlet;
+  if (currentUser) f.cashier.value = currentUser.name;
+  renderPurchases();
+  renderDashboard();
+}
+
 // Reports
 function renderReports() {
   const rows = OUTLETS.map(o => {
@@ -1003,7 +1103,7 @@ function renderReports() {
 function renderAll() {
   renderDashboard(); renderDeliveries(); renderInventory();
   renderInspections(); renderShiftNotes(); renderStaff();
-  renderPresence(); renderCompliance(); renderReports();
+  renderPresence(); renderCompliance(); renderPurchases(); renderReports();
 }
 
 // Auth & Init
@@ -1033,6 +1133,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("deliveryForm").addEventListener("submit", addDelivery);
   document.getElementById("inspectionForm").addEventListener("submit", addInspection);
   document.getElementById("shiftNoteForm").addEventListener("submit", addShiftNote);
+  document.getElementById("purchaseForm").addEventListener("submit", addPurchase);
   document.getElementById("staffForm").addEventListener("submit", addStaff);
   document.getElementById("retentionForm").addEventListener("submit", saveRetention);
   document.getElementById("dsRequestForm").addEventListener("submit", addDsRequest);

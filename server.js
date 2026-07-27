@@ -155,16 +155,46 @@ app.post('/api/compliance', (req, res) => {
   res.json({ success: true, data: updated });
 });
 
-// 9. Add Data Subject request
+// 9. Add purchase log
+app.post('/api/purchases', (req, res) => {
+  const { outlet, cashier, customer, item, qty, unitPrice, paymentMethod, notes } = req.body;
+  if (!outlet || !item || !cashier) {
+    return res.status(400).json({ success: false, error: 'Outlet, cashier, and item are required' });
+  }
+ 
+  const now = new Date();
+  const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const parsedQty = parseInt(qty) || 1;
+  const parsedUnitPrice = parseFloat(unitPrice) || 0;
+ 
+  const purchase = {
+    id: `pu_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    time: timeStr,
+    outlet,
+    cashier,
+    customer: customer || 'Walk-in',
+    item,
+    qty: parsedQty,
+    unitPrice: parsedUnitPrice,
+    amount: parseFloat((parsedQty * parsedUnitPrice).toFixed(2)),
+    paymentMethod: paymentMethod || 'cash',
+    notes: notes || '—'
+  };
+ 
+  const added = db.addPurchase(purchase);
+  res.status(201).json({ success: true, data: added });
+});
+ 
+// 10. Add Data Subject request
 app.post('/api/ds-requests', (req, res) => {
   const { staff, type, note } = req.body;
   if (!staff || !type) {
     return res.status(400).json({ success: false, error: 'Staff name and type are required' });
   }
-
+ 
   const now = new Date();
   const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
+ 
   const request = {
     id: `r_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     time: timeStr,
@@ -173,12 +203,12 @@ app.post('/api/ds-requests', (req, res) => {
     status: 'open',
     note: note || '—'
   };
-
+ 
   const added = db.addDsRequest(request);
   res.status(201).json({ success: true, data: added });
 });
-
-// 10. Resolve Data Subject request
+ 
+// 11. Resolve Data Subject request
 app.patch('/api/ds-requests/:id/resolve', (req, res) => {
   const { id } = req.params;
   const updated = db.resolveDsRequest(id);

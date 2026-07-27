@@ -47,7 +47,7 @@ async function syncFirestoreData(onUpdateCallback) {
   if (!isFirebaseInitialized || !db) return false;
 
   try {
-    const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests'];
+    const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests', 'purchases'];
     const remoteData = {};
 
     for (const colName of collections) {
