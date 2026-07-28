@@ -131,6 +131,16 @@
       "qty": 5,
       "customer": "Test Customer",
       "status": "done"
+    },
+    {
+      "id": "d_1785252550870_2lxf",
+      "time": "2026-07-28 11:29",
+      "outlet": "Accra",
+      "driver": "Test Driver",
+      "size": "14.5kg",
+      "qty": 5,
+      "customer": "Test Customer",
+      "status": "done"
     }
   ],
   "inventory": [
@@ -155,7 +165,7 @@
     {
       "outlet": "Accra",
       "size": "14.5kg",
-      "qty": 36,
+      "qty": 33,
       "status": "ok"
     },
     {
@@ -185,7 +195,7 @@
     {
       "outlet": "Bonwire",
       "size": "3kg",
-      "qty": 5,
+      "qty": 2,
       "status": "critical"
     },
     {
@@ -309,6 +319,15 @@
       "inspector": "Inspector K.",
       "result": "pass",
       "nextDue": "2026-08-30"
+    },
+    {
+      "id": "i_1785252550880_t9pq",
+      "time": "2026-07-28 11:29",
+      "outlet": "Antoa",
+      "item": "Valve Unit #1",
+      "inspector": "Inspector K.",
+      "result": "pass",
+      "nextDue": "2026-08-30"
     }
   ],
   "shiftNotes": [
@@ -343,6 +362,13 @@
     {
       "id": "n_1785191903044_qtkb",
       "time": "2026-07-27 18:38",
+      "outlet": "Bonwire",
+      "staff": "Abena",
+      "note": "All pumps fully operational."
+    },
+    {
+      "id": "n_1785252550884_l76l",
+      "time": "2026-07-28 11:29",
       "outlet": "Bonwire",
       "staff": "Abena",
       "note": "All pumps fully operational."
@@ -505,6 +531,41 @@
       "amount": 175,
       "paymentMethod": "cash",
       "notes": "Test auto inventory update for spaced size"
+    },
+    {
+      "id": "pu_1785252544863_c5ju",
+      "time": "2026-07-28 11:29",
+      "outlet": "Bonwire",
+      "cashier": "API Test",
+      "customer": "Walk-in",
+      "item": "3kg cylinder",
+      "qty": 3,
+      "unitPrice": 35,
+      "amount": 105,
+      "paymentMethod": "cash",
+      "notes": "Inventory movement test"
+    }
+  ],
+  "inventoryMovements": [
+    {
+      "id": "m_1785252544864_9u54",
+      "time": "2026-07-28 11:29",
+      "outlet": "Bonwire",
+      "size": "3kg",
+      "qty": -3,
+      "source": "sale",
+      "item": "3kg cylinder",
+      "purchaseId": "pu_1785252544863_c5ju"
+    },
+    {
+      "id": "m_1785252550875_aqyo",
+      "time": "2026-07-28 11:29",
+      "outlet": "Accra",
+      "size": "14.5kg",
+      "qty": -3,
+      "source": "manual",
+      "item": "Purchase",
+      "purchaseId": null
     }
   ]
 }

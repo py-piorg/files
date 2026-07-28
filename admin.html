@@ -170,6 +170,26 @@ button{font-family:var(--body);}
 .gauge svg{width:100%;height:100%;}
 .gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;color:#fff;}
 
+.tank-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:18px;margin-bottom:22px;}
+@media (max-width:900px){.tank-grid{grid-template-columns:1fr;}}
+.tank-card{background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.08);border-radius:22px;overflow:hidden;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,0.2);}
+.tank-card .tank-title{font-size:14px;font-weight:700;margin-bottom:12px;color:#fff;}
+.tank-surface{position:relative;height:170px;background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
+.tank-surface::before{content:'';position:absolute;left:50%;top:0;transform:translateX(-50%);width:70%;height:100%;background:radial-gradient(circle at 50% 20%, rgba(255,255,255,0.18), transparent 50%);pointer-events:none;}
+.tank-fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(199,154,61,0.95),rgba(199,154,61,0.4));border-top-left-radius:16px;border-top-right-radius:16px;transition:height .4s ease;}
+.tank-meta{margin-top:14px;font-size:13px;color:var(--text-dim);}
+.tank-meta strong{color:#fff;}
+
+.movement-panel{margin-top:18px;}
+.movement-panel h4{font-size:15px;margin-bottom:12px;}
+.movement-list{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+.movement-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
+.movement-item .detail{max-width:70%;}
+.movement-item .detail span{display:block;font-size:12px;color:var(--text-dim);margin-top:4px;}
+.movement-item .qty{font-family:var(--mono);font-weight:700;font-size:14px;}
+.movement-item .qty.negative{color:var(--danger);}
+.movement-item .qty.positive{color:var(--safe);}
+
 .table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);}
 table{width:100%;border-collapse:collapse;text-align:left;font-size:13.5px;}
 th{background:rgba(255,255,255,0.04);color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:12px 16px;border-bottom:1px solid var(--border);}
@@ -318,6 +338,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         </div>
       </div>
       <div id="dashStats" class="stat-grid"></div>
+      <div id="dashSales" class="stat-grid"></div>
 
       <div class="two-col">
         <div class="panel">
@@ -372,11 +393,16 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
       <div class="panel">
         <h3>Cylinder Inventory Levels</h3>
+        <div id="inventoryTankVisuals" class="tank-grid"></div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Station Outlet</th><th>Cylinder Size</th><th>Quantity in Stock</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
             <tbody id="inventoryTable"></tbody>
           </table>
+        </div>
+        <div class="movement-panel">
+          <h4>Recent Inventory Movements</h4>
+          <ul id="inventoryMovementList" class="movement-list"></ul>
         </div>
       </div>
     </div>
@@ -622,7 +648,7 @@ const PRODUCT_PRESETS = [
 function getDefaultDbState() {
   return {
     staff: [], deliveries: [], inventory: [], inspections: [],
-    shiftNotes: [], presence: [], cameras: [], compliance: {}, dsRequests: [], purchases: []
+    shiftNotes: [], presence: [], cameras: [], compliance: {}, dsRequests: [], purchases: [], inventoryMovements: []
   };
 }
 
@@ -766,25 +792,40 @@ function renderDashboard() {
   const dueInspections = DB.inspections.filter(i => (!scope || i.outlet === scope) && i.result !== "pass").length;
   const overdue = DB.inspections.filter(i => (!scope || i.outlet === scope) && i.result === "overdue").length;
   const deliveriesToday = DB.deliveries.filter(d => !scope || d.outlet === scope).length;
+  const sales = DB.purchases.filter(p => !scope || p.outlet === scope);
+  const totalRevenue = sales.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  const totalItemsSold = sales.reduce((sum, p) => sum + (Number(p.qty) || 0), 0);
+  const dailyRevenue = totalRevenue; // overall revenue for the selected view
+  const topItem = Object.entries(sales.reduce((acc, p) => { acc[p.item] = (acc[p.item] || 0) + (Number(p.qty) || 0); return acc; }, {})).sort((a, b) => b[1] - a[1])[0];
+  const bestSeller = topItem ? `${topItem[0]} (${topItem[1]} sold)` : 'No sales yet';
 
   document.getElementById("dashStats").innerHTML = `
     <div class="stat-card"><div class="n">${totalCyl}</div><div class="l">Cylinders in stock${scope ? "" : " (all outlets)"}</div></div>
     <div class="stat-card"><div class="n ${lowCount ? "warn" : "safe"}">${lowCount}</div><div class="l">Low / critical stock lines</div></div>
-    <div class="stat-card"><div class="n ${overdue ? "danger" : "safe"}">${dueInspections}</div><div class="l">Inspections due or overdue</div></div>
-    <div class="stat-card"><div class="n safe">${deliveriesToday}</div><div class="l">Deliveries logged</div></div>
+    <div class="stat-card"><div class="n safe">GH₵${totalRevenue.toFixed(2)}</div><div class="l">Total sales value</div></div>
+    <div class="stat-card"><div class="n">${totalItemsSold}</div><div class="l">Items sold</div></div>
+  `;
+
+  document.getElementById("dashSales").innerHTML = `
+    <div class="stat-card" style="grid-column:1 / -1;">
+      <div class="n" style="font-size:18px;">${esc(bestSeller)}</div>
+      <div class="l">Top selling product${scope ? '' : ' across all outlets'}</div>
+    </div>
   `;
 
   const compliance = DB.inspections.length ? Math.round(100 * (DB.inspections.filter(i => i.result === "pass").length / DB.inspections.length)) : 100;
   const stockHealth = inv.length ? Math.round(100 * (inv.filter(i => i.status === "ok").length / Math.max(1, inv.length))) : 100;
 
   document.getElementById("dashGauges").innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div class="gauge">${gaugeSVG(stockHealth, stockHealth > 60 ? "var(--safe)" : "var(--warn)")}<div class="gauge-val">${stockHealth}%</div></div>
-      <div><b style="display:block;font-size:14px;color:#fff;">Stock Health</b><span style="font-size:12px;color:var(--text-dim);">Lines at healthy stock levels</span></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div class="gauge">${gaugeSVG(compliance, compliance > 60 ? "var(--safe)" : "var(--danger)")}<div class="gauge-val">${compliance}%</div></div>
-      <div><b style="display:block;font-size:14px;color:#fff;">Inspection Compliance</b><span style="font-size:12px;color:var(--text-dim);">Passed safety inspections</span></div>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:220px;">
+        <div class="gauge">${gaugeSVG(stockHealth, stockHealth > 60 ? "var(--safe)" : "var(--warn)")}<div class="gauge-val">${stockHealth}%</div></div>
+        <div><b style="display:block;font-size:14px;color:#fff;">Stock Health</b><span style="font-size:12px;color:var(--text-dim);">Lines at healthy stock levels</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:220px;">
+        <div class="gauge">${gaugeSVG(compliance, compliance > 60 ? "var(--safe)" : "var(--danger)")}<div class="gauge-val">${compliance}%</div></div>
+        <div><b style="display:block;font-size:14px;color:#fff;">Inspection Compliance</b><span style="font-size:12px;color:var(--text-dim);">Passed safety inspections</span></div>
+      </div>
     </div>
   `;
 
@@ -856,6 +897,8 @@ function renderInventory() {
         <button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',1)">+</button>
       </td>
     </tr>`).join("") : `<tr><td colspan="5">No inventory rows.</td></tr>`;
+  renderInventoryVisuals();
+  renderInventoryMovements();
 }
 
 async function adjustStock(outlet, size, delta) {
@@ -873,6 +916,52 @@ async function adjustStock(outlet, size, delta) {
     toast("Stock adjusted.");
   }
   renderInventory(); renderDashboard();
+}
+
+function getOutletTankCapacity(outlet) {
+  const baseCapacity = 60;
+  return baseCapacity;
+}
+
+function renderInventoryVisuals() {
+  const outlets = OUTLETS;
+  const html = outlets.map(outlet => {
+    const inv = DB.inventory.filter(i => i.outlet === outlet);
+    const totalQty = inv.reduce((sum, row) => sum + (row.qty || 0), 0);
+    const capacity = getOutletTankCapacity(outlet);
+    const fillPercent = Math.min(100, Math.round((totalQty / Math.max(capacity, 1)) * 100));
+    const status = totalQty <= 12 ? (totalQty <= 5 ? 'Critical' : 'Low') : 'Healthy';
+    return `
+      <div class="tank-card">
+        <div class="tank-title">${esc(outlet)} Tank Level</div>
+        <div class="tank-surface"><div class="tank-fill" style="height:${fillPercent}%;"></div></div>
+        <div class="tank-meta"><strong>${totalQty}</strong> cylinders available • ${fillPercent}% full</div>
+        <div class="tank-meta">Status: ${status}</div>
+      </div>`;
+  }).join('');
+  const container = document.getElementById('inventoryTankVisuals');
+  if (container) container.innerHTML = html;
+}
+
+function renderInventoryMovements() {
+  const scope = scopedOutlet();
+  const movements = (DB.inventoryMovements || []).filter(m => !scope || m.outlet === scope)
+    .slice().sort((a, b) => (b.time || '').localeCompare(a.time)).slice(0, 6);
+  const container = document.getElementById('inventoryMovementList');
+  if (!container) return;
+  container.innerHTML = movements.length ? movements.map(m => {
+    const qty = Number(m.qty || 0);
+    const sign = qty > 0 ? '+' : '';
+    const kind = qty < 0 ? 'negative' : 'positive';
+    return `
+      <li class="movement-item">
+        <div class="detail">
+          <div>${esc(m.source === 'sale' ? 'Sale' : m.source === 'manual' ? 'Manual adjustment' : 'Inventory movement')} at ${esc(m.outlet)}</div>
+          <span>${esc(m.item || 'Item')} • ${esc(m.size || 'Unknown size')}</span>
+        </div>
+        <div class="qty ${kind}">${sign}${qty}</div>
+      </li>`;
+  }).join('') : `<li class="movement-item"><div class="detail"><div style="color:var(--text-faint);">No inventory movements logged yet.</div></div></li>`;
 }
 
 // Inspections
