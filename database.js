@@ -83,7 +83,8 @@ const SEED_DATA = {
     { id: "r1", time: "2026-07-15 11:20", staff: "Abena Osei", type: "access", status: "resolved", note: "Requested a copy of her presence log history." },
     { id: "r2", time: "2026-07-22 09:05", staff: "Adjoa Mensah", type: "deletion", status: "open", note: "Requested deletion of biometric enrollment after consent revoked." }
   ],
-  purchases: []
+  purchases: [],
+  inventoryMovements: []
 };
 
 // Database persistence wrapper
@@ -100,6 +101,7 @@ class DatabaseStore {
         const seeded = JSON.parse(JSON.stringify(SEED_DATA));
         const merged = { ...seeded, ...parsed };
         if (!Array.isArray(merged.purchases)) merged.purchases = [];
+        if (!Array.isArray(merged.inventoryMovements)) merged.inventoryMovements = [];
         this.save(merged);
         return merged;
       }
@@ -128,7 +130,7 @@ class DatabaseStore {
     return delivery;
   }
 
-  adjustInventory(outlet, size, delta) {
+  adjustInventory(outlet, size, delta, recordMovement = true) {
     const row = this.data.inventory.find(i => i.outlet === outlet && i.size === size);
     const qty = Math.max(0, delta);
     const statusForQty = q => q <= 5 ? "critical" : q <= 12 ? "low" : "ok";
@@ -136,6 +138,9 @@ class DatabaseStore {
     if (row) {
       row.qty = Math.max(0, row.qty + delta);
       row.status = statusForQty(row.qty);
+      if (recordMovement) {
+        this.addInventoryMovement({ outlet, size, qty: delta, source: 'manual' });
+      }
       this.save();
       return row;
     }
@@ -143,6 +148,9 @@ class DatabaseStore {
     const newQty = qty;
     const newRow = { outlet, size, qty: newQty, status: statusForQty(newQty) };
     this.data.inventory.push(newRow);
+    if (recordMovement) {
+      this.addInventoryMovement({ outlet, size, qty: delta, source: 'manual' });
+    }
     this.save();
     return newRow;
   }
@@ -182,7 +190,25 @@ class DatabaseStore {
     this.save();
     return request;
   }
- 
+
+  addInventoryMovement(movement) {
+    const now = new Date();
+    const time = movement.time || `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const record = {
+      id: `m_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      time,
+      outlet: movement.outlet,
+      size: movement.size || null,
+      qty: movement.qty,
+      source: movement.source || 'sale',
+      item: movement.item || 'Purchase',
+      purchaseId: movement.purchaseId || null
+    };
+    this.data.inventoryMovements.push(record);
+    this.save();
+    return record;
+  }
+  
   resolvePurchaseSize(item) {
     if (!item) return null;
     const normalized = item.toLowerCase().replace(/\s+/g, '');
@@ -197,7 +223,16 @@ class DatabaseStore {
     this.data.purchases.push(purchase);
     const size = this.resolvePurchaseSize(purchase.item);
     if (size) {
-      this.adjustInventory(purchase.outlet, size, -purchase.qty);
+      this.adjustInventory(purchase.outlet, size, -purchase.qty, false);
+      this.addInventoryMovement({
+        outlet: purchase.outlet,
+        size,
+        qty: -purchase.qty,
+        source: 'sale',
+        item: purchase.item,
+        purchaseId: purchase.id,
+        time: purchase.time
+      });
     }
     this.save();
     return purchase;

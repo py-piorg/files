@@ -25,7 +25,7 @@ function initFirestore() {
 }
 
 async function readAllCollections(db) {
-  const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests', 'purchases'];
+  const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests', 'purchases', 'inventoryMovements'];
   const out = {};
   for (const name of collections) {
     try {
@@ -120,6 +120,15 @@ exports.handler = async function (event, context) {
       }
       const newStatus = newQty <= 5 ? 'critical' : newQty <= 12 ? 'low' : 'ok';
       await docRef.set({ outlet, size, qty: newQty, status: newStatus, updatedAt: adminLib.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      await db.collection('inventoryMovements').add({
+        outlet,
+        size,
+        qty: parseInt(delta),
+        source: 'manual',
+        item: 'Inventory adjustment',
+        time: formatNow(),
+        createdAt: adminLib.firestore.FieldValue.serverTimestamp()
+      });
       return { statusCode: 200, body: JSON.stringify({ success: true, data: { outlet, size, qty: newQty, status: newStatus } }) };
     }
 
@@ -213,6 +222,16 @@ exports.handler = async function (event, context) {
         const newStatus = newQty <= 5 ? 'critical' : newQty <= 12 ? 'low' : 'ok';
         await invRef.set({ outlet: saved.outlet, size, qty: newQty, status: newStatus, updatedAt: adminLib.firestore.FieldValue.serverTimestamp() }, { merge: true });
         inventoryUpdate = { outlet: saved.outlet, size, qty: newQty, status: newStatus };
+        await db.collection('inventoryMovements').add({
+          outlet: saved.outlet,
+          size,
+          qty: -parsedQty,
+          source: 'sale',
+          item: saved.item,
+          purchaseId: ref.id,
+          time: nowStr,
+          createdAt: adminLib.firestore.FieldValue.serverTimestamp()
+        });
       }
       return { statusCode: 201, body: JSON.stringify({ success: true, data: { id: ref.id, ...saved }, inventoryUpdate }) };
     }
