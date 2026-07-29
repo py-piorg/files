@@ -5,12 +5,12 @@
 
 // Firebase Configuration Object (Default Demo / Production ready)
 const firebaseConfig = {
-  apiKey: "AIzaSyTripleAGasKeyForNetlifySync2026",
-  authDomain: "triple-a-gas-ghana.firebaseapp.com",
-  projectId: "triple-a-gas-ghana",
-  storageBucket: "triple-a-gas-ghana.appspot.com",
-  messagingSenderId: "987654321012",
-  appId: "1:987654321012:web:abc123def456789"
+  apiKey: "AIzaSyAvkq7YEuJtD7IlsdcBE8hh9OX380YgeUg",
+  authDomain: "triple-a-gas.firebaseapp.com",
+  projectId: "triple-a-gas",
+  storageBucket: "triple-a-gas.firebasestorage.app",
+  messagingSenderId: "533855152730",
+  appId: "1:533855152730:web:8f92468605c6e25a458663"
 };
 
 let db = null;
@@ -24,8 +24,7 @@ function initFirebase() {
         firebase.initializeApp(firebaseConfig);
       }
       db = firebase.firestore();
-      
-      // Enable offline persistence for Netlify
+
       db.enablePersistence({ synchronizeTabs: true }).catch(err => {
         if (err.code == 'failed-precondition') {
           console.warn("Multiple tabs open, persistence enabled in primary tab.");
@@ -35,19 +34,24 @@ function initFirebase() {
       });
 
       isFirebaseInitialized = true;
-      console.log("🔥 Firebase Cloud Firestore Connected for Netlify!");
+      console.log("🔥 Firebase Cloud Firestore Connected!");
     } catch (e) {
-      console.warn("Firebase initialization error, using SQLite/Local fallback:", e);
+      console.warn("Firebase initialization error, using local fallback:", e);
     }
   }
 }
 
-// Firestore Realtime Collections Sync
+// ── Read All Collections ────────────────────────────────────────────────────
 async function syncFirestoreData(onUpdateCallback) {
   if (!isFirebaseInitialized || !db) return false;
 
   try {
-    const collections = ['staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes', 'presence', 'cameras', 'dsRequests', 'purchases'];
+    const collections = [
+      'staff', 'deliveries', 'inventory', 'inspections', 'shiftNotes',
+      'presence', 'cameras', 'dsRequests', 'purchases',
+      'expenses', 'vehicles', 'trips', 'maintenance',
+      'customers', 'orders', 'suppliers', 'purchaseOrders', 'payroll', 'licences'
+    ];
     const remoteData = {};
 
     for (const colName of collections) {
@@ -57,26 +61,43 @@ async function syncFirestoreData(onUpdateCallback) {
       }
     }
 
+    // Settings documents
     const compDoc = await db.collection('settings').doc('compliance').get();
-    if (compDoc.exists) {
-      remoteData.compliance = compDoc.data();
-    }
+    if (compDoc.exists) remoteData.compliance = compDoc.data();
+
+    const priceDoc = await db.collection('settings').doc('pricing').get();
+    if (priceDoc.exists) remoteData.pricing = priceDoc.data();
 
     if (Object.keys(remoteData).length > 0) {
       onUpdateCallback(remoteData);
       return true;
     }
   } catch (err) {
-    console.warn("Firestore sync query fallback:", err);
+    console.warn("Firestore sync fallback:", err);
   }
   return false;
 }
 
-// Write Helper Operations
+// ── Public Pricing Read (used by public-facing pages) ──────────────────────
+async function getPublicPricing() {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const doc = await db.collection('settings').doc('pricing').get();
+    if (doc.exists) return doc.data();
+  } catch (e) {
+    console.warn("Could not fetch live pricing:", e);
+  }
+  return null;
+}
+
+// ── Existing Write Helpers ─────────────────────────────────────────────────
 async function firestoreAddDelivery(delivery) {
   if (!isFirebaseInitialized || !db) return null;
   try {
-    const docRef = await db.collection('deliveries').add(delivery);
+    const docRef = await db.collection('deliveries').add({
+      ...delivery,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     return { id: docRef.id, ...delivery };
   } catch (e) { console.error("Firestore addDelivery error:", e); return null; }
 }
@@ -85,9 +106,10 @@ async function firestoreAdjustInventory(outlet, size, delta, newQty, newStatus) 
   if (!isFirebaseInitialized || !db) return null;
   try {
     const docId = `${outlet}_${size}`;
-    await db.collection('inventory').doc(docId).set({
-      outlet, size, qty: newQty, status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    await db.collection('inventory').doc(docId).set(
+      { outlet, size, qty: newQty, status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
     return { outlet, size, qty: newQty, status: newStatus };
   } catch (e) { console.error("Firestore adjustInventory error:", e); return null; }
 }
@@ -95,7 +117,10 @@ async function firestoreAdjustInventory(outlet, size, delta, newQty, newStatus) 
 async function firestoreAddInspection(inspection) {
   if (!isFirebaseInitialized || !db) return null;
   try {
-    const docRef = await db.collection('inspections').add(inspection);
+    const docRef = await db.collection('inspections').add({
+      ...inspection,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     return { id: docRef.id, ...inspection };
   } catch (e) { console.error("Firestore addInspection error:", e); return null; }
 }
@@ -103,7 +128,10 @@ async function firestoreAddInspection(inspection) {
 async function firestoreAddShiftNote(note) {
   if (!isFirebaseInitialized || !db) return null;
   try {
-    const docRef = await db.collection('shiftNotes').add(note);
+    const docRef = await db.collection('shiftNotes').add({
+      ...note,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     return { id: docRef.id, ...note };
   } catch (e) { console.error("Firestore addShiftNote error:", e); return null; }
 }
@@ -111,12 +139,178 @@ async function firestoreAddShiftNote(note) {
 async function firestoreAddStaff(staffMember) {
   if (!isFirebaseInitialized || !db) return null;
   try {
-    const docRef = await db.collection('staff').add(staffMember);
+    const docRef = await db.collection('staff').add({
+      ...staffMember,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     return { id: docRef.id, ...staffMember };
   } catch (e) { console.error("Firestore addStaff error:", e); return null; }
 }
 
-// Auto Init on script load
+// ── NEW: Pricing ───────────────────────────────────────────────────────────
+async function firestoreSetPricing(priceObj) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    await db.collection('settings').doc('pricing').set(
+      { ...priceObj, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    console.log("✅ Pricing published to Firestore — public pages will update.");
+    return priceObj;
+  } catch (e) { console.error("Firestore setPricing error:", e); return null; }
+}
+
+// ── NEW: Finance / Expenses ─────────────────────────────────────────────────
+async function firestoreAddExpense(expense) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('expenses').add({
+      ...expense,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...expense };
+  } catch (e) { console.error("Firestore addExpense error:", e); return null; }
+}
+
+// ── NEW: Fleet / Vehicles ──────────────────────────────────────────────────
+async function firestoreAddVehicle(vehicle) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('vehicles').add({
+      ...vehicle,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...vehicle };
+  } catch (e) { console.error("Firestore addVehicle error:", e); return null; }
+}
+
+async function firestoreAddTrip(trip) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('trips').add({
+      ...trip,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...trip };
+  } catch (e) { console.error("Firestore addTrip error:", e); return null; }
+}
+
+async function firestoreAddMaintenance(record) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('maintenance').add({
+      ...record,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...record };
+  } catch (e) { console.error("Firestore addMaintenance error:", e); return null; }
+}
+
+// ── NEW: Customers ─────────────────────────────────────────────────────────
+async function firestoreAddCustomer(customer) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('customers').add({
+      ...customer,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...customer };
+  } catch (e) { console.error("Firestore addCustomer error:", e); return null; }
+}
+
+async function firestoreAddOrder(order) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('orders').add({
+      ...order,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...order };
+  } catch (e) { console.error("Firestore addOrder error:", e); return null; }
+}
+
+async function firestoreUpdateCustomerBalance(customerId, newBalance) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    await db.collection('customers').doc(customerId).update({
+      balance: newBalance,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: customerId, balance: newBalance };
+  } catch (e) { console.error("Firestore updateCustomerBalance error:", e); return null; }
+}
+
+// ── NEW: Suppliers & Procurement ───────────────────────────────────────────
+async function firestoreAddSupplier(supplier) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('suppliers').add({
+      ...supplier,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...supplier };
+  } catch (e) { console.error("Firestore addSupplier error:", e); return null; }
+}
+
+async function firestoreAddPurchaseOrder(po) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('purchaseOrders').add({
+      ...po,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...po };
+  } catch (e) { console.error("Firestore addPurchaseOrder error:", e); return null; }
+}
+
+async function firestoreUpdatePOStatus(poId, status) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    await db.collection('purchaseOrders').doc(poId).update({
+      status,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: poId, status };
+  } catch (e) { console.error("Firestore updatePOStatus error:", e); return null; }
+}
+
+// ── NEW: Payroll ───────────────────────────────────────────────────────────
+async function firestoreSavePayroll(record) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docId = record.id || `${record.staffId}_${record.month}`;
+    await db.collection('payroll').doc(docId).set(
+      { ...record, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    return { id: docId, ...record };
+  } catch (e) { console.error("Firestore savePayroll error:", e); return null; }
+}
+
+// ── NEW: Licences ──────────────────────────────────────────────────────────
+async function firestoreAddLicence(licence) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('licences').add({
+      ...licence,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...licence };
+  } catch (e) { console.error("Firestore addLicence error:", e); return null; }
+}
+
+async function firestoreUpdateLicence(licenceId, updates) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    await db.collection('licences').doc(licenceId).update({
+      ...updates,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: licenceId, ...updates };
+  } catch (e) { console.error("Firestore updateLicence error:", e); return null; }
+}
+
+// ── Auto Init on script load ───────────────────────────────────────────────
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', initFirebase);
 }

@@ -625,5 +625,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </script>
   <script src="public-luxury.js"></script>
+
+  <!-- Firebase for live pricing -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-db.js"></script>
+  <script>
+  // Live pricing from Firestore → update product cards
+  const FALLBACK_PRICES = {
+    bulk_per_kg: 14.50,
+    '3kg': 43.50,
+    '6kg': 87.00,
+    '13kg': 188.50,
+    '14.5kg': 210.25,
+    autogas: 11.80
+  };
+
+  async function applyLivePricingIndex() {
+    let prices = FALLBACK_PRICES;
+    try {
+      if (typeof initFirebase === 'function') initFirebase();
+      await new Promise(r => setTimeout(r, 800)); // allow Firebase init
+      const live = typeof getPublicPricing === 'function' ? await getPublicPricing() : null;
+      if (live) prices = { ...FALLBACK_PRICES, ...live };
+    } catch(e) { /* use fallback */ }
+
+    // Walk-In Refill — bulk_per_kg rate
+    const refillSpan = document.querySelector('.prod-card:nth-child(1) .placeholder');
+    if (refillSpan) refillSpan.textContent = prices.bulk_per_kg.toFixed(2);
+
+    // Cylinder Exchange — show 13kg as representative exchange price
+    const exchangeSpan = document.querySelector('.prod-card:nth-child(2) .placeholder');
+    if (exchangeSpan) exchangeSpan.textContent = prices['13kg'].toFixed(2);
+  }
+
+  document.addEventListener('DOMContentLoaded', applyLivePricingIndex);
+  </script>
 </body>
 </html>

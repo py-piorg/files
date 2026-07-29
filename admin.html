@@ -3,260 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Staff Portal & Admin Dashboard | Triple A Gas</title>
+<title>Staff Admin Portal | Triple A Gas</title>
 <link rel="icon" href="images/offical_logo.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="apple-design.css">
-<!-- Firebase Cloud Database SDK for Netlify Live Sync -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-db.js"></script>
 <style>
-/* ===========================================================
-   TRIPLE A GAS — APPLE DARK MODE ADMIN PORTAL
-   =========================================================== */
-
 :root {
-  --wine:        #8E1B2C;
-  --wine-500:    #A8283A;
-  --wine-300:    #C96A78;
-  --gold:        #C79A3D;
-  --safe:        #3FA24A;
-  --safe-pale:   rgba(63, 162, 74, 0.15);
-  --warn:        #D99A2B;
-  --warn-pale:   rgba(217, 154, 43, 0.15);
-  --danger:      #E05247;
-  --danger-pale: rgba(224, 82, 71, 0.15);
-
-  --bg:          #0b0c0e;
-  --panel:       rgba(24, 26, 30, 0.75);
-  --panel-solid: #16181c;
-  --panel-2:     rgba(36, 40, 46, 0.7);
-  --panel-3:     rgba(48, 54, 62, 0.8);
-  --border:      rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --text:        #f0f3f5;
-  --text-dim:    #9aa5ad;
-  --text-faint:  #636f78;
-
-  --display: 'Archivo Expanded', -apple-system, sans-serif;
-  --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
-  --radius: 16px;
-  --ease: cubic-bezier(.16,1,.3,1);
+  --wine:#8E1B2C; --wine-500:#A8283A; --wine-300:#C96A78; --wine-900:#3E0B14;
+  --gold:#C79A3D; --gold-pale:rgba(199,154,61,0.15);
+  --safe:#3FA24A; --safe-pale:rgba(63,162,74,0.15);
+  --warn:#D99A2B; --warn-pale:rgba(217,154,43,0.15);
+  --danger:#E05247; --danger-pale:rgba(224,82,71,0.15);
+  --bg:#0b0c0e; --panel:rgba(24,26,30,0.75); --panel-solid:#16181c;
+  --panel-2:rgba(36,40,46,0.7); --panel-3:rgba(48,54,62,0.8);
+  --border:rgba(255,255,255,0.1); --border-strong:rgba(255,255,255,0.18);
+  --text:#f0f3f5; --text-dim:#9aa5ad; --text-faint:#636f78;
+  --display:'Archivo Expanded',-apple-system,sans-serif;
+  --body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --radius:16px; --ease:cubic-bezier(.16,1,.3,1);
 }
-
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;height:100%;}
-body{
-  font-family:var(--body);
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-  font-size:14px;
-}
+body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:14px;}
 a{color:var(--wine-300);text-decoration:none;}
 h1,h2,h3,h4{font-family:var(--display);color:#fff;margin:0 0 8px;letter-spacing:-.02em;}
 p{margin:0 0 10px;color:var(--text-dim);}
 button{font-family:var(--body);}
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:6px;}
-::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:6px;}
 
-/* ---------- Glass Login Screen ---------- */
-.login-screen{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 30%, #2a0b12 0%, #0b0c0e 70%);padding:24px;
-}
-.login-card{
-  width:100%;max-width:420px;background:rgba(24, 26, 30, 0.8);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border:1px solid var(--border);border-radius:24px;padding:40px 34px;
-  box-shadow:0 30px 80px rgba(0,0,0,.6);animation:fadeInUp .5s var(--ease) both;
-}
+/* ── Login ── */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a0b12 0%,#0b0c0e 70%);padding:24px;}
+.login-card{width:100%;max-width:420px;background:rgba(24,26,30,0.85);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:24px;padding:40px 34px;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:fadeInUp .5s var(--ease) both;}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
 .login-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:26px;}
 .login-logo img{height:54px;margin-bottom:12px;}
-.login-logo b{font-family:var(--display);font-weight:800;font-size:17px;color:#fff;letter-spacing:.04em;}
+.login-logo b{font-family:var(--display);font-weight:800;font-size:17px;color:#fff;}
 .login-logo span{font-family:var(--mono);font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-top:3px;}
+.login-note{text-align:center;font-size:12px;color:var(--text-faint);margin-top:16px;}
 
-.field{margin-bottom:18px;}
+/* ── Fields ── */
+.field{margin-bottom:16px;}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;}
-.field select, .field input, .field textarea{
-  width:100%;padding:12px 14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;
-  color:var(--text);font-family:var(--body);font-size:14px;transition:border-color .2s ease, background .2s ease;
-}
-.field select:focus, .field input:focus, .field textarea:focus{outline:none;border-color:var(--wine-500);background:rgba(255,255,255,0.1);}
-.field textarea{resize:vertical;min-height:90px;}
+.field select,.field input,.field textarea{width:100%;padding:11px 13px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);font-size:14px;transition:border-color .2s,background .2s;}
+.field select:focus,.field input:focus,.field textarea:focus{outline:none;border-color:var(--wine-500);background:rgba(255,255,255,0.1);}
+.field textarea{resize:vertical;min-height:80px;}
+.field select option{background:#1e2026;}
 
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  font-weight:600;font-size:13.5px;padding:12px 20px;border-radius:9999px;border:none;cursor:pointer;
-  transition:transform .15s var(--ease), background .2s ease, box-shadow .2s ease;
-}
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:13px;padding:10px 18px;border-radius:9999px;border:none;cursor:pointer;transition:transform .15s var(--ease),background .2s,box-shadow .2s;}
 .btn:active{transform:scale(.97);}
-.btn-primary{background:var(--wine-500);color:#fff;box-shadow:0 6px 20px rgba(168,40,58,0.4);}
-.btn-primary:hover{background:var(--wine);box-shadow:0 8px 24px rgba(168,40,58,0.6);}
+.btn-primary{background:var(--wine-500);color:#fff;box-shadow:0 4px 18px rgba(168,40,58,0.35);}
+.btn-primary:hover{background:var(--wine);box-shadow:0 6px 22px rgba(168,40,58,0.5);}
 .btn-block{width:100%;}
-.btn-ghost{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--border);}
-.btn-ghost:hover{background:rgba(255,255,255,0.15);}
-.btn-sm{padding:8px 14px;font-size:12px;}
-.btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid rgba(224,82,71,.4);}
-.btn-danger-ghost:hover{background:var(--danger-pale);}
- 
-.quick-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
-.quick-actions .btn{font-size:12px;padding:10px 14px;border-radius:14px;}
- 
-/* ---------- Shell Layout ---------- */
+.btn-ghost{background:rgba(255,255,255,0.07);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:rgba(255,255,255,0.14);}
+.btn-sm{padding:7px 13px;font-size:12px;}
+.btn-danger{background:var(--danger-pale);color:var(--danger);border:1px solid rgba(224,82,71,.3);}
+.btn-danger:hover{background:rgba(224,82,71,.25);}
+.btn-gold{background:var(--gold-pale);color:var(--gold);border:1px solid rgba(199,154,61,.3);}
+.btn-safe{background:var(--safe-pale);color:var(--safe);border:1px solid rgba(63,162,74,.3);}
+
+/* ── Shell Layout ── */
 .shell{display:flex;height:100vh;overflow:hidden;}
-.sidebar{
-  width:240px;flex-shrink:0;background:rgba(18, 20, 24, 0.9);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-right:1px solid var(--border);display:flex;flex-direction:column;
-}
-.sidebar-top{padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
-.sidebar-top img{height:36px;}
-.sidebar-top b{font-family:var(--display);font-weight:800;font-size:14px;color:#fff;}
-.sidebar-context{padding:16px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);}
-.sidebar-context .ctx-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-faint);margin-bottom:3px;}
-.sidebar-context .ctx-val{font-size:13.5px;font-weight:600;color:#fff;}
-.sidebar-context .ctx-role{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:10.5px;padding:3px 10px;border-radius:100px;background:rgba(199,154,61,0.15);color:var(--gold);border:1px solid rgba(199,154,61,0.3);}
-
-.navlist{list-style:none;margin:0;padding:14px;flex:1;overflow-y:auto;}
-.navlist li{margin-bottom:3px;}
-.navlist button{
-  all:unset;display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:12px;
-  cursor:pointer;color:var(--text-dim);font-size:13.5px;font-weight:500;transition:all .15s ease;
-}
+.sidebar{width:248px;flex-shrink:0;background:rgba(16,18,22,0.95);backdrop-filter:blur(20px);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-top{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.sidebar-top img{height:34px;}
+.sidebar-top b{font-family:var(--display);font-weight:800;font-size:13px;color:#fff;}
+.sidebar-ctx{padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);}
+.ctx-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-faint);margin-bottom:3px;}
+.ctx-val{font-size:13px;font-weight:600;color:#fff;}
+.ctx-role{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:100px;background:rgba(199,154,61,0.15);color:var(--gold);border:1px solid rgba(199,154,61,0.3);}
+.db-indicator{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:100px;background:rgba(63,162,74,0.12);color:var(--safe);border:1px solid rgba(63,162,74,0.25);margin-top:6px;}
+.navlist{list-style:none;margin:0;padding:10px;flex:1;overflow-y:auto;}
+.navlist li{margin-bottom:2px;}
+.navlist button{all:unset;display:flex;align-items:center;gap:10px;width:100%;padding:10px 13px;border-radius:11px;cursor:pointer;color:var(--text-dim);font-size:13px;font-weight:500;transition:all .15s ease;white-space:nowrap;}
 .navlist button:hover{background:rgba(255,255,255,0.06);color:var(--text);}
-.navlist button.active{background:var(--wine-500);color:#fff;box-shadow:0 4px 16px rgba(168,40,58,0.4);}
-.navlist .navicon{width:18px;height:18px;flex-shrink:0;}
+.navlist button.active{background:var(--wine-500);color:#fff;box-shadow:0 3px 14px rgba(168,40,58,0.4);}
+.navlist .nav-icon{width:16px;text-align:center;flex-shrink:0;}
+.navlist .nav-restricted{font-size:10px;margin-left:auto;opacity:.5;}
+.nav-section-label{padding:8px 13px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-faint);}
+.alert-bell-wrap{padding:10px 18px;border-top:1px solid var(--border);}
+.alert-bell-btn{all:unset;display:flex;align-items:center;gap:10px;width:100%;padding:10px 13px;border-radius:11px;cursor:pointer;color:var(--text-dim);font-size:13px;font-weight:500;transition:all .15s ease;position:relative;}
+.alert-bell-btn:hover{background:rgba(255,255,255,0.06);color:var(--text);}
+.alert-badge{background:var(--danger);color:#fff;font-size:10px;font-weight:800;font-family:var(--mono);border-radius:100px;padding:1px 6px;min-width:18px;text-align:center;}
+.sidebar-bottom{padding:10px 18px 18px;border-top:1px solid var(--border);}
 
-.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border);}
-
-.main{flex:1;overflow-y:auto;padding:32px 38px 60px;background:radial-gradient(circle at 80% 10%, #1d0a10 0%, #0b0c0e 60%);}
-.view{display:none;animation:fadeIn .3s var(--ease);}
+.main{flex:1;overflow-y:auto;padding:28px 36px 60px;background:radial-gradient(circle at 80% 10%,#1d0a10 0%,#0b0c0e 60%);}
+.view{display:none;animation:fadeIn .25s var(--ease);}
 .view.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.view-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+.view-head h2{font-size:22px;margin-bottom:4px;}
+.view-head p{margin-bottom:0;font-size:13px;max-width:540px;}
+.view-head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 
-.view-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;gap:18px;flex-wrap:wrap;}
-.view-head h2{font-size:24px;margin-bottom:4px;}
-.view-head p{margin-bottom:0;font-size:13.5px;max-width:540px;}
+/* ── Panels ── */
+.panel{background:var(--panel);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:20px;padding:22px 24px;margin-bottom:20px;}
+.panel h3{font-size:14px;margin-bottom:16px;color:#fff;}
+.panel-tight{padding:16px 20px;}
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
 
-/* ---------- Bento Stat Cards ---------- */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-@media (max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
-.stat-card{
-  background:rgba(24, 26, 30, 0.7);backdrop-filter:blur(16px);
-  border:1px solid var(--border);border-radius:20px;padding:20px 22px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
-.stat-card .n{font-family:var(--mono);font-weight:700;font-size:28px;color:#fff;}
-.stat-card .n.safe{color:var(--safe);} .stat-card .n.warn{color:var(--warn);} .stat-card .n.danger{color:var(--danger);}
-.stat-card .l{font-size:11.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+/* ── Stat Cards ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.stat-card{background:var(--panel);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:18px;padding:18px 20px;}
+.stat-card .n{font-family:var(--mono);font-weight:700;font-size:26px;color:#fff;}
+.stat-card .n.safe{color:var(--safe);} .stat-card .n.warn{color:var(--warn);} .stat-card .n.danger{color:var(--danger);} .stat-card .n.gold{color:var(--gold);}
+.stat-card .l{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
 
-.panel{
-  background:rgba(24, 26, 30, 0.7);backdrop-filter:blur(16px);
-  border:1px solid var(--border);border-radius:22px;padding:24px 26px;margin-bottom:24px;
-}
-.panel h3{font-size:15px;margin-bottom:16px;}
-.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;align-items:start;}
-@media (max-width:1000px){.two-col{grid-template-columns:1fr;}}
+/* ── Badges ── */
+.badge{display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}
+.badge-safe{background:var(--safe-pale);color:var(--safe);border:1px solid rgba(63,162,74,.3);}
+.badge-warn{background:var(--warn-pale);color:var(--warn);border:1px solid rgba(217,154,43,.3);}
+.badge-danger{background:var(--danger-pale);color:var(--danger);border:1px solid rgba(224,82,71,.3);}
+.badge-neutral{background:rgba(255,255,255,0.08);color:var(--text-dim);border:1px solid var(--border);}
+.badge-gold{background:var(--gold-pale);color:var(--gold);border:1px solid rgba(199,154,61,.3);}
 
-/* ---------- Gauges & Tables ---------- */
-.gauge{position:relative;width:76px;height:76px;flex-shrink:0;}
-.gauge svg{width:100%;height:100%;}
-.gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;color:#fff;}
-
-.table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;text-align:left;font-size:13.5px;}
-th{background:rgba(255,255,255,0.04);color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:12px 16px;border-bottom:1px solid var(--border);}
-td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--text);}
+/* ── Tables ── */
+.table-wrap{overflow-x:auto;border-radius:13px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:13px;}
+th{background:rgba(255,255,255,0.04);color:var(--text-dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;padding:11px 15px;border-bottom:1px solid var(--border);}
+td{padding:11px 15px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--text);}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,0.02);}
-
 .mono{font-family:var(--mono);}
-.badge{display:inline-flex;padding:3px 10px;border-radius:100px;font-size:11.5px;font-weight:600;}
-.badge-safe{background:var(--safe-pale);color:var(--safe);border:1px solid rgba(63,162,74,0.3);}
-.badge-warn{background:var(--warn-pale);color:var(--warn);border:1px solid rgba(217,154,43,0.3);}
-.badge-danger{background:var(--danger-pale);color:var(--danger);border:1px solid rgba(224,82,71,0.3);}
-.badge-neutral{background:rgba(255,255,255,0.08);color:var(--text-dim);border:1px solid var(--border);}
 
-.toast{
-  position:fixed;bottom:24px;right:24px;z-index:999;
-  background:rgba(28,32,38,0.95);backdrop-filter:blur(16px);
-  border:1px solid var(--border-strong);border-radius:14px;padding:14px 20px;
-  display:flex;align-items:center;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,0.5);
-  transform:translateY(100px);opacity:0;transition:all .3s var(--ease);
-}
+/* ── Forms ── */
+.form-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:end;}
+.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end;}
+.form-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;}
+.form-grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;}
+.field-m0{margin:0;}
+
+/* ── Gauges ── */
+.gauge{position:relative;width:72px;height:72px;flex-shrink:0;}
+.gauge svg{width:100%;height:100%;}
+.gauge-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;}
+
+/* ── Progress bars ── */
+.progress-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.1);overflow:hidden;margin-top:6px;}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s ease;}
+
+/* ── Quick actions ── */
+.quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+
+/* ── Charts ── */
+.chart-wrap{position:relative;height:240px;}
+
+/* ── Filter row ── */
+.filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.filter-row input,.filter-row select{padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--body);font-size:13px;}
+.date-range-btns{display:flex;gap:6px;}
+.date-range-btns button{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--text-dim);font-size:12px;cursor:pointer;font-family:var(--body);transition:all .15s;}
+.date-range-btns button.active,.date-range-btns button:hover{background:var(--wine-500);color:#fff;border-color:transparent;}
+
+/* ── Access denied overlay ── */
+.access-denied{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:300px;text-align:center;gap:12px;color:var(--text-faint);}
+.access-denied .lock-icon{font-size:48px;opacity:.4;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:rgba(28,32,38,0.96);backdrop-filter:blur(16px);border:1px solid var(--border-strong);border-radius:13px;padding:13px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 20px 50px rgba(0,0,0,.5);transform:translateY(100px);opacity:0;transition:all .3s var(--ease);}
 .toast.show{transform:translateY(0);opacity:1;}
-.toast .dot{width:10px;height:10px;border-radius:50%;}
+.toast .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 
-.db-indicator{
-  display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
-  padding:3px 10px;border-radius:100px;background:rgba(63,162,74,0.15);color:var(--safe);border:1px solid rgba(63,162,74,0.3);
+/* ── Invoice / Receipt print ── */
+#invoice-print-area,#receipt-print-area{display:none;}
+@media print{
+  body>*:not(#invoice-print-area):not(#receipt-print-area){display:none!important;}
+  #invoice-print-area.printing,#receipt-print-area.printing{display:block!important;font-family:Arial,sans-serif;color:#000;padding:40px;max-width:800px;margin:0 auto;}
+  #invoice-print-area.printing h1{font-size:28px;margin:0 0 4px;}
+  #invoice-print-area.printing .inv-meta{display:flex;justify-content:space-between;margin:24px 0;font-size:13px;}
+  #invoice-print-area.printing table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;}
+  #invoice-print-area.printing th,#invoice-print-area.printing td{border:1px solid #ccc;padding:8px 12px;text-align:left;}
+  #invoice-print-area.printing .inv-total{text-align:right;font-size:16px;font-weight:bold;margin-top:12px;}
+  #receipt-print-area.printing{max-width:320px;font-size:12px;}
+  #receipt-print-area.printing h2{font-size:16px;}
 }
 
-/* Overlay default: avoid accidentally blocking interactions on desktop */
-.overlay{ display:none; pointer-events:none; }
-.overlay.show{ display:block; pointer-events:auto; }
+/* ── Licence countdown cards ── */
+.licence-alert-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.lic-alert{border-radius:16px;padding:18px 20px;border:1px solid;}
+.lic-alert.red{background:var(--danger-pale);border-color:rgba(224,82,71,.3);}
+.lic-alert.amber{background:var(--warn-pale);border-color:rgba(217,154,43,.3);}
+.lic-alert.green{background:var(--safe-pale);border-color:rgba(63,162,74,.3);}
+.lic-alert .days{font-family:var(--mono);font-size:28px;font-weight:700;}
+.lic-alert.red .days{color:var(--danger);}
+.lic-alert.amber .days{color:var(--warn);}
+.lic-alert.green .days{color:var(--safe);}
+.lic-alert .name{font-size:13px;font-weight:600;color:#fff;margin:4px 0 2px;}
+.lic-alert .sub{font-size:11px;color:var(--text-dim);}
 
-/* Menu button fixed position (hidden by default) */
-#menuBtn{ display:none; position:fixed; top:12px; left:12px; z-index:1200; border:none; background:var(--panel-solid); color:var(--text); padding:8px 10px; border-radius:10px; font-size:18px; box-shadow:0 6px 18px rgba(0,0,0,0.5); }
-#menuBtn:active{ transform:scale(.98); }
+/* ── Payroll table ── */
+.payroll-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
 
-/* Responsive: make sidebar dismissible on small screens */
-@media (max-width: 900px) {
-  .sidebar{
-    position:fixed;
-    left:-260px;
-    top:0;
-    bottom:0;
-    width:240px;
-    z-index:1100;
-    transition:left .25s var(--ease);
-  }
-  .sidebar.open{ left:0; }
-  .main{ padding-left:20px; }
-  #menuBtn{ display:block !important; }
-  .overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; }
-  .overlay.show{ display:block; }
-  .sidebar .sidebar-top b{ display:none; }
-  .navlist button{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* ── Alert items ── */
+.alert-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+.alert-item:last-child{border-bottom:none;}
+.alert-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.alert-item .al-title{font-size:13.5px;color:#fff;font-weight:500;margin-bottom:3px;}
+.alert-item .al-sub{font-size:11.5px;color:var(--text-dim);}
+.alert-empty{text-align:center;padding:40px;color:var(--text-faint);}
+
+/* ── Responsive ── */
+#menuBtn{display:none;position:fixed;top:12px;left:12px;z-index:1200;border:none;background:var(--panel-solid);color:var(--text);padding:8px 10px;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.5);}
+.overlay{display:none;pointer-events:none;}
+.overlay.show{display:block;pointer-events:auto;}
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:248px;z-index:1100;transition:left .25s var(--ease);}
+  .sidebar.open{left:0;}
+  .main{padding:20px 18px 60px;}
+  #menuBtn{display:block;}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .form-grid-4,.form-grid-5{grid-template-columns:repeat(2,1fr);}
+  .form-grid-3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .form-grid-2,.form-grid-3,.form-grid-4,.form-grid-5{grid-template-columns:1fr;}
+  .licence-alert-cards,.payroll-summary{grid-template-columns:1fr;}
 }
 </style>
 </head>
 <body>
-<button id="menuBtn" class="btn btn-ghost btn-sm" style="display:none;">☰</button>
+
+<button id="menuBtn">☰</button>
 <div id="overlay" class="overlay"></div>
 
-<!-- LOGIN SCREEN -->
+<!-- ═══════════════════════════════════ LOGIN ═══════════════════════════════════ -->
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
     <div class="login-logo">
-      <img src="images/offical_logo.png" alt="Triple A Gas Logo">
+      <img src="images/offical_logo.png" alt="Triple A Gas">
       <b>TRIPLE A GAS</b>
       <span>Staff Admin Portal</span>
     </div>
     <form id="loginForm">
-      <div class="field">
-        <label for="loginName">Staff Name</label>
-        <input type="text" id="loginName" placeholder="e.g. Akua Mensah" required>
-      </div>
-      <div class="field">
-        <label for="loginRole">Role / Department</label>
+      <div class="field"><label for="loginName">Your Name</label><input type="text" id="loginName" placeholder="e.g. Akua Mensah" required></div>
+      <div class="field"><label for="loginRole">Role</label>
         <select id="loginRole">
           <option value="Owner / Head Office">Owner / Head Office</option>
           <option value="COO">COO</option>
           <option value="Station Manager">Station Manager</option>
+          <option value="Cashier">Cashier</option>
           <option value="Driver">Driver</option>
           <option value="Secretary">Secretary</option>
         </select>
       </div>
-      <div class="field">
-        <label for="loginOutlet">Station Location</label>
+      <div class="field"><label for="loginOutlet">Station</label>
         <select id="loginOutlet">
           <option value="Accra">Accra (Head Office)</option>
           <option value="Antoa">Antoa</option>
@@ -265,168 +266,482 @@ tr:hover td{background:rgba(255,255,255,0.02);}
           <option value="Prestea">Prestea</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;">Sign In to Dashboard</button>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">Sign In to Dashboard</button>
     </form>
-    <div class="login-note">
-      Connected to the live admin backend for Netlify and local hosting.
-    </div>
+    <div class="login-note">Live backend sync via Firebase Cloud Firestore.</div>
   </div>
 </div>
 
-<!-- SHELL -->
+<!-- ═══════════════════════════════════ SHELL ═══════════════════════════════════ -->
 <div id="shell" class="shell" style="display:none;">
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <img src="images/offical_logo.png" alt="Logo">
       <b>TRIPLE A GAS</b>
     </div>
-    <div class="sidebar-context">
-      <div class="ctx-label">Active User</div>
-      <div id="ctxName" class="ctx-val">Staff User</div>
-      <div id="ctxOutlet" style="font-size:12px;color:var(--text-dim);">Accra</div>
-      <span id="ctxRole" class="ctx-role">Station Manager</span>
-      <div style="margin-top:8px;">
-        <span class="db-indicator"><span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> Live Backend Active</span>
-      </div>
+    <div class="sidebar-ctx">
+      <div class="ctx-label">Signed in as</div>
+      <div id="ctxName" class="ctx-val">—</div>
+      <div id="ctxOutlet" style="font-size:12px;color:var(--text-dim);margin-top:2px;">—</div>
+      <span id="ctxRole" class="ctx-role">—</span><br>
+      <span class="db-indicator"><span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> Live Backend</span>
     </div>
     <ul class="navlist">
-      <li><button data-view="dashboard" class="active"><span>Dashboard</span></button></li>
-      <li><button data-view="deliveries"><span>Deliveries</span></button></li>
-      <li><button data-view="inventory"><span>Inventory</span></button></li>
-      <li><button data-view="inspections"><span>Inspections</span></button></li>
-      <li><button data-view="shiftNotes"><span>Shift Notes</span></button></li>
-      <li><button data-view="staff"><span>Staff Directory</span></button></li>
-      <li><button data-view="cashier"><span>Cashier Purchases</span></button></li>
-      <li><button data-view="presence"><span>Presence Log</span></button></li>
-      <li><button data-view="compliance"><span>Compliance</span></button></li>
-      <li><button data-view="reports"><span>Reports</span></button></li>
+      <li><div class="nav-section-label">Overview</div></li>
+      <li><button data-view="dashboard" class="active"><span class="nav-icon">📊</span>Dashboard</button></li>
+      <li><button data-view="finance"><span class="nav-icon">💰</span>Finance &amp; Revenue<span class="nav-restricted" id="financeRestrict"></span></button></li>
+      <li><button data-view="pricing"><span class="nav-icon">🏷️</span>Pricing Control<span class="nav-restricted" id="pricingRestrict"></span></button></li>
+      <li><div class="nav-section-label">Operations</div></li>
+      <li><button data-view="deliveries"><span class="nav-icon">📦</span>Deliveries</button></li>
+      <li><button data-view="inventory"><span class="nav-icon">🗃️</span>Inventory</button></li>
+      <li><button data-view="fleet"><span class="nav-icon">🚛</span>Fleet &amp; Drivers</button></li>
+      <li><button data-view="cashier"><span class="nav-icon">🛒</span>Cashier Sales</button></li>
+      <li><div class="nav-section-label">Business</div></li>
+      <li><button data-view="customers"><span class="nav-icon">🏢</span>Customer Accounts</button></li>
+      <li><button data-view="suppliers"><span class="nav-icon">📋</span>Suppliers &amp; Procurement</button></li>
+      <li><button data-view="payroll"><span class="nav-icon">👷</span>Payroll<span class="nav-restricted" id="payrollRestrict"></span></button></li>
+      <li><div class="nav-section-label">People &amp; Safety</div></li>
+      <li><button data-view="staff"><span class="nav-icon">👤</span>Staff Directory</button></li>
+      <li><button data-view="inspections"><span class="nav-icon">🔍</span>Inspections</button></li>
+      <li><button data-view="shiftNotes"><span class="nav-icon">📝</span>Shift Notes</button></li>
+      <li><button data-view="presence"><span class="nav-icon">📹</span>Presence &amp; Cameras</button></li>
+      <li><div class="nav-section-label">Compliance</div></li>
+      <li><button data-view="licences"><span class="nav-icon">📋</span>Licence Tracker</button></li>
+      <li><button data-view="compliance"><span class="nav-icon">🛡️</span>Data Compliance</button></li>
+      <li><button data-view="reports"><span class="nav-icon">📈</span>Reports &amp; Analytics</button></li>
     </ul>
+    <div class="alert-bell-wrap">
+      <button class="alert-bell-btn" onclick="showView('alerts')">
+        <span>🔔</span> Alert Centre
+        <span id="alertBadge" class="alert-badge" style="display:none;">0</span>
+      </button>
+    </div>
     <div class="sidebar-bottom">
       <button id="logoutBtn" class="btn btn-ghost btn-block btn-sm">Sign Out</button>
     </div>
   </aside>
 
-  <!-- MAIN VIEWS -->
+  <!-- MAIN CONTENT -->
   <main class="main">
-    <!-- VIEW: DASHBOARD -->
+
+    <!-- ──────────────── DASHBOARD ──────────────── -->
     <div id="view-dashboard" class="view active">
       <div class="view-head">
-        <div>
-          <h2>Operational Overview</h2>
-          <p>Real-time stock health, active deliveries, and station compliance stats.</p>
-        </div>
+        <div><h2>Operational Overview</h2><p>Live snapshot of stock, revenue, compliance, and alerts across all stations.</p></div>
       </div>
       <div id="dashStats" class="stat-grid"></div>
-
       <div class="two-col">
-        <div class="panel">
-          <h3>Health Indicators</h3>
-          <div id="dashGauges" style="display:flex;gap:32px;flex-wrap:wrap;"></div>
+        <div>
+          <div class="panel">
+            <h3>Health Indicators</h3>
+            <div id="dashGauges" style="display:flex;gap:28px;flex-wrap:wrap;"></div>
+          </div>
+          <div class="panel">
+            <h3>Recent Activity Feed</h3>
+            <ul id="dashFeed" style="list-style:none;padding:0;margin:0;font-size:13px;"></ul>
+          </div>
         </div>
-        <div class="panel">
-          <h3>Recent Operations Feed</h3>
-          <ul id="dashFeed" style="list-style:none;padding:0;margin:0;font-size:13px;line-height:2;"></ul>
+        <div>
+          <div class="panel">
+            <h3>Revenue by Station (This Month)</h3>
+            <div class="chart-wrap"><canvas id="dashRevenueChart"></canvas></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- VIEW: DELIVERIES -->
+    <!-- ──────────────── FINANCE ──────────────── -->
+    <div id="view-finance" class="view">
+      <div class="access-denied" id="financeAccessDenied"><span class="lock-icon">🔒</span><h3>Restricted Access</h3><p>Finance data is only visible to Owner and COO roles.</p></div>
+      <div id="financeContent">
+        <div class="view-head">
+          <div><h2>Finance &amp; Revenue</h2><p>Revenue, expenses, and profit across all 5 stations.</p></div>
+          <div class="view-head-actions">
+            <div class="date-range-btns" id="financeDateBtns">
+              <button onclick="setFinanceRange('today')" class="active" data-range="today">Today</button>
+              <button onclick="setFinanceRange('week')" data-range="week">This Week</button>
+              <button onclick="setFinanceRange('month')" data-range="month">This Month</button>
+              <button onclick="setFinanceRange('all')" data-range="all">All Time</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="exportFinanceCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div id="financeStats" class="stat-grid"></div>
+        <div class="two-col">
+          <div class="panel">
+            <h3>Revenue by Station</h3>
+            <div class="chart-wrap"><canvas id="financeStationChart"></canvas></div>
+          </div>
+          <div class="panel">
+            <h3>Revenue by Product</h3>
+            <div class="chart-wrap"><canvas id="financeProductChart"></canvas></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="panel">
+            <h3>Payment Method Breakdown</h3>
+            <div id="financePaymentBreakdown" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px;"></div>
+          </div>
+          <div class="panel">
+            <h3>Log Expense</h3>
+            <form id="expenseForm" class="form-grid-3">
+              <div class="field field-m0"><label>Date</label><input type="date" name="date" required></div>
+              <div class="field field-m0"><label>Category</label><select name="category"><option value="Fuel">Fuel</option><option value="Wages">Wages</option><option value="Maintenance">Maintenance</option><option value="Supplies">Supplies</option><option value="Rent">Rent</option><option value="Utilities">Utilities</option><option value="Other">Other</option></select></div>
+              <div class="field field-m0"><label>Amount (GH₵)</label><input type="number" name="amount" min="0" step="0.01" required></div>
+              <div class="field field-m0"><label>Outlet</label><select name="outlet" id="expenseOutletSelect"></select></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>Description</label><input type="text" name="description" placeholder="e.g. Diesel for delivery trucks"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 3;margin-top:4px;">Log Expense</button>
+            </form>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Expense Log</h3>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Outlet</th><th>Amount</th></tr></thead><tbody id="expenseTable"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── PRICING CONTROL ──────────────── -->
+    <div id="view-pricing" class="view">
+      <div class="access-denied" id="pricingAccessDenied"><span class="lock-icon">🔒</span><h3>Restricted Access</h3><p>Pricing control is only visible to Owner and COO roles.</p></div>
+      <div id="pricingContent">
+        <div class="view-head">
+          <div><h2>Pricing Control</h2><p>Prices saved here are automatically published to the public website in real time.</p></div>
+        </div>
+        <div class="two-col">
+          <div class="panel">
+            <h3>Current Prices</h3>
+            <p style="font-size:12px;margin-bottom:16px;color:var(--safe);">✅ Changes update the public calculator and homepage immediately via Firestore.</p>
+            <form id="pricingForm">
+              <div class="form-grid-2">
+                <div class="field field-m0"><label>3 kg Cylinder (GH₵)</label><input type="number" name="3kg" step="0.01" min="0" id="price3kg"></div>
+                <div class="field field-m0"><label>6 kg Cylinder (GH₵)</label><input type="number" name="6kg" step="0.01" min="0" id="price6kg"></div>
+                <div class="field field-m0"><label>13 kg Cylinder (GH₵)</label><input type="number" name="13kg" step="0.01" min="0" id="price13kg"></div>
+                <div class="field field-m0"><label>14.5 kg Cylinder (GH₵)</label><input type="number" name="14.5kg" step="0.01" min="0" id="price14kg"></div>
+                <div class="field field-m0"><label>Autogas (GH₵ / litre)</label><input type="number" name="autogas" step="0.01" min="0" id="priceAutogas"></div>
+                <div class="field field-m0"><label>Bulk LPG (GH₵ / kg)</label><input type="number" name="bulk_per_kg" step="0.01" min="0" id="priceBulk"></div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top:16px;width:100%;">💾 Save &amp; Publish Prices to Website</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>Competitor Notes</h3>
+            <div class="field"><label>Competitor Observations (Internal)</label><textarea id="competitorNotes" placeholder="Note what nearby competitors are charging this week..."></textarea></div>
+            <button class="btn btn-ghost btn-sm" onclick="saveCompetitorNotes()">Save Notes</button>
+            <h3 style="margin-top:20px;">Price Change History</h3>
+            <div class="table-wrap"><table><thead><tr><th>Date</th><th>Changed By</th><th>Notes</th></tr></thead><tbody id="priceHistoryTable"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── DELIVERIES ──────────────── -->
     <div id="view-deliveries" class="view">
       <div class="view-head">
-        <div>
-          <h2>Log LPG Deliveries</h2>
-          <p>Track cylinder shipments and refills across stations.</p>
-        </div>
+        <div><h2>Deliveries</h2><p>Log and track all LPG cylinder deliveries across stations.</p></div>
       </div>
       <div class="panel">
         <h3>Record New Delivery</h3>
-        <form id="deliveryForm" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;">
-          <div class="field" style="margin:0;"><label>Station</label><select id="deliveryOutletSelect" name="outlet"></select></div>
-          <div class="field" style="margin:0;"><label>Driver</label><input type="text" name="driver" placeholder="Driver Name"></div>
-          <div class="field" style="margin:0;"><label>Cylinder Size</label><select id="deliverySizeSelect" name="size"></select></div>
-          <div class="field" style="margin:0;"><label>Quantity</label><input type="number" name="qty" value="1" min="1"></div>
-          <div class="field" style="margin:0;"><label>Customer / Destination</label><input type="text" name="customer" placeholder="Customer Name"></div>
-          <div class="field" style="margin:0;"><label>Status</label><select name="status"><option value="done">Done</option><option value="in_transit">In Transit</option></select></div>
-          <button type="submit" class="btn btn-primary" style="grid-column:span 4;">Save Delivery to SQLite Database</button>
+        <form id="deliveryForm" class="form-grid-5" style="gap:12px;">
+          <div class="field field-m0"><label>Station</label><select id="deliveryOutletSelect" name="outlet"></select></div>
+          <div class="field field-m0"><label>Driver</label><input type="text" name="driver" placeholder="Driver name"></div>
+          <div class="field field-m0"><label>Cylinder Size</label><select id="deliverySizeSelect" name="size"></select></div>
+          <div class="field field-m0"><label>Quantity</label><input type="number" name="qty" value="1" min="1"></div>
+          <div class="field field-m0"><label>Customer / Destination</label><input type="text" name="customer" placeholder="Customer name"></div>
+          <div class="field field-m0"><label>Revenue (GH₵)</label><input type="number" name="revenue" id="deliveryRevenue" step="0.01" min="0" placeholder="Auto-calculated"></div>
+          <div class="field field-m0"><label>Status</label><select name="status"><option value="done">Done</option><option value="in_transit">In Transit</option></select></div>
+          <button type="submit" class="btn btn-primary" style="grid-column:span 5;margin-top:4px;">Save Delivery</button>
         </form>
       </div>
+      <div class="filter-row">
+        <input type="text" id="deliverySearch" placeholder="Search driver or customer..." oninput="renderDeliveries()">
+        <select id="deliveryFilterOutlet" onchange="renderDeliveries()"><option value="">All Stations</option></select>
+      </div>
       <div class="panel">
-        <h3>Delivery Log History</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Timestamp</th><th>Outlet</th><th>Driver</th><th>Items</th><th>Customer</th><th>Status</th></tr></thead>
-            <tbody id="deliveryTable"></tbody>
-          </table>
-        </div>
+        <h3>Delivery Log</h3>
+        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Outlet</th><th>Driver</th><th>Items</th><th>Customer</th><th>Revenue</th><th>Status</th></tr></thead><tbody id="deliveryTable"></tbody></table></div>
       </div>
     </div>
 
-    <!-- VIEW: INVENTORY -->
+    <!-- ──────────────── INVENTORY ──────────────── -->
     <div id="view-inventory" class="view">
       <div class="view-head">
-        <div>
-          <h2>Stock & Inventory Management</h2>
-          <p>Real-time LPG cylinder counts across 3kg, 6kg, 13kg, and 14.5kg sizes.</p>
-        </div>
+        <div><h2>Stock &amp; Inventory</h2><p>Real-time cylinder counts with visual indicators.</p></div>
       </div>
-      <div class="panel">
-        <h3>Cylinder Inventory Levels</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Station Outlet</th><th>Cylinder Size</th><th>Quantity in Stock</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
-            <tbody id="inventoryTable"></tbody>
-          </table>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Cylinder Stock Levels</h3>
+          <div class="table-wrap"><table><thead><tr><th>Outlet</th><th>Size</th><th>Qty</th><th>Level</th><th>Status</th><th style="text-align:right;">Adjust</th></tr></thead><tbody id="inventoryTable"></tbody></table></div>
+        </div>
+        <div>
+          <div class="panel">
+            <h3>Restock Stock</h3>
+            <form id="restockForm" class="form-grid-3">
+              <div class="field field-m0"><label>Outlet</label><select name="outlet" id="restockOutletSelect"></select></div>
+              <div class="field field-m0"><label>Size</label><select name="size" id="restockSizeSelect"></select></div>
+              <div class="field field-m0"><label>Qty to Add</label><input type="number" name="qty" value="10" min="1"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 3;">+ Add Stock</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>Low Stock Thresholds</h3>
+            <p style="font-size:12px;">Items below threshold will trigger an alert.</p>
+            <div class="form-grid-2">
+              <div class="field field-m0"><label>3kg Low at</label><input type="number" id="thresh3kg" value="10" min="1"></div>
+              <div class="field field-m0"><label>6kg Low at</label><input type="number" id="thresh6kg" value="8" min="1"></div>
+              <div class="field field-m0"><label>13kg Low at</label><input type="number" id="thresh13kg" value="5" min="1"></div>
+              <div class="field field-m0"><label>14.5kg Low at</label><input type="number" id="thresh14kg" value="5" min="1"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="saveThresholds()" style="margin-top:12px;">Save Thresholds</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- VIEW: INSPECTIONS -->
-    <div id="view-inspections" class="view">
-      <div class="view-head">
+    <!-- ──────────────── FLEET ──────────────── -->
+    <div id="view-fleet" class="view">
+      <div class="view-head"><div><h2>Fleet &amp; Driver Management</h2><p>Vehicles, trips, fuel costs, and maintenance schedules.</p></div></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Vehicle Registry</h3>
+          <form id="vehicleForm" class="form-grid-3" style="margin-bottom:16px;">
+            <div class="field field-m0"><label>Plate Number</label><input type="text" name="plate" placeholder="GR-1234-22" required></div>
+            <div class="field field-m0"><label>Model</label><input type="text" name="model" placeholder="e.g. Isuzu NPR"></div>
+            <div class="field field-m0"><label>Capacity (kg)</label><input type="number" name="capacity" min="0"></div>
+            <div class="field field-m0"><label>Base Station</label><select name="outlet" id="vehicleOutletSelect"></select></div>
+            <div class="field field-m0"><label>Status</label><select name="status"><option value="Active">Active</option><option value="Maintenance">In Maintenance</option><option value="Inactive">Inactive</option></select></div>
+            <button type="submit" class="btn btn-primary" style="align-self:flex-end;">Add Vehicle</button>
+          </form>
+          <div class="table-wrap"><table><thead><tr><th>Plate</th><th>Model</th><th>Cap.</th><th>Base</th><th>Status</th><th>Total km</th></tr></thead><tbody id="vehicleTable"></tbody></table></div>
+        </div>
         <div>
-          <h2>Safety & Equipment Inspections</h2>
-          <p>Audit bulk tanks, regulators, forecourt hoses, and safety valves.</p>
+          <div class="panel">
+            <h3>Log Trip</h3>
+            <form id="tripForm" class="form-grid-2">
+              <div class="field field-m0"><label>Vehicle</label><select name="vehicleId" id="tripVehicleSelect"></select></div>
+              <div class="field field-m0"><label>Driver</label><input type="text" name="driver" placeholder="Driver name"></div>
+              <div class="field field-m0"><label>Outlet</label><select name="outlet" id="tripOutletSelect"></select></div>
+              <div class="field field-m0"><label>Date</label><input type="date" name="date"></div>
+              <div class="field field-m0"><label>Distance (km)</label><input type="number" name="km" min="0" step="0.1"></div>
+              <div class="field field-m0"><label>Fuel Cost (GH₵)</label><input type="number" name="fuelCost" min="0" step="0.01"></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>Notes</label><input type="text" name="notes" placeholder="Delivery route or notes"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Log Trip</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>Log Maintenance</h3>
+            <form id="maintenanceForm" class="form-grid-2">
+              <div class="field field-m0"><label>Vehicle</label><select name="vehicleId" id="maintVehicleSelect"></select></div>
+              <div class="field field-m0"><label>Type</label><select name="type"><option>Oil Change</option><option>Tyre Replacement</option><option>Brake Service</option><option>Full Service</option><option>Other</option></select></div>
+              <div class="field field-m0"><label>Date</label><input type="date" name="date"></div>
+              <div class="field field-m0"><label>Cost (GH₵)</label><input type="number" name="cost" min="0" step="0.01"></div>
+              <div class="field field-m0"><label>Next Due Date</label><input type="date" name="nextDueDate"></div>
+              <div class="field field-m0"><label>Notes</label><input type="text" name="notes" placeholder="Details"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Log Maintenance</button>
+            </form>
+          </div>
         </div>
       </div>
       <div class="panel">
-        <h3>Log Safety Inspection</h3>
-        <form id="inspectionForm" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end;">
-          <div class="field" style="margin:0;"><label>Outlet</label><select id="inspectionOutletSelect" name="outlet"></select></div>
-          <div class="field" style="margin:0;"><label>Equipment / Item</label><input type="text" name="item" placeholder="e.g. Bulk tank #02" required></div>
-          <div class="field" style="margin:0;"><label>Inspector</label><input type="text" name="inspector" placeholder="Inspector Name"></div>
-          <div class="field" style="margin:0;"><label>Result</label><select name="result"><option value="pass">Pass</option><option value="due">Due Soon</option><option value="overdue">Overdue</option></select></div>
-          <div class="field" style="margin:0;"><label>Next Due Date</label><input type="date" name="nextDue"></div>
-          <button type="submit" class="btn btn-primary">Save Inspection Record</button>
+        <h3>Trip Log</h3>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th>Outlet</th><th>km</th><th>Fuel Cost</th><th>Notes</th></tr></thead><tbody id="tripTable"></tbody></table></div>
+      </div>
+      <div class="panel">
+        <h3>Maintenance Log</h3>
+        <div class="table-wrap"><table><thead><tr><th>Vehicle</th><th>Type</th><th>Date</th><th>Cost</th><th>Next Due</th><th>Notes</th><th>Status</th></tr></thead><tbody id="maintenanceTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── CUSTOMERS ──────────────── -->
+    <div id="view-customers" class="view">
+      <div class="view-head"><div><h2>Customer Accounts</h2><p>Manage commercial and repeat customer accounts, balances, and invoices.</p></div></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Add Customer Account</h3>
+          <form id="customerForm" class="form-grid-2">
+            <div class="field field-m0"><label>Company / Name</label><input type="text" name="name" required placeholder="e.g. Accra Bakeries Ltd"></div>
+            <div class="field field-m0"><label>Contact Person</label><input type="text" name="contact" placeholder="Contact name"></div>
+            <div class="field field-m0"><label>Phone</label><input type="tel" name="phone" placeholder="+233..."></div>
+            <div class="field field-m0"><label>Type</label><select name="type"><option value="Commercial">Commercial</option><option value="Individual">Individual</option></select></div>
+            <div class="field field-m0"><label>Outlet</label><select name="outlet" id="customerOutletSelect"></select></div>
+            <div class="field field-m0"><label>Credit Limit (GH₵)</label><input type="number" name="creditLimit" value="0" min="0" step="100"></div>
+            <div class="field field-m0" style="grid-column:span 2;"><label>Address</label><input type="text" name="address" placeholder="Delivery / office address"></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Add Customer</button>
+          </form>
+        </div>
+        <div class="panel">
+          <h3>Log Order / Sale to Account</h3>
+          <form id="orderForm" class="form-grid-2">
+            <div class="field field-m0"><label>Customer</label><select name="customerId" id="orderCustomerSelect"></select></div>
+            <div class="field field-m0"><label>Outlet</label><select name="outlet" id="orderOutletSelect"></select></div>
+            <div class="field field-m0"><label>Item</label><input type="text" name="items" placeholder="e.g. 13kg × 10"></div>
+            <div class="field field-m0"><label>Total (GH₵)</label><input type="number" name="total" min="0" step="0.01"></div>
+            <div class="field field-m0"><label>Date</label><input type="date" name="date"></div>
+            <div class="field field-m0"><label>Status</label><select name="status"><option value="Invoiced">Invoiced</option><option value="Paid">Paid</option><option value="Overdue">Overdue</option></select></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Log Order</button>
+          </form>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Customer List</h3>
+        <div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Phone</th><th>Outlet</th><th>Credit Limit</th><th>Balance</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="customerTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── SUPPLIERS ──────────────── -->
+    <div id="view-suppliers" class="view">
+      <div class="view-head"><div><h2>Suppliers &amp; Procurement</h2><p>Supplier registry and purchase order tracking.</p></div></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Add Supplier</h3>
+          <form id="supplierForm" class="form-grid-2">
+            <div class="field field-m0"><label>Company Name</label><input type="text" name="name" required placeholder="Supplier company name"></div>
+            <div class="field field-m0"><label>Contact Person</label><input type="text" name="contact" placeholder="Name"></div>
+            <div class="field field-m0"><label>Phone</label><input type="tel" name="phone" placeholder="+233..."></div>
+            <div class="field field-m0"><label>Email</label><input type="email" name="email" placeholder="email@supplier.com"></div>
+            <div class="field field-m0" style="grid-column:span 2;"><label>Products Supplied</label><input type="text" name="product" placeholder="e.g. Bulk LPG, 13kg cylinders"></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Add Supplier</button>
+          </form>
+        </div>
+        <div class="panel">
+          <h3>Create Purchase Order</h3>
+          <form id="poForm" class="form-grid-2">
+            <div class="field field-m0"><label>Supplier</label><select name="supplierId" id="poSupplierSelect"></select></div>
+            <div class="field field-m0"><label>Product</label><input type="text" name="product" placeholder="e.g. Bulk LPG (MT)"></div>
+            <div class="field field-m0"><label>Quantity</label><input type="number" name="qty" min="1"></div>
+            <div class="field field-m0"><label>Unit Cost (GH₵)</label><input type="number" name="unitCost" step="0.01" min="0" id="poUnitCost"></div>
+            <div class="field field-m0"><label>Total Cost (GH₵)</label><div id="poTotal" class="mono" style="padding:11px 13px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;">GH₵ 0.00</div></div>
+            <div class="field field-m0"><label>Expected Delivery</label><input type="date" name="expectedDate"></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Create Purchase Order</button>
+          </form>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Supplier List</h3>
+          <div class="table-wrap"><table><thead><tr><th>Name</th><th>Contact</th><th>Phone</th><th>Products</th></tr></thead><tbody id="supplierTable"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <h3>Purchase Orders</h3>
+          <div class="table-wrap"><table><thead><tr><th>Supplier</th><th>Product</th><th>Qty</th><th>Total</th><th>Expected</th><th>Status</th><th>Update</th></tr></thead><tbody id="poTable"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────────── CASHIER ──────────────── -->
+    <div id="view-cashier" class="view">
+      <div class="view-head"><div><h2>Cashier Sales</h2><p>Log in-store and walk-in purchases. Stock is automatically adjusted.</p></div></div>
+      <div id="cashierDailySummary" class="stat-grid" style="grid-template-columns:repeat(3,1fr);"></div>
+      <div class="panel">
+        <h3>Quick Presets</h3>
+        <div id="purchaseQuickActions" class="quick-actions"></div>
+        <form id="purchaseForm" class="form-grid-5">
+          <div class="field field-m0"><label>Outlet</label><select id="purchaseOutletSelect" name="outlet"></select></div>
+          <div class="field field-m0"><label>Cashier</label><input type="text" name="cashier" placeholder="Cashier name"></div>
+          <div class="field field-m0"><label>Customer</label><input type="text" name="customer" placeholder="Name or Walk-in"></div>
+          <div class="field field-m0"><label>Item</label><input type="text" id="purchaseItem" name="item" placeholder="e.g. 6kg cylinder"></div>
+          <div class="field field-m0"><label>Qty</label><input type="number" id="purchaseQty" name="qty" value="1" min="1"></div>
+          <div class="field field-m0"><label>Unit Price (GH₵)</label><input type="number" id="purchaseUnitPrice" name="unitPrice" value="0" min="0" step="0.01"></div>
+          <div class="field field-m0"><label>Payment</label><select name="paymentMethod"><option value="cash">Cash</option><option value="momo">MoMo</option><option value="card">Card</option><option value="transfer">Transfer</option></select></div>
+          <div class="field field-m0"><label>Notes</label><input type="text" name="notes" placeholder="Optional"></div>
+          <div class="field field-m0" style="grid-column:span 2;"><label>Total</label><div id="purchaseAmount" class="mono" style="padding:11px 13px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;">GH₵ 0.00</div></div>
+          <button type="submit" class="btn btn-primary" style="grid-column:span 5;margin-top:4px;">Save Sale</button>
         </form>
       </div>
       <div class="panel">
-        <h3>Inspection Audit History</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Timestamp</th><th>Outlet</th><th>Item</th><th>Inspector</th><th>Result</th><th>Next Due</th></tr></thead>
-            <tbody id="inspectionTable"></tbody>
-          </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin:0;">Sales History</h3>
+          <button class="btn btn-ghost btn-sm" onclick="printReceipt()">🖨 Print Last Receipt</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Outlet</th><th>Cashier</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Payment</th></tr></thead><tbody id="purchaseTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── PAYROLL ──────────────── -->
+    <div id="view-payroll" class="view">
+      <div class="access-denied" id="payrollAccessDenied"><span class="lock-icon">🔒</span><h3>Restricted Access</h3><p>Payroll is only visible to Owner and COO roles.</p></div>
+      <div id="payrollContent">
+        <div class="view-head"><div><h2>Payroll &amp; Salaries</h2><p>Monthly payroll records. Visible to Owner and COO only.</p></div></div>
+        <div id="payrollSummary" class="payroll-summary"></div>
+        <div class="two-col">
+          <div class="panel">
+            <h3>Add / Update Payroll Record</h3>
+            <form id="payrollForm" class="form-grid-2">
+              <div class="field field-m0"><label>Staff Member</label><select name="staffId" id="payrollStaffSelect"></select></div>
+              <div class="field field-m0"><label>Month (YYYY-MM)</label><input type="month" name="month"></div>
+              <div class="field field-m0"><label>Base Salary (GH₵)</label><input type="number" name="baseSalary" min="0" step="0.01" id="payBaseSalary"></div>
+              <div class="field field-m0"><label>Bonus (GH₵)</label><input type="number" name="bonus" min="0" step="0.01" value="0"></div>
+              <div class="field field-m0"><label>Deductions (GH₵)</label><input type="number" name="deductions" min="0" step="0.01" value="0" id="payDeductions"></div>
+              <div class="field field-m0"><label>Net Pay</label><div id="payNetPay" class="mono" style="padding:11px 13px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;">GH₵ 0.00</div></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Save Payroll Record</button>
+            </form>
+          </div>
+          <div class="panel">
+            <h3>Monthly Totals</h3>
+            <div class="chart-wrap"><canvas id="payrollChart"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Payroll Records</h3>
+          <div class="table-wrap"><table><thead><tr><th>Staff</th><th>Outlet</th><th>Month</th><th>Base</th><th>Bonus</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead><tbody id="payrollTable"></tbody></table></div>
         </div>
       </div>
     </div>
 
-    <!-- VIEW: SHIFT NOTES -->
-    <div id="view-shiftNotes" class="view">
-      <div class="view-head">
-        <div>
-          <h2>Station Shift Notes</h2>
-          <p>Communicate shift changes, maintenance requests, and handovers.</p>
-        </div>
+    <!-- ──────────────── STAFF ──────────────── -->
+    <div id="view-staff" class="view">
+      <div class="view-head"><div><h2>Staff Directory</h2><p>Manage personnel across all 5 stations.</p></div></div>
+      <div class="panel">
+        <h3>Add Staff Member</h3>
+        <form id="staffForm" class="form-grid-5">
+          <div class="field field-m0"><label>Full Name</label><input type="text" name="name" required placeholder="Full Name"></div>
+          <div class="field field-m0"><label>Role</label><input type="text" name="role" placeholder="e.g. Attendant" required></div>
+          <div class="field field-m0"><label>Outlet</label><select id="staffOutletSelect" name="outlet"></select></div>
+          <div class="field field-m0"><label>Phone</label><input type="tel" name="phone" placeholder="+233..."></div>
+          <div class="field field-m0"><label>Biometric Consent</label><select name="consent"><option value="enrolled">Enrolled</option><option value="not_enrolled">Not Enrolled</option><option value="n/a">N/A</option></select></div>
+          <button type="submit" class="btn btn-primary" style="grid-column:span 5;margin-top:4px;">Add Staff Member</button>
+        </form>
       </div>
       <div class="panel">
-        <h3>Leave Shift Note</h3>
+        <h3>Staff List</h3>
+        <div class="table-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Outlet</th><th>Phone</th><th>Biometric</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="staffTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── INSPECTIONS ──────────────── -->
+    <div id="view-inspections" class="view">
+      <div class="view-head"><div><h2>Safety &amp; Equipment Inspections</h2><p>Audit tanks, hoses, scales, and safety equipment.</p></div></div>
+      <div class="panel">
+        <h3>Log Inspection</h3>
+        <form id="inspectionForm" class="form-grid-5">
+          <div class="field field-m0"><label>Outlet</label><select id="inspectionOutletSelect" name="outlet"></select></div>
+          <div class="field field-m0"><label>Equipment</label><select name="item"><option>Bulk Tank #1</option><option>Bulk Tank #2</option><option>Digital Scale</option><option>Hose Line</option><option>Safety Valve</option><option>Forecourt</option><option>Fire Extinguisher</option><option>Autogas Pump</option><option>Other</option></select></div>
+          <div class="field field-m0"><label>Inspector</label><input type="text" name="inspector" placeholder="Inspector name"></div>
+          <div class="field field-m0"><label>Result</label><select name="result"><option value="pass">Pass</option><option value="due">Due Soon</option><option value="overdue">Overdue</option></select></div>
+          <div class="field field-m0"><label>Next Due</label><input type="date" name="nextDue"></div>
+          <button type="submit" class="btn btn-primary" style="grid-column:span 5;margin-top:4px;">Save Inspection</button>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Inspection History</h3>
+        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Outlet</th><th>Equipment</th><th>Inspector</th><th>Result</th><th>Next Due</th></tr></thead><tbody id="inspectionTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── SHIFT NOTES ──────────────── -->
+    <div id="view-shiftNotes" class="view">
+      <div class="view-head"><div><h2>Shift Notes &amp; Handovers</h2><p>Leave notes for the next shift. Mark urgent items clearly.</p></div></div>
+      <div class="panel">
+        <h3>Post Shift Note</h3>
         <form id="shiftNoteForm">
-          <div style="display:flex;gap:12px;margin-bottom:12px;">
-            <div class="field" style="flex:1;margin:0;"><label>Outlet</label><select id="shiftOutletSelect" name="outlet"></select></div>
+          <div class="form-grid-2" style="margin-bottom:12px;">
+            <div class="field field-m0"><label>Outlet</label><select id="shiftOutletSelect" name="outlet"></select></div>
+            <div class="field field-m0"><label>Priority</label><select name="priority"><option value="Normal">Normal</option><option value="Urgent">🚨 Urgent</option><option value="FYI">📌 FYI</option></select></div>
           </div>
-          <div class="field"><label>Shift Note Content</label><textarea name="note" placeholder="Write handover notes..." required></textarea></div>
-          <button type="submit" class="btn btn-primary">Publish Shift Note</button>
+          <div class="field"><label>Note Content</label><textarea name="note" placeholder="Handover notes, maintenance requests, issues..." required></textarea></div>
+          <button type="submit" class="btn btn-primary">Publish Note</button>
         </form>
       </div>
       <div class="panel">
@@ -435,109 +750,69 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
     </div>
 
-    <!-- VIEW: STAFF DIRECTORY -->
-    <div id="view-staff" class="view">
-      <div class="view-head">
-        <div>
-          <h2>Staff Directory</h2>
-          <p>Manage personnel roles, assigned station outlets, and biometric consent.</p>
-        </div>
-      </div>
-      <div class="panel">
-        <h3>Add Staff Member</h3>
-        <form id="staffForm" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;">
-          <div class="field" style="margin:0;"><label>Name</label><input type="text" name="name" placeholder="Full Name" required></div>
-          <div class="field" style="margin:0;"><label>Role</label><input type="text" name="role" placeholder="Role (e.g. Attendant)" required></div>
-          <div class="field" style="margin:0;"><label>Outlet</label><select id="staffOutletSelect" name="outlet"></select></div>
-          <div class="field" style="margin:0;"><label>Consent</label><select name="consent"><option value="enrolled">Enrolled</option><option value="not_enrolled">Not Enrolled</option><option value="n/a">N/A</option></select></div>
-          <button type="submit" class="btn btn-primary" style="grid-column:span 4;">Add Staff Member</button>
-        </form>
-      </div>
-      <div class="panel">
-        <h3>Staff List</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Name</th><th>Role</th><th>Outlet</th><th>Biometric Status</th></tr></thead>
-            <tbody id="staffTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW: CASHIER PURCHASES -->
-    <div id="view-cashier" class="view">
-      <div class="view-head">
-        <div>
-          <h2>Cashier Purchase Logging</h2>
-          <p>Record in-store purchases for receipt-printer integration later and keep them in the shared database.</p>
-        </div>
-      </div>
-      <div class="panel">
-        <h3>Log New Purchase</h3>
-        <div id="purchaseQuickActions" class="quick-actions"></div>
-        <form id="purchaseForm" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;">
-          <div class="field" style="margin:0;"><label>Outlet</label><select id="purchaseOutletSelect" name="outlet"></select></div>
-          <div class="field" style="margin:0;"><label>Cashier</label><input type="text" name="cashier" placeholder="Cashier name" required></div>
-          <div class="field" style="margin:0;"><label>Customer</label><input type="text" name="customer" placeholder="Walk-in or account"></div>
-          <div class="field" style="margin:0;"><label>Item</label><input type="text" id="purchaseItem" name="item" placeholder="e.g. 6kg cylinder" required></div>
-          <div class="field" style="margin:0;"><label>Quantity</label><input type="number" id="purchaseQty" name="qty" value="1" min="1"></div>
-          <div class="field" style="margin:0;"><label>Unit Price (GH₵)</label><input type="number" id="purchaseUnitPrice" name="unitPrice" value="0" min="0" step="0.01"></div>
-          <div class="field" style="margin:0;"><label>Payment Method</label><select name="paymentMethod"><option value="cash">Cash</option><option value="momo">MoMo</option><option value="card">Card</option><option value="transfer">Transfer</option></select></div>
-          <div class="field" style="margin:0;"><label>Notes</label><input type="text" name="notes" placeholder="Optional note"></div>
-          <div class="field" style="margin:0;grid-column:span 2;"><label>Total Amount</label><div id="purchaseAmount" class="mono" style="padding:12px 14px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);">GH₵0.00</div></div>
-          <button type="submit" class="btn btn-primary" style="grid-column:span 5;">Save Purchase to Database</button>
-        </form>
-      </div>
-      <div class="panel">
-        <h3>Purchase History</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Timestamp</th><th>Outlet</th><th>Cashier</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Payment</th><th>Notes</th></tr></thead>
-            <tbody id="purchaseTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW: PRESENCE LOG -->
+    <!-- ──────────────── PRESENCE ──────────────── -->
     <div id="view-presence" class="view">
       <div class="view-head">
-        <div>
-          <h2>Presence Log & Smart Camera AI</h2>
-          <p>Automated forecourt recognition logs and camera status.</p>
+        <div><h2>Presence Log &amp; Cameras</h2><p>Staff clock-in events and camera status.</p></div>
+        <div class="view-head-actions">
+          <button id="manualClockInBtn" class="btn btn-safe btn-sm">🕐 Manual Clock-In</button>
+          <button id="simulateMatchBtn" class="btn btn-ghost btn-sm">⚡ Simulate AI Match</button>
         </div>
-        <button id="simulateMatchBtn" class="btn btn-ghost">Simulate Match Event</button>
       </div>
       <div class="two-col">
         <div class="panel">
-          <h3>Recent Presence Events</h3>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Time</th><th>Outlet</th><th>Worker</th><th>Match Score</th><th>Status</th></tr></thead>
-              <tbody id="presenceTable"></tbody>
-            </table>
-          </div>
+          <h3>Presence Events</h3>
+          <div class="table-wrap"><table><thead><tr><th>Time</th><th>Outlet</th><th>Staff</th><th>Confidence</th><th>Status</th></tr></thead><tbody id="presenceTable"></tbody></table></div>
         </div>
         <div class="panel">
           <h3>Camera Feed Health</h3>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Camera</th><th>Outlet</th><th>Status</th></tr></thead>
-              <tbody id="cameraTable"></tbody>
-            </table>
-          </div>
+          <div class="table-wrap"><table><thead><tr><th>Camera</th><th>Outlet</th><th>Status</th></tr></thead><tbody id="cameraTable"></tbody></table></div>
         </div>
       </div>
     </div>
 
-    <!-- VIEW: COMPLIANCE -->
-    <div id="view-compliance" class="view">
-      <div class="view-head">
-        <div>
-          <h2>Data Protection & Regulatory Compliance</h2>
-          <p>DPC registration, data retention rules, and data subject requests.</p>
+    <!-- ──────────────── ALERTS ──────────────── -->
+    <div id="view-alerts" class="view">
+      <div class="view-head"><div><h2>Alert Centre</h2><p>All active operational alerts across the business.</p></div></div>
+      <div id="alertsContent">
+        <div class="panel" id="alertsPanel">
+          <div id="alertsList"></div>
         </div>
       </div>
+    </div>
+
+    <!-- ──────────────── REPORTS ──────────────── -->
+    <div id="view-reports" class="view">
+      <div class="view-head">
+        <div><h2>Reports &amp; Analytics</h2><p>Aggregated business intelligence across all stations.</p></div>
+        <div class="view-head-actions">
+          <div class="date-range-btns" id="reportDateBtns">
+            <button onclick="setReportRange('week')" class="active" data-range="week">This Week</button>
+            <button onclick="setReportRange('month')" data-range="month">This Month</button>
+            <button onclick="setReportRange('all')" data-range="all">All Time</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportReportCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Station Comparison (Revenue)</h3>
+          <div class="chart-wrap"><canvas id="reportStationChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <h3>Revenue Trend (Last 8 Weeks)</h3>
+          <div class="chart-wrap"><canvas id="reportTrendChart"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Outlet Operations Summary</h3>
+        <div class="table-wrap"><table><thead><tr><th>Station</th><th>Revenue</th><th>Deliveries</th><th>Stock Lines OK</th><th>Inspections Passed</th><th>Overdue Items</th></tr></thead><tbody id="reportsTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── COMPLIANCE ──────────────── -->
+    <div id="view-compliance" class="view">
+      <div class="view-head"><div><h2>Data Protection &amp; Compliance</h2><p>DPC registration, data retention, and data subject requests.</p></div></div>
       <div id="complianceStatusCards" class="stat-grid"></div>
       <div class="two-col">
         <div class="panel">
@@ -560,680 +835,1090 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
       <div class="panel">
         <h3>Request Log</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Timestamp</th><th>Subject</th><th>Type</th><th>Notes</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead>
-            <tbody id="dsRequestTable"></tbody>
-          </table>
-        </div>
+        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Subject</th><th>Type</th><th>Notes</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="dsRequestTable"></tbody></table></div>
       </div>
     </div>
 
-    <!-- VIEW: REPORTS -->
-    <div id="view-reports" class="view">
-      <div class="view-head">
-        <div>
-          <h2>Station Summary Reports</h2>
-          <p>Consolidated stats across all 5 Triple A Gas outlets.</p>
+    <!-- ──────────────── LICENCES ──────────────── -->
+    <div id="view-licences" class="view">
+      <div class="view-head"><div><h2>Licence &amp; Certificate Tracker</h2><p>Track NPA, Fire Service, and all regulatory certificates with automatic expiry alerts.</p></div></div>
+      <div id="licenceAlertCards" class="licence-alert-cards"></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Register Licence / Certificate</h3>
+          <form id="licenceForm" class="form-grid-2">
+            <div class="field field-m0"><label>Licence Type</label><select name="type"><option value="NPA Operating Licence">NPA Operating Licence</option><option value="Fire Service Certificate">Fire Service Certificate</option><option value="Weights &amp; Measures Certificate">Weights &amp; Measures Cert.</option><option value="Business Registration">Business Registration</option><option value="Environmental Permit">Environmental Permit</option><option value="Other">Other</option></select></div>
+            <div class="field field-m0"><label>Licence Number</label><input type="text" name="number" placeholder="Licence / cert number"></div>
+            <div class="field field-m0"><label>Issuing Authority</label><input type="text" name="issuer" placeholder="e.g. NPA Ghana"></div>
+            <div class="field field-m0"><label>Outlet</label><select name="outlet" id="licenceOutletSelect"></select></div>
+            <div class="field field-m0"><label>Issue Date</label><input type="date" name="issueDate"></div>
+            <div class="field field-m0"><label>Expiry Date</label><input type="date" name="expiryDate" required></div>
+            <div class="field field-m0" style="grid-column:span 2;"><label>Notes</label><input type="text" name="notes" placeholder="Optional notes"></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Register Licence</button>
+          </form>
+        </div>
+        <div class="panel" style="background:rgba(199,154,61,0.06);border-color:rgba(199,154,61,0.2);">
+          <h3>⏳ Renewal Reminders</h3>
+          <p style="font-size:13px;">Licences are flagged automatically at 90, 30, and 14 days before expiry. The Alert Centre will also show active warnings.</p>
+          <div style="padding:16px;background:rgba(255,255,255,0.04);border-radius:12px;margin-top:16px;">
+            <div style="color:var(--safe);font-size:13px;margin-bottom:8px;">🟢 &gt;90 days — All clear</div>
+            <div style="color:var(--warn);font-size:13px;margin-bottom:8px;">🟡 30–90 days — Renewal approaching</div>
+            <div style="color:var(--danger);font-size:13px;">🔴 &lt;30 days — Urgent: renew now</div>
+          </div>
         </div>
       </div>
       <div class="panel">
-        <h3>Outlets Operations Summary</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Station Outlet</th><th>Total Cylinders</th><th>Low Stock Warning</th><th>Deliveries Logged</th><th>Safety Overdues</th></tr></thead>
-            <tbody id="reportsTable"></tbody>
-          </table>
-        </div>
+        <h3>All Licences</h3>
+        <div class="table-wrap"><table><thead><tr><th>Type</th><th>Number</th><th>Issuer</th><th>Outlet</th><th>Issue Date</th><th>Expiry</th><th>Days Left</th><th>Status</th></tr></thead><tbody id="licenceTable"></tbody></table></div>
       </div>
     </div>
-  </main>
-</div>
 
-<!-- TOAST -->
-<div id="toast" class="toast">
-  <span class="dot" style="background:var(--safe)"></span>
-  <span class="msg">Notification</span>
-</div>
+  </main>
+</div><!-- end shell -->
+
+<!-- Toast -->
+<div id="toast" class="toast"><span class="dot"></span><span class="msg">Notification</span></div>
+
+<!-- Invoice Print Area -->
+<div id="invoice-print-area"></div>
+
+<!-- Receipt Print Area -->
+<div id="receipt-print-area"></div>
 
 <script>
-// Mobile sidebar toggle (small, self-contained)
-(function(){
-  const menu = document.getElementById('menuBtn');
-  const overlay = document.getElementById('overlay');
-  const sidebar = document.querySelector('.sidebar');
-  if (!menu || !overlay || !sidebar) return;
-  menu.addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
-  overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
-  window.addEventListener('resize', () => { if (window.innerWidth > 900) { sidebar.classList.remove('open'); overlay.classList.remove('show'); } });
-})();
+// ═══════════════════════════════════════════════════════════
+//  TRIPLE A GAS — ADMIN PORTAL JAVASCRIPT ENGINE
+// ═══════════════════════════════════════════════════════════
 
-const OUTLETS = ["Accra", "Antoa", "Bonwire", "Bogoso", "Prestea"];
-const SIZES = ["3kg", "6kg", "13kg", "14.5kg"];
-const PRODUCT_PRESETS = [
-  { label: "3kg cylinder", price: 35 },
-  { label: "6kg cylinder", price: 70 },
-  { label: "13kg cylinder", price: 150 },
-  { label: "14.5kg cylinder", price: 175 },
-  { label: "LPG refill", price: 85 },
-  { label: "Snack pack", price: 25 }
-];
+Chart.defaults.color = '#9aa5ad';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
 
-function getDefaultDbState() {
+const OUTLETS = ['Accra','Antoa','Bonwire','Bogoso','Prestea'];
+const SIZES   = ['3kg','6kg','13kg','14.5kg'];
+const EXPENSE_CATEGORIES = ['Fuel','Wages','Maintenance','Supplies','Rent','Utilities','Other'];
+let currentUser = null;
+let dismissedAlerts = new Set(JSON.parse(localStorage.getItem('tAG_dismissedAlerts')||'[]'));
+let THRESHOLDS = JSON.parse(localStorage.getItem('tAG_thresholds')||'{"3kg":10,"6kg":8,"13kg":5,"14.5kg":5}');
+let PRICE_HISTORY = JSON.parse(localStorage.getItem('tAG_priceHistory')||'[]');
+let COMPETITOR_NOTES = localStorage.getItem('tAG_competitorNotes')||'';
+let reportRange = 'month';
+let financeRange = 'month';
+let chartInstances = {};
+
+function getDefaultDB() {
   return {
-    staff: [], deliveries: [], inventory: [], inspections: [],
-    shiftNotes: [], presence: [], cameras: [], compliance: {}, dsRequests: [], purchases: []
+    staff:[], deliveries:[], inventory:[], inspections:[],
+    shiftNotes:[], presence:[], cameras:[], compliance:{}, dsRequests:[], purchases:[],
+    expenses:[], vehicles:[], trips:[], maintenance:[],
+    customers:[], orders:[], suppliers:[], purchaseOrders:[],
+    payroll:[
+      {id:'pay1',staffId:'s1',staffName:'Kofi Asante',month:'2026-07',outlet:'Accra',baseSalary:1200,bonus:150,deductions:80,netPay:1270,paid:true,paidDate:'2026-07-28'},
+      {id:'pay2',staffId:'s2',staffName:'Ama Owusu',month:'2026-07',outlet:'Antoa',baseSalary:950,bonus:0,deductions:50,netPay:900,paid:false,paidDate:''},
+      {id:'pay3',staffId:'s3',staffName:'Kwame Boateng',month:'2026-07',outlet:'Accra',baseSalary:1500,bonus:200,deductions:100,netPay:1600,paid:true,paidDate:'2026-07-27'}
+    ],
+    licences:[],
+    pricing:{'3kg':43.50,'6kg':87.00,'13kg':188.50,'14.5kg':210.25,'autogas':11.80,'bulk_per_kg':14.50}
   };
 }
 
-// Database Object (synced with the live admin API or local fallback)
-let DB = getDefaultDbState();
+let DB = getDefaultDB();
 
-let currentUser = null;
+// ── Persistence ──────────────────────────────────────────
+function saveToLocal() {
+  try { localStorage.setItem('tAG_db', JSON.stringify(DB)); } catch(e){}
+}
+function loadFromLocal() {
+  try {
+    const s = localStorage.getItem('tAG_db');
+    if (s) { const p = JSON.parse(s); DB = { ...getDefaultDB(), ...p }; }
+  } catch(e){}
+}
 
-// Helpers
-function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
-function badge(kind, label) {
-  const map = { safe: "badge-safe", warn: "badge-warn", danger: "badge-danger", neutral: "badge-neutral" };
-  return `<span class="badge ${map[kind] || "badge-neutral"}">${esc(label)}</span>`;
+// ── Helpers ───────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function badge(k,l){ const m={safe:'badge-safe',warn:'badge-warn',danger:'badge-danger',neutral:'badge-neutral',gold:'badge-gold'}; return `<span class="badge ${m[k]||'badge-neutral'}">${esc(l)}</span>`; }
+function opts(arr,sel){ return arr.map(v=>`<option value="${esc(v)}" ${v===sel?'selected':''}>${esc(v)}</option>`).join(''); }
+function toast(msg,k='safe'){
+  const el=document.getElementById('toast');
+  el.querySelector('.dot').style.background = k==='safe'?'var(--safe)':k==='warn'?'var(--warn)':'var(--danger)';
+  el.querySelector('.msg').textContent=msg;
+  el.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>el.classList.remove('show'),3000);
 }
-function optionList(arr, selected) {
-  return arr.map(v => `<option value="${esc(v)}" ${v === selected ? "selected" : ""}>${esc(v)}</option>`).join("");
+function gaugeSVG(pct,color){
+  const r=30,c=2*Math.PI*r,off=c-(Math.min(100,Math.max(0,pct))/100)*c;
+  return `<svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="8"/><circle cx="37" cy="37" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 37 37)"/></svg>`;
 }
-function toast(msg, kind = "safe") {
-  const el = document.getElementById("toast");
-  el.querySelector(".dot").style.background = kind === "safe" ? "var(--safe)" : kind === "warn" ? "var(--warn)" : "var(--danger)";
-  el.querySelector(".msg").textContent = msg;
-  el.classList.add("show");
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+function scopedOutlet(){ return currentUser&&currentUser.role!=='Owner / Head Office'&&currentUser.role!=='COO'?currentUser.outlet:null; }
+function isFinanceRole(){ return currentUser&&(currentUser.role==='Owner / Head Office'||currentUser.role==='COO'); }
+function now(){ return new Date().toISOString().slice(0,16).replace('T',' '); }
+function uid(pfx){ return `${pfx}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`; }
+function gh(n){ return 'GH₵'+Number(n||0).toFixed(2); }
+function daysUntil(dateStr){
+  if(!dateStr) return 9999;
+  const d=new Date(dateStr), t=new Date();
+  t.setHours(0,0,0,0); d.setHours(0,0,0,0);
+  return Math.round((d-t)/(1000*60*60*24));
 }
-function updatePurchaseAmount() {
-  const qty = parseInt(document.getElementById('purchaseQty')?.value) || 1;
-  const unitPrice = parseFloat(document.getElementById('purchaseUnitPrice')?.value) || 0;
-  const total = (qty * unitPrice).toFixed(2);
-  const display = document.getElementById('purchaseAmount');
-  if (display) display.textContent = `GH₵${total}`;
+function exportCSV(data,filename){
+  if(!data||!data.length){toast('No data to export','warn');return;}
+  const keys=Object.keys(data[0]);
+  const csv=[keys.join(','),...data.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))].join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
 }
-function resolvePurchaseSize(item) {
-  if (!item) return null;
-  const normalized = item.toLowerCase().trim();
-  if (normalized.includes('14.5kg')) return '14.5kg';
-  if (normalized.includes('13kg')) return '13kg';
-  if (normalized.includes('6kg')) return '6kg';
-  if (normalized.includes('3kg')) return '3kg';
-  if (normalized.includes('14.5')) return '14.5kg';
-  if (normalized.includes('13')) return '13kg';
-  if (normalized.includes('6')) return '6kg';
-  if (normalized.includes('3')) return '3kg';
+
+// ── Chart helpers ─────────────────────────────────────────
+function makeChart(id,type,labels,datasets,opts={}){
+  if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; }
+  const canvas=document.getElementById(id);
+  if(!canvas)return;
+  chartInstances[id]=new Chart(canvas,{
+    type,
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9aa5ad',font:{family:'IBM Plex Mono',size:11}}}},scales:type==='doughnut'?{}:{x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9aa5ad',font:{family:'IBM Plex Mono',size:11}}},y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9aa5ad',font:{family:'IBM Plex Mono',size:11}}}},...opts}
+  });
+}
+
+// ── Date range filtering ──────────────────────────────────
+function filterByRange(arr, range, dateField='time'){
+  const now=new Date(), start=new Date();
+  if(range==='today'){start.setHours(0,0,0,0);}
+  else if(range==='week'){start.setDate(now.getDate()-7);}
+  else if(range==='month'){start.setDate(1);start.setHours(0,0,0,0);}
+  else return arr;
+  return arr.filter(x=>{
+    const d=x[dateField]||x.date||x.time||'';
+    return new Date(d)>=start;
+  });
+}
+
+// ── Fetch DB ─────────────────────────────────────────────
+async function fetchDatabase(){
+  try{
+    const r=await fetch('/api/data');
+    if(r.ok){const j=await r.json();if(j.success&&j.data){DB={...getDefaultDB(),...DB,...j.data};renderAll();return;}}
+  }catch(e){ console.warn('API unavailable, trying Firebase'); }
+  if(typeof syncFirestoreData==='function'){
+    const ok=await syncFirestoreData(d=>{DB={...getDefaultDB(),...DB,...d};renderAll();});
+    if(ok)return;
+  }
+  renderAll();
+}
+
+// ── Navigation ────────────────────────────────────────────
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.navlist button').forEach(b=>b.classList.remove('active'));
+  const v=document.getElementById('view-'+id);
+  if(v)v.classList.add('active');
+  const b=document.querySelector(`.navlist button[data-view="${id}"]`);
+  if(b)b.classList.add('active');
+
+  // Role-gated views
+  ['finance','pricing','payroll'].forEach(gv=>{
+    const ad=document.getElementById(gv+'AccessDenied');
+    const cnt=document.getElementById(gv+'Content');
+    if(ad&&cnt){ const show=isFinanceRole(); ad.style.display=show?'none':'flex'; cnt.style.display=show?'block':'none'; }
+  });
+
+  // Lazy render charts
+  setTimeout(()=>{ if(id==='dashboard')renderDashboardCharts(); if(id==='finance')renderFinanceCharts(); if(id==='reports')renderReportCharts(); if(id==='payroll')renderPayrollChart(); },80);
+}
+
+// ══════════════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════════════
+function renderDashboard(){
+  const sc=scopedOutlet();
+  const inv=DB.inventory.filter(i=>!sc||i.outlet===sc);
+  const totalCyl=inv.reduce((a,b)=>a+b.qty,0);
+  const lowCnt=inv.filter(i=>i.status==='low'||i.status==='critical').length;
+  const due=DB.inspections.filter(i=>(!sc||i.outlet===sc)&&i.result!=='pass').length;
+  const overdueI=DB.inspections.filter(i=>(!sc||i.outlet===sc)&&i.result==='overdue').length;
+  const dels=DB.deliveries.filter(d=>!sc||d.outlet===sc).length;
+  const todayPurchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),'today');
+  const todayRev=todayPurchases.reduce((a,b)=>a+(Number(b.amount)||0),0);
+  const alertCnt=computeAlerts().length;
+
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card"><div class="n">${totalCyl}</div><div class="l">Cylinders in Stock</div></div>
+    <div class="stat-card"><div class="n gold">${gh(todayRev)}</div><div class="l">Revenue Today</div></div>
+    <div class="stat-card"><div class="n ${lowCnt?'warn':'safe'}">${lowCnt}</div><div class="l">Low/Critical Stock Lines</div></div>
+    <div class="stat-card"><div class="n ${overdueI?'danger':due?'warn':'safe'}">${due}</div><div class="l">Inspections Due/Overdue</div></div>
+  `;
+
+  const comp=DB.inspections.length?Math.round(100*DB.inspections.filter(i=>i.result==='pass').length/DB.inspections.length):100;
+  const stockH=inv.length?Math.round(100*inv.filter(i=>i.status==='ok').length/Math.max(1,inv.length)):100;
+  document.getElementById('dashGauges').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;"><div class="gauge">${gaugeSVG(stockH,stockH>60?'var(--safe)':'var(--warn)')}<div class="gauge-val">${stockH}%</div></div><div><b style="display:block;font-size:13px;color:#fff;">Stock Health</b><span style="font-size:11px;color:var(--text-dim);">Lines at OK level</span></div></div>
+    <div style="display:flex;align-items:center;gap:14px;"><div class="gauge">${gaugeSVG(comp,comp>60?'var(--safe)':'var(--danger)')}<div class="gauge-val">${comp}%</div></div><div><b style="display:block;font-size:13px;color:#fff;">Safety Compliance</b><span style="font-size:11px;color:var(--text-dim);">Passed inspections</span></div></div>
+    <div style="display:flex;align-items:center;gap:14px;"><div class="gauge">${gaugeSVG(Math.min(100,100-alertCnt*10),alertCnt===0?'var(--safe)':alertCnt<3?'var(--warn)':'var(--danger)')}<div class="gauge-val">${alertCnt}</div></div><div><b style="display:block;font-size:13px;color:#fff;">Active Alerts</b><span style="font-size:11px;color:var(--text-dim);">Requiring attention</span></div></div>
+  `;
+
+  const feed=[
+    ...DB.deliveries.map(d=>({time:d.time||'',kind:'safe',text:`Delivery — ${d.size} ×${d.qty} → ${esc(d.customer)} (${d.outlet})`,outlet:d.outlet})),
+    ...DB.inspections.map(i=>({time:i.time||'',kind:i.result==='pass'?'safe':i.result==='overdue'?'danger':'warn',text:`Inspection — ${esc(i.item)} at ${i.outlet}`,outlet:i.outlet})),
+    ...DB.shiftNotes.map(n=>({time:n.time||'',kind:'neutral',text:`Note — ${esc((n.note||'').slice(0,50))} (${n.outlet})`,outlet:n.outlet})),
+    ...DB.purchases.map(p=>({time:p.time||'',kind:'safe',text:`Sale — ${esc(p.item)} ×${p.qty} ${gh(p.amount)} (${p.outlet})`,outlet:p.outlet}))
+  ].filter(x=>!sc||x.outlet===sc).sort((a,b)=>b.time.localeCompare(a.time)).slice(0,8);
+  document.getElementById('dashFeed').innerHTML=feed.length
+    ?feed.map(f=>`<li style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span class="mono" style="color:var(--text-faint);font-size:11px;min-width:100px;">${f.time.slice(11)||f.time.slice(0,10)}</span><span style="width:8px;height:8px;border-radius:50%;background:${f.kind==='safe'?'var(--safe)':f.kind==='warn'?'var(--warn)':f.kind==='danger'?'var(--danger)':'var(--text-faint)'};flex-shrink:0;"></span><span style="font-size:12.5px;">${f.text}</span></li>`).join('')
+    :`<li style="color:var(--text-faint);padding:12px 0;">No recent activity.</li>`;
+
+  updateAlertBadge();
+}
+
+function renderDashboardCharts(){
+  const revByStation=OUTLETS.map(o=>DB.purchases.filter(p=>p.outlet===o).reduce((a,b)=>a+(Number(b.amount)||0),0));
+  makeChart('dashRevenueChart','bar',OUTLETS,[{label:'Revenue (GH₵)',data:revByStation,backgroundColor:'rgba(142,27,44,0.7)',borderColor:'rgba(142,27,44,1)',borderWidth:1,borderRadius:6}]);
+}
+
+// ══════════════════════════════════════════════════════════
+//  ALERTS
+// ══════════════════════════════════════════════════════════
+function computeAlerts(){
+  const alerts=[];
+  // Low/critical inventory
+  DB.inventory.forEach(i=>{
+    const thresh=THRESHOLDS[i.size]||5;
+    if(i.qty<=thresh){
+      const id=`inv_${i.outlet}_${i.size}`;
+      if(!dismissedAlerts.has(id)) alerts.push({id,kind:i.qty<=Math.floor(thresh/2)?'danger':'warn',title:`${i.outlet}: ${i.size} stock critically low`,sub:`Only ${i.qty} remaining (threshold: ${thresh})`});
+    }
+  });
+  // Overdue inspections
+  DB.inspections.filter(i=>i.result==='overdue').forEach(i=>{
+    const id=`insp_${i.id||i.outlet+i.item}`;
+    if(!dismissedAlerts.has(id)) alerts.push({id,kind:'danger',title:`${i.outlet}: ${i.item} inspection overdue`,sub:`Inspector: ${i.inspector||'N/A'} — Next due: ${i.nextDue||'Not set'}`});
+  });
+  // Customer over credit limit
+  DB.customers.filter(c=>c.balance>c.creditLimit&&c.creditLimit>0).forEach(c=>{
+    const id=`cust_${c.id}`;
+    if(!dismissedAlerts.has(id)) alerts.push({id,kind:'warn',title:`${c.name} is over credit limit`,sub:`Balance: ${gh(c.balance)} — Limit: ${gh(c.creditLimit)}`});
+  });
+  // Licences expiring
+  DB.licences.forEach(l=>{
+    const days=daysUntil(l.expiryDate);
+    if(days<=90){
+      const id=`lic_${l.id}`;
+      if(!dismissedAlerts.has(id)) alerts.push({id,kind:days<30?'danger':days<60?'warn':'neutral',title:`${l.type} (${l.outlet}) expires in ${days} days`,sub:`Expiry: ${l.expiryDate} — Number: ${l.number||'N/A'}`});
+    }
+  });
+  // Vehicle maintenance due
+  DB.maintenance.forEach(m=>{
+    const days=daysUntil(m.nextDueDate);
+    if(days>=0&&days<=14){
+      const v=DB.vehicles.find(x=>x.id===m.vehicleId);
+      const plate=v?v.plate:m.vehicleId;
+      const id=`maint_${m.id}`;
+      if(!dismissedAlerts.has(id)) alerts.push({id,kind:days<=3?'danger':'warn',title:`Vehicle ${plate}: ${m.type} due in ${days} days`,sub:`Scheduled: ${m.nextDueDate}`});
+    }
+  });
+  return alerts;
+}
+
+function renderAlerts(){
+  const alerts=computeAlerts();
+  updateAlertBadge(alerts.length);
+  const panel=document.getElementById('alertsList');
+  if(!panel)return;
+  if(!alerts.length){panel.innerHTML=`<div class="alert-empty"><div style="font-size:48px;">✅</div><p style="margin-top:12px;color:var(--safe);">No active alerts. All systems healthy.</p></div>`;return;}
+  panel.innerHTML=alerts.map(a=>`
+    <div class="alert-item">
+      <div class="alert-dot" style="background:${a.kind==='danger'?'var(--danger)':a.kind==='warn'?'var(--warn)':'var(--text-faint)'}"></div>
+      <div style="flex:1;"><div class="al-title">${esc(a.title)}</div><div class="al-sub">${esc(a.sub)}</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="dismissAlert('${a.id}')">Dismiss</button>
+    </div>`).join('');
+}
+
+function updateAlertBadge(cnt){
+  if(cnt===undefined) cnt=computeAlerts().length;
+  const b=document.getElementById('alertBadge');
+  if(b){ b.textContent=cnt; b.style.display=cnt>0?'inline':'none'; }
+}
+
+function dismissAlert(id){
+  dismissedAlerts.add(id);
+  localStorage.setItem('tAG_dismissedAlerts',JSON.stringify([...dismissedAlerts]));
+  renderAlerts(); updateAlertBadge();
+}
+
+// ══════════════════════════════════════════════════════════
+//  FINANCE
+// ══════════════════════════════════════════════════════════
+function setFinanceRange(r){
+  financeRange=r;
+  document.querySelectorAll('#financeDateBtns button').forEach(b=>b.classList.toggle('active',b.dataset.range===r));
+  renderFinance();
+}
+function renderFinance(){
+  const sc=scopedOutlet();
+  const purchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),financeRange);
+  const expenses=filterByRange(DB.expenses.filter(e=>!sc||e.outlet===sc),financeRange,'date');
+  const revenue=purchases.reduce((a,b)=>a+(Number(b.amount)||0),0);
+  const expTotal=expenses.reduce((a,b)=>a+(Number(b.amount)||0),0);
+  const profit=revenue-expTotal;
+  const margin=revenue?((profit/revenue)*100):0;
+
+  document.getElementById('financeStats').innerHTML=`
+    <div class="stat-card"><div class="n gold">${gh(revenue)}</div><div class="l">Total Revenue</div></div>
+    <div class="stat-card"><div class="n danger">${gh(expTotal)}</div><div class="l">Total Expenses</div></div>
+    <div class="stat-card"><div class="n ${profit>=0?'safe':'danger'}">${gh(profit)}</div><div class="l">Gross Profit</div></div>
+    <div class="stat-card"><div class="n ${margin>=0?'gold':'danger'}">${margin.toFixed(1)}%</div><div class="l">Profit Margin</div></div>
+  `;
+
+  // Payment breakdown
+  const methods=['cash','momo','card','transfer'];
+  const payBreak=document.getElementById('financePaymentBreakdown');
+  if(payBreak){
+    const totals=methods.map(m=>{const t=purchases.filter(p=>(p.paymentMethod||'cash')===m).reduce((a,b)=>a+(Number(b.amount)||0),0);return{m,t};});
+    payBreak.innerHTML=totals.map(({m,t})=>`<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;text-align:center;"><div class="mono" style="font-size:18px;font-weight:700;color:#fff;">${gh(t)}</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px;text-transform:uppercase;">${m}</div></div>`).join('');
+  }
+
+  // Expenses table
+  const et=document.getElementById('expenseTable');
+  if(et) et.innerHTML=expenses.length?expenses.slice().reverse().map(e=>`<tr><td class="mono">${esc(e.date)}</td><td>${esc(e.category)}</td><td>${esc(e.description)}</td><td>${esc(e.outlet)}</td><td class="mono">${gh(e.amount)}</td></tr>`).join(''):`<tr><td colspan="5" style="color:var(--text-faint);">No expenses logged.</td></tr>`;
+
+  // Populate outlet select
+  const es=document.getElementById('expenseOutletSelect');
+  if(es) es.innerHTML=opts(OUTLETS,scopedOutlet()||OUTLETS[0]);
+
+  setTimeout(()=>renderFinanceCharts(),80);
+}
+
+function renderFinanceCharts(){
+  const sc=scopedOutlet();
+  const purchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),financeRange);
+  // Revenue by station
+  const byStation=OUTLETS.map(o=>purchases.filter(p=>p.outlet===o).reduce((a,b)=>a+(Number(b.amount)||0),0));
+  makeChart('financeStationChart','bar',OUTLETS,[{label:'Revenue (GH₵)',data:byStation,backgroundColor:['#8e1b2c','#a8283a','#c96a78','#c79a3d','#3fa24a'],borderRadius:6}]);
+  // Revenue by product
+  const byProduct=SIZES.map(s=>purchases.filter(p=>p.item&&p.item.toLowerCase().includes(s.replace('.','.'))).reduce((a,b)=>a+(Number(b.amount)||0),0));
+  makeChart('financeProductChart','doughnut',SIZES,[{data:byProduct,backgroundColor:['#8e1b2c','#a8283a','#c79a3d','#3fa24a'],borderWidth:2,borderColor:'#16181c'}]);
+}
+
+async function addExpense(ev){
+  ev.preventDefault();
+  const f=ev.target;
+  const payload={outlet:f.outlet.value,category:f.category.value,description:f.description.value.trim(),amount:parseFloat(f.amount.value)||0,date:f.date.value,staff:currentUser?currentUser.name:'Staff'};
+  try{
+    const r=await fetch('/api/expenses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const j=await r.json();if(j.success){DB.expenses.push(j.data);toast('Expense logged.');}
+  }catch(e){DB.expenses.push({id:uid('ex'),...payload});toast('Expense saved locally.');}
+  if(typeof firestoreAddExpense==='function') firestoreAddExpense(payload);
+  f.reset();saveToLocal();renderFinance();
+}
+
+function exportFinanceCSV(){
+  const all=[...DB.purchases.map(p=>({type:'Revenue',date:p.time,category:p.item,description:'Sale',amount:p.amount,outlet:p.outlet,payment:p.paymentMethod})),...DB.expenses.map(e=>({type:'Expense',date:e.date,category:e.category,description:e.description,amount:-e.amount,outlet:e.outlet,payment:''}))];
+  exportCSV(all,'triple_a_gas_finance.csv');
+}
+
+// ══════════════════════════════════════════════════════════
+//  PRICING
+// ══════════════════════════════════════════════════════════
+function renderPricing(){
+  const p=DB.pricing||{};
+  ['3kg','6kg','13kg','14.5kg','autogas','bulk_per_kg'].forEach(k=>{
+    const el=document.getElementById('price'+k.replace('.','').replace('_','').replace('kg','kg').replace('perkg','bulk').replace('autogas','Autogas'));
+    // map ids
+  });
+  const fields={'3kg':'price3kg','6kg':'price6kg','13kg':'price13kg','14.5kg':'price14kg','autogas':'priceAutogas','bulk_per_kg':'priceBulk'};
+  Object.entries(fields).forEach(([k,id])=>{ const el=document.getElementById(id); if(el) el.value=p[k]||''; });
+  document.getElementById('competitorNotes').value=COMPETITOR_NOTES;
+  renderPriceHistory();
+}
+
+function renderPriceHistory(){
+  const tb=document.getElementById('priceHistoryTable');
+  if(!tb)return;
+  tb.innerHTML=PRICE_HISTORY.length?PRICE_HISTORY.slice().reverse().map(h=>`<tr><td class="mono">${esc(h.date)}</td><td>${esc(h.by)}</td><td style="font-size:11px;color:var(--text-dim);">${esc(h.notes||'—')}</td></tr>`).join(''):`<tr><td colspan="3" style="color:var(--text-faint);">No price changes recorded.</td></tr>`;
+}
+
+async function savePricing(ev){
+  ev.preventDefault();
+  const oldPricing={...DB.pricing};
+  DB.pricing={'3kg':parseFloat(document.getElementById('price3kg').value)||DB.pricing['3kg'],'6kg':parseFloat(document.getElementById('price6kg').value)||DB.pricing['6kg'],'13kg':parseFloat(document.getElementById('price13kg').value)||DB.pricing['13kg'],'14.5kg':parseFloat(document.getElementById('price14kg').value)||DB.pricing['14.5kg'],'autogas':parseFloat(document.getElementById('priceAutogas').value)||DB.pricing['autogas'],'bulk_per_kg':parseFloat(document.getElementById('priceBulk').value)||DB.pricing['bulk_per_kg']};
+  PRICE_HISTORY.push({date:now(),by:currentUser?currentUser.name:'Admin',old:oldPricing,new:{...DB.pricing},notes:''});
+  localStorage.setItem('tAG_priceHistory',JSON.stringify(PRICE_HISTORY));
+  saveToLocal();
+  try{ await fetch('/api/pricing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(DB.pricing)}); }catch(e){}
+  if(typeof firestoreSetPricing==='function') await firestoreSetPricing(DB.pricing);
+  toast('Prices saved and published to public website!','safe');
+  renderPriceHistory();
+  initPurchaseQuickActions();
+}
+
+function saveCompetitorNotes(){ COMPETITOR_NOTES=document.getElementById('competitorNotes').value; localStorage.setItem('tAG_competitorNotes',COMPETITOR_NOTES); toast('Notes saved.'); }
+
+// ══════════════════════════════════════════════════════════
+//  DELIVERIES
+// ══════════════════════════════════════════════════════════
+function renderDeliveries(){
+  const sc=scopedOutlet();
+  const search=(document.getElementById('deliverySearch')?.value||'').toLowerCase();
+  const filterOutlet=document.getElementById('deliveryFilterOutlet')?.value||'';
+  let rows=DB.deliveries.filter(d=>(!sc||d.outlet===sc)&&(!filterOutlet||d.outlet===filterOutlet)&&(!search||(d.driver||'').toLowerCase().includes(search)||(d.customer||'').toLowerCase().includes(search))).slice().reverse();
+  document.getElementById('deliveryTable').innerHTML=rows.length?rows.map(d=>`<tr><td class="mono">${esc(d.time)}</td><td>${esc(d.outlet)}</td><td>${esc(d.driver)}</td><td>${esc(d.size)} ×${d.qty}</td><td>${esc(d.customer)}</td><td class="mono">${gh(d.revenue)}</td><td>${d.status==='done'?badge('safe','Done'):badge('warn','In Transit')}</td></tr>`).join(''):`<tr><td colspan="7" style="color:var(--text-faint);">No deliveries recorded.</td></tr>`;
+  const dos=document.getElementById('deliveryOutletSelect');if(dos)dos.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const dss=document.getElementById('deliverySizeSelect');if(dss)dss.innerHTML=opts(SIZES);
+  const dfo=document.getElementById('deliveryFilterOutlet');if(dfo)dfo.innerHTML='<option value="">All Stations</option>'+opts(OUTLETS);
+}
+
+function autoCalcDeliveryRevenue(){
+  const size=document.getElementById('deliverySizeSelect')?.value;
+  const qty=parseInt(document.getElementById('deliveryForm')?.qty?.value)||1;
+  const price=DB.pricing?DB.pricing[size]||0:0;
+  const rev=document.getElementById('deliveryRevenue');
+  if(rev&&size&&!rev._manuallyEdited) rev.value=(price*qty).toFixed(2);
+}
+
+async function addDelivery(ev){
+  ev.preventDefault();
+  const f=ev.target;
+  const payload={outlet:f.outlet.value,driver:f.driver.value.trim()||(currentUser?currentUser.name:'Staff'),size:f.size.value,qty:parseInt(f.qty.value)||1,customer:f.customer.value.trim()||'Walk-in',status:f.status.value,revenue:parseFloat(f.revenue?.value)||0};
+  try{
+    const r=await fetch('/api/deliveries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const j=await r.json();if(j.success){DB.deliveries.push(j.data);toast('Delivery saved.');}
+  }catch(e){DB.deliveries.push({id:uid('d'),time:now(),...payload});toast('Delivery logged.');}
+  if(typeof firestoreAddDelivery==='function') firestoreAddDelivery({...payload,time:now()});
+  f.reset();saveToLocal();renderDeliveries();renderDashboard();
+}
+
+// ══════════════════════════════════════════════════════════
+//  INVENTORY
+// ══════════════════════════════════════════════════════════
+function renderInventory(){
+  const sc=scopedOutlet();
+  const rows=DB.inventory.filter(i=>!sc||i.outlet===sc);
+  document.getElementById('inventoryTable').innerHTML=rows.length?rows.map(i=>{
+    const max=Math.max(50,i.qty);const pct=Math.round((i.qty/max)*100);
+    const color=i.status==='ok'?'var(--safe)':i.status==='low'?'var(--warn)':'var(--danger)';
+    return `<tr>
+      <td>${esc(i.outlet)}</td><td>${esc(i.size)}</td>
+      <td class="mono" style="font-weight:700;font-size:15px;">${i.qty}</td>
+      <td style="min-width:100px;"><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,pct)}%;background:${color};"></div></div></td>
+      <td>${i.status==='ok'?badge('safe','OK'):i.status==='low'?badge('warn','Low'):badge('danger','Critical')}</td>
+      <td style="text-align:right;"><button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',-1)">−</button> <button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',1)">+</button></td>
+    </tr>`;}).join(''):`<tr><td colspan="6" style="color:var(--text-faint);">No inventory rows. Add stock via Restock.</td></tr>`;
+  const ro=document.getElementById('restockOutletSelect');if(ro)ro.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const rs=document.getElementById('restockSizeSelect');if(rs)rs.innerHTML=opts(SIZES);
+}
+
+async function adjustStock(outlet,size,delta){
+  const row=DB.inventory.find(i=>i.outlet===outlet&&i.size===size);
+  if(!row){DB.inventory.push({outlet,size,qty:Math.max(0,delta),status:'ok'});}
+  else{row.qty=Math.max(0,row.qty+delta);row.status=row.qty<=5?'critical':row.qty<=12?'low':'ok';}
+  try{await fetch('/api/inventory/adjust',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet,size,delta})});}catch(e){}
+  if(typeof firestoreAdjustInventory==='function'){const r=DB.inventory.find(i=>i.outlet===outlet&&i.size===size);if(r)firestoreAdjustInventory(outlet,size,delta,r.qty,r.status);}
+  saveToLocal();renderInventory();renderDashboard();toast('Stock updated.');
+}
+
+async function addRestock(ev){
+  ev.preventDefault();
+  const f=ev.target;
+  const outlet=f.outlet.value,size=f.size.value,qty=parseInt(f.qty.value)||0;
+  if(qty<=0)return;
+  let row=DB.inventory.find(i=>i.outlet===outlet&&i.size===size);
+  if(!row){row={outlet,size,qty:0,status:'ok'};DB.inventory.push(row);}
+  row.qty+=qty;row.status=row.qty<=5?'critical':row.qty<=12?'low':'ok';
+  try{await fetch('/api/inventory/adjust',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet,size,delta:qty})});}catch(e){}
+  saveToLocal();renderInventory();renderDashboard();toast(`Added ${qty} × ${size} at ${outlet}.`);f.reset();
+}
+
+function saveThresholds(){
+  THRESHOLDS={'3kg':parseInt(document.getElementById('thresh3kg').value)||10,'6kg':parseInt(document.getElementById('thresh6kg').value)||8,'13kg':parseInt(document.getElementById('thresh13kg').value)||5,'14.5kg':parseInt(document.getElementById('thresh14kg').value)||5};
+  localStorage.setItem('tAG_thresholds',JSON.stringify(THRESHOLDS));
+  toast('Thresholds saved. Alerts will update.');updateAlertBadge();
+}
+
+// ══════════════════════════════════════════════════════════
+//  FLEET
+// ══════════════════════════════════════════════════════════
+function renderFleet(){
+  const sc=scopedOutlet();
+  ['vehicleOutletSelect','tripOutletSelect'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);});
+  const vSel=[document.getElementById('tripVehicleSelect'),document.getElementById('maintVehicleSelect')];
+  const vOpts=DB.vehicles.length?DB.vehicles.map(v=>`<option value="${v.id}">${v.plate} — ${v.model}</option>`).join(''):'<option value="">No vehicles added</option>';
+  vSel.forEach(el=>{if(el)el.innerHTML=vOpts;});
+
+  document.getElementById('vehicleTable').innerHTML=DB.vehicles.length?DB.vehicles.filter(v=>!sc||v.outlet===sc).map(v=>{
+    const km=DB.trips.filter(t=>t.vehicleId===v.id).reduce((a,b)=>a+(Number(b.km)||0),0);
+    return `<tr><td class="mono" style="font-weight:700;">${esc(v.plate)}</td><td>${esc(v.model)}</td><td class="mono">${v.capacity||'—'}kg</td><td>${esc(v.outlet)}</td><td>${v.status==='Active'?badge('safe','Active'):v.status==='Maintenance'?badge('warn','Maintenance'):badge('neutral','Inactive')}</td><td class="mono">${km.toFixed(0)} km</td></tr>`;}).join(''):`<tr><td colspan="6" style="color:var(--text-faint);">No vehicles registered.</td></tr>`;
+
+  document.getElementById('tripTable').innerHTML=DB.trips.filter(t=>!sc||t.outlet===sc).slice().reverse().map(t=>{
+    const v=DB.vehicles.find(x=>x.id===t.vehicleId);
+    return `<tr><td class="mono">${esc(t.date)}</td><td class="mono">${v?v.plate:esc(t.vehicleId)}</td><td>${esc(t.driver)}</td><td>${esc(t.outlet)}</td><td class="mono">${t.km} km</td><td class="mono">${gh(t.fuelCost)}</td><td>${esc(t.notes||'—')}</td></tr>`;}).join('')||`<tr><td colspan="7" style="color:var(--text-faint);">No trips logged.</td></tr>`;
+
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('maintenanceTable').innerHTML=DB.maintenance.slice().reverse().map(m=>{
+    const v=DB.vehicles.find(x=>x.id===m.vehicleId);
+    const overdue=m.nextDueDate&&m.nextDueDate<today;
+    return `<tr style="${overdue?'background:var(--danger-pale);':''}"><td class="mono">${v?v.plate:esc(m.vehicleId)}</td><td>${esc(m.type)}</td><td class="mono">${esc(m.date)}</td><td class="mono">${gh(m.cost)}</td><td class="mono">${esc(m.nextDueDate||'—')}</td><td>${esc(m.notes||'—')}</td><td>${overdue?badge('danger','Overdue'):badge('safe','OK')}</td></tr>`;}).join('')||`<tr><td colspan="7" style="color:var(--text-faint);">No maintenance records.</td></tr>`;
+}
+
+async function addVehicle(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={plate:f.plate.value.trim(),model:f.model.value.trim(),capacity:f.capacity.value||0,outlet:f.outlet.value,status:f.status.value};
+  const rec={id:uid('v'),...payload};DB.vehicles.push(rec);
+  if(typeof firestoreAddVehicle==='function') firestoreAddVehicle(rec);
+  saveToLocal();renderFleet();toast('Vehicle added.');f.reset();
+}
+async function addTrip(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={vehicleId:f.vehicleId.value,driver:f.driver.value.trim(),outlet:f.outlet.value,date:f.date.value,km:parseFloat(f.km.value)||0,fuelCost:parseFloat(f.fuelCost.value)||0,notes:f.notes.value.trim()};
+  const rec={id:uid('t'),...payload};DB.trips.push(rec);
+  if(typeof firestoreAddTrip==='function') firestoreAddTrip(rec);
+  saveToLocal();renderFleet();toast('Trip logged.');f.reset();
+}
+async function addMaintenance(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={vehicleId:f.vehicleId.value,type:f.type.value,date:f.date.value,cost:parseFloat(f.cost.value)||0,nextDueDate:f.nextDueDate.value,notes:f.notes.value.trim()};
+  const rec={id:uid('m'),...payload};DB.maintenance.push(rec);
+  if(typeof firestoreAddMaintenance==='function') firestoreAddMaintenance(rec);
+  saveToLocal();renderFleet();renderAlerts();toast('Maintenance logged.');f.reset();
+}
+
+// ══════════════════════════════════════════════════════════
+//  CUSTOMERS
+// ══════════════════════════════════════════════════════════
+function renderCustomers(){
+  const sc=scopedOutlet();
+  const co=document.getElementById('customerOutletSelect');if(co)co.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const oo=document.getElementById('orderOutletSelect');if(oo)oo.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const ocs=document.getElementById('orderCustomerSelect');
+  if(ocs)ocs.innerHTML=DB.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')||'<option>No customers added</option>';
+
+  document.getElementById('customerTable').innerHTML=DB.customers.filter(c=>!sc||c.outlet===sc).map(c=>{
+    const bal=Number(c.balance||0);const lim=Number(c.creditLimit||0);
+    const overLimit=lim>0&&bal>lim;
+    return `<tr>
+      <td style="font-weight:600;color:#fff;">${esc(c.name)}</td>
+      <td>${badge('neutral',c.type||'Commercial')}</td>
+      <td class="mono">${esc(c.phone||'—')}</td>
+      <td>${esc(c.outlet)}</td>
+      <td class="mono">${gh(c.creditLimit)}</td>
+      <td class="mono" style="color:${overLimit?'var(--danger)':'inherit'}">${gh(bal)}</td>
+      <td>${overLimit?badge('danger','Over Limit'):badge('safe','Good Standing')}</td>
+      <td style="text-align:right;"><button class="btn btn-gold btn-sm" onclick="openInvoice('${c.id}')">📄 Invoice</button></td>
+    </tr>`;}).join('')||`<tr><td colspan="8" style="color:var(--text-faint);">No customer accounts.</td></tr>`;
+}
+
+async function addCustomer(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={name:f.name.value.trim(),contact:f.contact.value.trim(),phone:f.phone.value.trim(),address:f.address.value.trim(),type:f.type.value,outlet:f.outlet.value,creditLimit:parseFloat(f.creditLimit.value)||0,balance:0};
+  const rec={id:uid('c'),...payload};DB.customers.push(rec);
+  if(typeof firestoreAddCustomer==='function') firestoreAddCustomer(rec);
+  saveToLocal();renderCustomers();toast('Customer added.');f.reset();
+}
+
+async function addOrder(ev){
+  ev.preventDefault();const f=ev.target;
+  const cust=DB.customers.find(c=>c.id===f.customerId.value);
+  if(!cust)return;
+  const total=parseFloat(f.total.value)||0;
+  const payload={customerId:cust.id,customerName:cust.name,outlet:f.outlet.value,items:f.items.value.trim(),total,date:f.date.value,status:f.status.value};
+  const rec={id:uid('o'),time:now(),...payload};DB.orders.push(rec);
+  if(f.status.value==='Invoiced'||f.status.value==='Overdue'){cust.balance=(Number(cust.balance)||0)+total;}
+  if(typeof firestoreAddOrder==='function') firestoreAddOrder(rec);
+  saveToLocal();renderCustomers();toast('Order logged and balance updated.');f.reset();
+}
+
+function openInvoice(custId){
+  const cust=DB.customers.find(c=>c.id===custId);if(!cust)return;
+  const orders=DB.orders.filter(o=>o.customerId===custId);
+  const area=document.getElementById('invoice-print-area');
+  area.className='printing';
+  area.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #8E1B2C;padding-bottom:20px;margin-bottom:20px;">
+      <div><h1 style="font-size:28px;margin:0;">TRIPLE A GAS</h1><p style="margin:4px 0 0;color:#666;font-size:13px;">Licensed LPG Marketing Company · Ghana</p></div>
+      <div style="text-align:right;font-size:13px;"><strong>INVOICE</strong><br>Date: ${new Date().toLocaleDateString()}<br>Ref: INV-${Date.now().toString().slice(-6)}</div>
+    </div>
+    <div class="inv-meta"><div><strong>Bill To:</strong><br>${esc(cust.name)}<br>${esc(cust.contact||'')}<br>${esc(cust.phone||'')}<br>${esc(cust.address||'')}</div><div style="text-align:right;"><strong>From:</strong><br>Triple A Gas (${esc(cust.outlet)} Station)<br>Greater Accra, Ghana</div></div>
+    <table><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody>${orders.length?orders.map(o=>`<tr><td>${esc(o.date||o.time)}</td><td>${esc(o.items)}</td><td>GH₵${Number(o.total).toFixed(2)}</td><td>${o.status}</td></tr>`).join(''):'<tr><td colspan="4">No orders on record.</td></tr>'}</tbody></table>
+    <div class="inv-total">Total Outstanding: GH₵${Number(cust.balance||0).toFixed(2)}</div>
+    <div style="margin-top:32px;font-size:12px;color:#888;border-top:1px solid #ccc;padding-top:12px;">Payment due within 30 days. MoMo / Bank Transfer. For queries: contact@tripleagas.com</div>
+    <div style="margin-top:16px;text-align:center;"><button onclick="window.print()" style="padding:10px 24px;background:#8E1B2C;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">🖨 Print Invoice</button> <button onclick="closeInvoice()" style="padding:10px 24px;background:#eee;color:#333;border:none;border-radius:6px;cursor:pointer;font-size:13px;margin-left:8px;">Close</button></div>
+  `;
+  document.body.appendChild(area);
+  area.style.display='block';
+  area.style.position='fixed';area.style.inset='0';area.style.background='#fff';area.style.overflowY='auto';area.style.zIndex='9999';area.style.padding='40px';area.style.color='#000';
+}
+function closeInvoice(){const area=document.getElementById('invoice-print-area');if(area){area.style.display='none';area.className='';area.innerHTML='';}}
+
+// ══════════════════════════════════════════════════════════
+//  SUPPLIERS
+// ══════════════════════════════════════════════════════════
+function renderSuppliers(){
+  document.getElementById('supplierTable').innerHTML=DB.suppliers.length?DB.suppliers.map(s=>`<tr><td style="font-weight:600;color:#fff;">${esc(s.name)}</td><td>${esc(s.contact||'—')}</td><td class="mono">${esc(s.phone||'—')}</td><td>${esc(s.product||'—')}</td></tr>`).join(''):`<tr><td colspan="4" style="color:var(--text-faint);">No suppliers added.</td></tr>`;
+  const ss=document.getElementById('poSupplierSelect');if(ss)ss.innerHTML=DB.suppliers.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')||'<option>No suppliers</option>';
+  document.getElementById('poTable').innerHTML=DB.purchaseOrders.slice().reverse().map(po=>`<tr><td>${esc(po.supplierName||'—')}</td><td>${esc(po.product)}</td><td class="mono">${po.qty}</td><td class="mono">${gh(po.totalCost)}</td><td class="mono">${esc(po.expectedDate||'—')}</td><td>${po.status==='Received'?badge('safe','Received'):po.status==='Paid'?badge('gold','Paid'):badge('warn','Pending')}</td><td><select class="btn-ghost" style="padding:4px 8px;border-radius:8px;font-size:11px;" onchange="updatePOStatus('${po.id}',this.value)"><option ${po.status==='Pending'?'selected':''}>Pending</option><option ${po.status==='Received'?'selected':''}>Received</option><option ${po.status==='Paid'?'selected':''}>Paid</option></select></td></tr>`).join('')||`<tr><td colspan="7" style="color:var(--text-faint);">No purchase orders.</td></tr>`;
+}
+
+async function addSupplier(ev){
+  ev.preventDefault();const f=ev.target;
+  const rec={id:uid('sup'),name:f.name.value.trim(),contact:f.contact.value.trim(),phone:f.phone.value.trim(),email:f.email.value.trim(),product:f.product.value.trim()};
+  DB.suppliers.push(rec);if(typeof firestoreAddSupplier==='function') firestoreAddSupplier(rec);
+  saveToLocal();renderSuppliers();toast('Supplier added.');f.reset();
+}
+
+async function addPO(ev){
+  ev.preventDefault();const f=ev.target;
+  const sup=DB.suppliers.find(s=>s.id===f.supplierId.value);
+  const qty=parseFloat(f.qty.value)||1,uc=parseFloat(f.unitCost.value)||0;
+  const rec={id:uid('po'),supplierId:f.supplierId.value,supplierName:sup?sup.name:'Unknown',product:f.product.value.trim(),qty,unitCost:uc,totalCost:qty*uc,expectedDate:f.expectedDate.value,status:'Pending',date:new Date().toISOString().slice(0,10)};
+  DB.purchaseOrders.push(rec);if(typeof firestoreAddPurchaseOrder==='function') firestoreAddPurchaseOrder(rec);
+  saveToLocal();renderSuppliers();toast('Purchase order created.');f.reset();document.getElementById('poTotal').textContent='GH₵ 0.00';
+}
+
+function updatePOStatus(id,status){
+  const po=DB.purchaseOrders.find(x=>x.id===id);if(po)po.status=status;
+  if(typeof firestoreUpdatePOStatus==='function') firestoreUpdatePOStatus(id,status);
+  saveToLocal();renderSuppliers();toast('PO status updated.');
+}
+
+// ══════════════════════════════════════════════════════════
+//  CASHIER SALES
+// ══════════════════════════════════════════════════════════
+function initPurchaseQuickActions(){
+  const c=document.getElementById('purchaseQuickActions');if(!c)return;
+  const presets=[
+    {label:'3kg cylinder',size:'3kg'},{label:'6kg cylinder',size:'6kg'},
+    {label:'13kg cylinder',size:'13kg'},{label:'14.5kg cylinder',size:'14.5kg'},
+    {label:'LPG Refill / kg',price:DB.pricing?.bulk_per_kg||14.50}
+  ];
+  c.innerHTML=presets.map(p=>{const price=p.price||DB.pricing?.[p.size]||0;return `<button type="button" class="btn btn-ghost btn-sm" onclick="applyPreset('${p.label}',${price})">${p.label} — GH₵${price.toFixed(2)}</button>`;}).join('');
+}
+
+function applyPreset(item,price){
+  const i=document.getElementById('purchaseItem');const p=document.getElementById('purchaseUnitPrice');
+  if(i)i.value=item;if(p)p.value=price;updatePurchaseAmount();
+}
+
+function updatePurchaseAmount(){
+  const q=parseInt(document.getElementById('purchaseQty')?.value)||1;
+  const u=parseFloat(document.getElementById('purchaseUnitPrice')?.value)||0;
+  const el=document.getElementById('purchaseAmount');if(el)el.textContent=`GH₵ ${(q*u).toFixed(2)}`;
+}
+
+function renderPurchases(){
+  const sc=scopedOutlet();
+  const rows=DB.purchases.filter(p=>!sc||p.outlet===sc).slice().reverse();
+  document.getElementById('purchaseTable').innerHTML=rows.length?rows.map(p=>`<tr><td class="mono">${esc(p.time)}</td><td>${esc(p.outlet)}</td><td>${esc(p.cashier)}</td><td>${esc(p.customer)}</td><td>${esc(p.item)}</td><td class="mono">${p.qty}</td><td class="mono">${gh(p.amount)}</td><td>${esc(p.paymentMethod||'cash')}</td></tr>`).join(''):`<tr><td colspan="8" style="color:var(--text-faint);">No sales logged.</td></tr>`;
+
+  const pos=document.getElementById('purchaseOutletSelect');if(pos)pos.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const cashierInput=document.querySelector('#purchaseForm input[name="cashier"]');
+  if(cashierInput&&currentUser&&!cashierInput.value)cashierInput.value=currentUser.name;
+
+  // Daily summary
+  const today=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),'today');
+  const todayRev=today.reduce((a,b)=>a+(Number(b.amount)||0),0);
+  const topItem=today.length?today.reduce((a,b,_,arr)=>{const c=arr.filter(x=>x.item===b.item).length;return c>a[1]?[b.item,c]:a;},['—',0])[0]:'—';
+  const ds=document.getElementById('cashierDailySummary');
+  if(ds)ds.innerHTML=`<div class="stat-card"><div class="n gold">${gh(todayRev)}</div><div class="l">Today's Revenue</div></div><div class="stat-card"><div class="n">${today.length}</div><div class="l">Transactions Today</div></div><div class="stat-card"><div class="n" style="font-size:16px;">${esc(topItem)}</div><div class="l">Best Seller Today</div></div>`;
+  updatePurchaseAmount();
+}
+
+function resolvePurchaseSize(item){
+  if(!item)return null;const n=item.toLowerCase();
+  if(n.includes('14.5'))return '14.5kg';if(n.includes('13'))return '13kg';
+  if(n.includes('6kg')||n.includes('6 kg'))return '6kg';if(n.includes('3kg')||n.includes('3 kg'))return '3kg';
   return null;
 }
-function decrementInventoryForPurchase(outlet, item, qty) {
-  const size = resolvePurchaseSize(item);
-  if (!size || !outlet || qty <= 0) return null;
-  let row = DB.inventory.find(i => i.outlet === outlet && i.size === size);
-  if (!row) {
-    row = { outlet, size, qty: 0, status: 'critical' };
-    DB.inventory.push(row);
-  } else {
-    row.qty = Math.max(0, row.qty - qty);
-    row.status = row.qty <= 5 ? 'critical' : row.qty <= 12 ? 'low' : 'ok';
+
+async function addPurchase(ev){
+  ev.preventDefault();const f=ev.target;
+  const qty=parseInt(f.qty.value)||1,up=parseFloat(f.unitPrice.value)||0;
+  const payload={outlet:f.outlet.value,cashier:f.cashier.value.trim()||(currentUser?currentUser.name:'Staff'),customer:f.customer.value.trim()||'Walk-in',item:f.item.value.trim(),qty,unitPrice:up,amount:+(qty*up).toFixed(2),paymentMethod:f.paymentMethod.value,notes:f.notes.value.trim()};
+  window._lastPurchase=payload;
+  try{
+    const r=await fetch('/api/purchases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const j=await r.json();if(j.success)DB.purchases.push(j.data);
+  }catch(e){DB.purchases.push({id:uid('pu'),time:now(),...payload});}
+  const size=resolvePurchaseSize(payload.item);
+  if(size){const row=DB.inventory.find(i=>i.outlet===payload.outlet&&i.size===size);if(row){row.qty=Math.max(0,row.qty-qty);row.status=row.qty<=5?'critical':row.qty<=12?'low':'ok';}}
+  saveToLocal();renderPurchases();renderInventory();renderDashboard();toast(`Sale logged — ${gh(payload.amount)}`);
+  f.reset();const ds=document.getElementById('purchaseOutletSelect');if(ds)ds.value=scopedOutlet()||OUTLETS[0];if(currentUser){const ci=document.querySelector('#purchaseForm input[name="cashier"]');if(ci)ci.value=currentUser.name;}updatePurchaseAmount();
+}
+
+function printReceipt(){
+  const p=window._lastPurchase;if(!p){toast('No recent sale to print.','warn');return;}
+  const area=document.getElementById('receipt-print-area');
+  area.className='printing';
+  area.innerHTML=`<div style="text-align:center;border-bottom:1px dashed #ccc;padding-bottom:12px;margin-bottom:12px;"><h2 style="margin:0;">TRIPLE A GAS</h2><p style="margin:4px 0;font-size:11px;">${esc(p.outlet)} Station</p></div><table style="width:100%;"><tr><td>Item:</td><td style="text-align:right;font-weight:bold;">${esc(p.item)}</td></tr><tr><td>Qty:</td><td style="text-align:right;">${p.qty}</td></tr><tr><td>Unit Price:</td><td style="text-align:right;">${gh(p.unitPrice)}</td></tr><tr><td><strong>Total:</strong></td><td style="text-align:right;font-weight:bold;">${gh(p.amount)}</td></tr><tr><td>Payment:</td><td style="text-align:right;">${esc(p.paymentMethod)}</td></tr><tr><td>Cashier:</td><td style="text-align:right;">${esc(p.cashier)}</td></tr></table><div style="text-align:center;margin-top:16px;font-size:10px;color:#666;">Thank you! · ${new Date().toLocaleString()}</div>`;
+  area.style.display='block';area.style.position='fixed';area.style.inset='0';area.style.background='#fff';area.style.padding='20px';area.style.zIndex='9999';area.style.color='#000';
+  setTimeout(()=>window.print(),200);
+  setTimeout(()=>{area.style.display='none';area.className='';},2000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  PAYROLL
+// ══════════════════════════════════════════════════════════
+function renderPayroll(){
+  const sc=scopedOutlet();
+  const ps=document.getElementById('payrollStaffSelect');
+  if(ps)ps.innerHTML=DB.staff.map(s=>`<option value="${s.id}">${esc(s.name)} — ${esc(s.outlet)}</option>`).join('')||'<option>Add staff first</option>';
+
+  const rows=DB.payroll.filter(p=>!sc||p.outlet===sc);
+  const totalNet=rows.reduce((a,b)=>a+(Number(b.netPay)||0),0);
+  const totalPaid=rows.filter(p=>p.paid).reduce((a,b)=>a+(Number(b.netPay)||0),0);
+  const pending=totalNet-totalPaid;
+  const ps2=document.getElementById('payrollSummary');
+  if(ps2)ps2.innerHTML=`<div class="stat-card"><div class="n gold">${gh(totalNet)}</div><div class="l">Total Payroll (This Month)</div></div><div class="stat-card"><div class="n safe">${gh(totalPaid)}</div><div class="l">Paid Out</div></div><div class="stat-card"><div class="n warn">${gh(pending)}</div><div class="l">Pending Payment</div></div>`;
+
+  const tb=document.getElementById('payrollTable');
+  if(tb)tb.innerHTML=rows.map(p=>`<tr><td style="font-weight:600;color:#fff;">${esc(p.staffName)}</td><td>${esc(p.outlet)}</td><td class="mono">${esc(p.month)}</td><td class="mono">${gh(p.baseSalary)}</td><td class="mono">${gh(p.bonus)}</td><td class="mono">${gh(p.deductions)}</td><td class="mono" style="font-weight:700;">${gh(p.netPay)}</td><td>${p.paid?badge('safe','Paid'):badge('warn','Pending')}</td><td style="text-align:right;">${p.paid?`<span class="mono" style="font-size:11px;color:var(--text-faint);">${esc(p.paidDate)}</span>`:`<button class="btn btn-safe btn-sm" onclick="markPaid('${p.id}')">Mark Paid</button>`}</td></tr>`).join('')||`<tr><td colspan="9" style="color:var(--text-faint);">No payroll records.</td></tr>`;
+}
+
+function calcNetPay(){
+  const b=parseFloat(document.getElementById('payBaseSalary')?.value)||0;
+  const bon=parseFloat(document.querySelector('#payrollForm input[name="bonus"]')?.value)||0;
+  const ded=parseFloat(document.getElementById('payDeductions')?.value)||0;
+  const el=document.getElementById('payNetPay');if(el)el.textContent=`GH₵ ${(b+bon-ded).toFixed(2)}`;
+}
+
+async function addPayrollRecord(ev){
+  ev.preventDefault();const f=ev.target;
+  const staff=DB.staff.find(s=>s.id===f.staffId.value);
+  const base=parseFloat(f.baseSalary.value)||0,bonus=parseFloat(f.bonus.value)||0,ded=parseFloat(f.deductions.value)||0;
+  const rec={id:uid('pay'),staffId:f.staffId.value,staffName:staff?staff.name:'Unknown',outlet:staff?staff.outlet:'',month:f.month.value,baseSalary:base,bonus,deductions:ded,netPay:+(base+bonus-ded).toFixed(2),paid:false,paidDate:''};
+  DB.payroll.push(rec);if(typeof firestoreSavePayroll==='function') firestoreSavePayroll(rec);
+  saveToLocal();renderPayroll();toast('Payroll record added.');f.reset();
+}
+
+function markPaid(id){
+  const rec=DB.payroll.find(p=>p.id===id);if(!rec)return;
+  rec.paid=true;rec.paidDate=new Date().toISOString().slice(0,10);
+  if(typeof firestoreSavePayroll==='function') firestoreSavePayroll(rec);
+  saveToLocal();renderPayroll();toast('Marked as paid.');
+}
+
+function renderPayrollChart(){
+  const months=[...new Set(DB.payroll.map(p=>p.month))].sort().slice(-6);
+  const data=months.map(m=>DB.payroll.filter(p=>p.month===m).reduce((a,b)=>a+(Number(b.netPay)||0),0));
+  makeChart('payrollChart','bar',months,[{label:'Total Payroll (GH₵)',data,backgroundColor:'rgba(199,154,61,0.6)',borderColor:'var(--gold)',borderWidth:1,borderRadius:6}]);
+}
+
+// ══════════════════════════════════════════════════════════
+//  STAFF
+// ══════════════════════════════════════════════════════════
+function renderStaff(){
+  const sc=scopedOutlet();
+  const sos=document.getElementById('staffOutletSelect');if(sos)sos.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const rows=DB.staff.filter(s=>!sc||s.outlet===sc);
+  document.getElementById('staffTable').innerHTML=rows.length?rows.map(s=>`<tr><td style="font-weight:600;color:#fff;">${esc(s.name)}</td><td>${esc(s.role)}</td><td>${esc(s.outlet)}</td><td class="mono">${esc(s.phone||'—')}</td><td>${s.consent==='enrolled'?badge('safe','Enrolled'):badge('neutral',s.consent||'N/A')}</td><td style="text-align:right;"><button class="btn btn-danger btn-sm" onclick="deleteStaff('${s.id}')">Remove</button></td></tr>`).join(''):`<tr><td colspan="6" style="color:var(--text-faint);">No staff members.</td></tr>`;
+}
+
+async function addStaff(ev){
+  ev.preventDefault();const f=ev.target;
+  const rec={id:uid('s'),name:f.name.value.trim(),role:f.role.value.trim(),outlet:f.outlet.value,phone:f.phone.value.trim(),consent:f.consent.value};
+  DB.staff.push(rec);if(typeof firestoreAddStaff==='function') firestoreAddStaff(rec);
+  saveToLocal();renderStaff();toast('Staff member added.');f.reset();
+}
+
+function deleteStaff(id){if(!confirm('Remove this staff member?'))return;DB.staff=DB.staff.filter(s=>s.id!==id);saveToLocal();renderStaff();toast('Staff removed.','warn');}
+
+// ══════════════════════════════════════════════════════════
+//  INSPECTIONS
+// ══════════════════════════════════════════════════════════
+function renderInspections(){
+  const sc=scopedOutlet();
+  const ios=document.getElementById('inspectionOutletSelect');if(ios)ios.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const rows=DB.inspections.filter(i=>!sc||i.outlet===sc).slice().reverse();
+  document.getElementById('inspectionTable').innerHTML=rows.length?rows.map(i=>`<tr style="${i.result==='overdue'?'background:var(--danger-pale);':''}"><td class="mono">${esc(i.time)}</td><td>${esc(i.outlet)}</td><td>${esc(i.item)}</td><td>${esc(i.inspector)}</td><td>${i.result==='pass'?badge('safe','Pass'):i.result==='due'?badge('warn','Due'):badge('danger','Overdue')}</td><td class="mono">${esc(i.nextDue||'—')}</td></tr>`).join(''):`<tr><td colspan="6" style="color:var(--text-faint);">No inspections logged.</td></tr>`;
+}
+
+async function addInspection(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={outlet:f.outlet.value,item:f.item.value,inspector:f.inspector.value.trim()||(currentUser?currentUser.name:'Staff'),result:f.result.value,nextDue:f.nextDue.value||'—'};
+  const rec={id:uid('i'),time:now(),...payload};
+  try{const r=await fetch('/api/inspections',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const j=await r.json();if(j.success)DB.inspections.push(j.data);}catch(e){DB.inspections.push(rec);}
+  if(typeof firestoreAddInspection==='function') firestoreAddInspection({...payload,time:now()});
+  saveToLocal();renderInspections();renderDashboard();renderAlerts();toast('Inspection logged.');f.reset();
+}
+
+// ══════════════════════════════════════════════════════════
+//  SHIFT NOTES
+// ══════════════════════════════════════════════════════════
+function renderShiftNotes(){
+  const sc=scopedOutlet();
+  const sos=document.getElementById('shiftOutletSelect');if(sos)sos.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+  const rows=DB.shiftNotes.filter(n=>!sc||n.outlet===sc).slice().reverse();
+  document.getElementById('shiftNoteList').innerHTML=rows.length?rows.map(n=>{
+    const pri=n.priority||'Normal';
+    const priStyle=pri==='Urgent'?'border-left:3px solid var(--danger);':pri==='FYI'?'border-left:3px solid var(--gold);':'border-left:3px solid var(--border);';
+    const priBadge=pri==='Urgent'?badge('danger','🚨 Urgent'):pri==='FYI'?badge('gold','📌 FYI'):badge('neutral','Normal');
+    return `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:15px 18px;margin-bottom:10px;${priStyle}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">${priBadge}<span class="mono" style="font-size:10px;color:var(--text-faint);">${esc(n.time)} · ${esc(n.outlet)} · ${esc(n.staff)}</span></div><div style="font-size:13.5px;color:var(--text);">${esc(n.note)}</div></div>`;}).join(''):`<p style="color:var(--text-faint);font-style:italic;">No shift notes yet.</p>`;
+}
+
+async function addShiftNote(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={outlet:f.outlet.value,staff:currentUser?currentUser.name:'Staff',note:f.note.value.trim(),priority:f.priority.value};
+  if(!payload.note)return;
+  const rec={id:uid('n'),time:now(),...payload};
+  try{const r=await fetch('/api/shift-notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const j=await r.json();if(j.success)DB.shiftNotes.push(j.data);}catch(e){DB.shiftNotes.push(rec);}
+  if(typeof firestoreAddShiftNote==='function') firestoreAddShiftNote({...payload,time:now()});
+  saveToLocal();renderShiftNotes();renderDashboard();toast('Shift note published.');f.reset();
+}
+
+// ══════════════════════════════════════════════════════════
+//  PRESENCE
+// ══════════════════════════════════════════════════════════
+function renderPresence(){
+  const sc=scopedOutlet();
+  const rows=DB.presence.filter(p=>!sc||p.outlet===sc).slice().reverse();
+  document.getElementById('presenceTable').innerHTML=rows.length?rows.map(p=>`<tr><td class="mono">${esc(p.time)}</td><td>${esc(p.outlet)}</td><td>${esc(p.worker)}</td><td class="mono">${p.confidence}%</td><td>${p.status==='confirmed'?badge('safe','Confirmed'):badge('warn','Review')}</td></tr>`).join(''):`<tr><td colspan="5" style="color:var(--text-faint);">No events.</td></tr>`;
+  document.getElementById('cameraTable').innerHTML=(DB.cameras||[]).filter(c=>!sc||c.outlet===sc).map(c=>`<tr><td class="mono">${esc(c.name)}</td><td>${esc(c.outlet)}</td><td>${c.status==='online'?badge('safe','Online'):badge('danger','Offline')}</td></tr>`).join('')||`<tr><td colspan="3" style="color:var(--text-faint);">No cameras registered.</td></tr>`;
+}
+
+async function simulateMatch(){
+  const sc=scopedOutlet();
+  const pool=DB.staff.filter(s=>(!sc||s.outlet===sc)&&s.consent==='enrolled');
+  if(!pool.length){toast('No enrolled staff found.','warn');return;}
+  const worker=pool[Math.floor(Math.random()*pool.length)];
+  const confidence=Math.floor(75+Math.random()*24);
+  const payload={outlet:worker.outlet,worker:worker.name,confidence,status:confidence>=85?'confirmed':'review'};
+  const rec={id:uid('p'),time:now(),...payload};
+  try{const r=await fetch('/api/presence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const j=await r.json();if(j.success)DB.presence.push(j.data);}catch(e){DB.presence.push(rec);}
+  saveToLocal();renderPresence();toast(`AI Match: ${worker.name} (${confidence}%)`);
+}
+
+function manualClockIn(){
+  if(!currentUser)return;
+  const rec={id:uid('p'),time:now(),outlet:currentUser.outlet,worker:currentUser.name,confidence:100,status:'confirmed'};
+  DB.presence.push(rec);saveToLocal();renderPresence();toast(`${currentUser.name} clocked in.`);
+}
+
+// ══════════════════════════════════════════════════════════
+//  COMPLIANCE
+// ══════════════════════════════════════════════════════════
+function renderCompliance(){
+  const c=DB.compliance||{};
+  document.getElementById('complianceStatusCards').innerHTML=`
+    <div class="stat-card"><div class="n ${c.dpcRegistered?'safe':'danger'}">${c.dpcRegistered?'Registered':'Pending'}</div><div class="l">DPC Status</div></div>
+    <div class="stat-card"><div class="n ${c.dpiaComplete?'safe':'warn'}">${c.dpiaComplete?'Complete':'In Progress'}</div><div class="l">DPIA Compliance</div></div>
+    <div class="stat-card"><div class="n">${DB.staff.filter(s=>s.consent==='enrolled').length}</div><div class="l">Enrolled Staff</div></div>
+    <div class="stat-card"><div class="n ${DB.dsRequests.some(r=>r.status==='open')?'warn':'safe'}">${DB.dsRequests.filter(r=>r.status==='open').length}</div><div class="l">Open DS Requests</div></div>
+  `;
+  const ri=document.getElementById('retentionRawDays');if(ri)ri.value=c.rawVideoRetentionDays||30;
+  const rm=document.getElementById('retentionMetaDays');if(rm)rm.value=c.matchMetadataRetentionDays||180;
+  const rows=DB.dsRequests.slice().reverse();
+  document.getElementById('dsRequestTable').innerHTML=rows.length?rows.map(r=>`<tr><td class="mono">${esc(r.time)}</td><td>${esc(r.staff)}</td><td>${esc(r.type)}</td><td>${esc(r.note)}</td><td>${r.status==='resolved'?badge('safe','Resolved'):badge('warn','Open')}</td><td style="text-align:right;">${r.status==='open'?`<button class="btn btn-ghost btn-sm" onclick="resolveRequest('${r.id}')">Resolve</button>`:''}</td></tr>`).join(''):`<tr><td colspan="6" style="color:var(--text-faint);">No requests.</td></tr>`;
+}
+
+async function saveRetention(ev){
+  ev.preventDefault();
+  const rawVideoRetentionDays=document.getElementById('retentionRawDays').value;
+  const matchMetadataRetentionDays=document.getElementById('retentionMetaDays').value;
+  try{await fetch('/api/compliance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rawVideoRetentionDays,matchMetadataRetentionDays})});}catch(e){}
+  DB.compliance.rawVideoRetentionDays=rawVideoRetentionDays;DB.compliance.matchMetadataRetentionDays=matchMetadataRetentionDays;
+  saveToLocal();renderCompliance();toast('Retention policy updated.');
+}
+
+async function addDsRequest(ev){
+  ev.preventDefault();const f=ev.target;
+  const payload={staff:f.staff.value.trim(),type:f.type.value,note:f.note.value.trim()};
+  const rec={id:uid('r'),time:now(),status:'open',...payload};
+  try{const r=await fetch('/api/ds-requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const j=await r.json();if(j.success)DB.dsRequests.push(j.data);}catch(e){DB.dsRequests.push(rec);}
+  saveToLocal();renderCompliance();toast('Request submitted.');f.reset();
+}
+
+function resolveRequest(id){
+  const r=DB.dsRequests.find(x=>x.id===id);if(r)r.status='resolved';
+  saveToLocal();renderCompliance();toast('Request resolved.');
+}
+
+// ══════════════════════════════════════════════════════════
+//  LICENCES
+// ══════════════════════════════════════════════════════════
+function renderLicences(){
+  const sc=scopedOutlet();
+  const los=document.getElementById('licenceOutletSelect');if(los)los.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
+
+  // Alert cards for expiring soon
+  const expiring=DB.licences.filter(l=>{const d=daysUntil(l.expiryDate);return d<=90&&d>=0;}).sort((a,b)=>daysUntil(a.expiryDate)-daysUntil(b.expiryDate));
+  const lac=document.getElementById('licenceAlertCards');
+  if(lac){
+    if(!expiring.length){lac.innerHTML=`<div class="lic-alert green"><div class="days">✅</div><div class="name">All Licences Clear</div><div class="sub">No licences expiring within 90 days.</div></div>`;lac.style.gridTemplateColumns='1fr';}
+    else{lac.style.gridTemplateColumns='';lac.innerHTML=expiring.map(l=>{const d=daysUntil(l.expiryDate);const cls=d<30?'red':d<60?'amber':'green';return `<div class="lic-alert ${cls}"><div class="days">${d} days</div><div class="name">${esc(l.type)}</div><div class="sub">${esc(l.outlet)} · Expires ${esc(l.expiryDate)}</div></div>`;}).join('');}
   }
-  return row;
+
+  const tb=document.getElementById('licenceTable');
+  if(tb)tb.innerHTML=DB.licences.filter(l=>!sc||l.outlet===sc).map(l=>{
+    const days=daysUntil(l.expiryDate);
+    const statusK=days<0?'danger':days<30?'danger':days<90?'warn':'safe';
+    const statusL=days<0?'Expired':days<30?'Expiring Soon':days<90?'Renew Soon':'Valid';
+    return `<tr style="${days<30&&days>=0?'background:var(--danger-pale);':days<90&&days>=0?'background:var(--warn-pale);':''}"><td style="font-weight:600;">${esc(l.type)}</td><td class="mono">${esc(l.number||'—')}</td><td>${esc(l.issuer||'—')}</td><td>${esc(l.outlet)}</td><td class="mono">${esc(l.issueDate||'—')}</td><td class="mono">${esc(l.expiryDate)}</td><td class="mono" style="font-weight:700;color:${days<30?'var(--danger)':days<90?'var(--warn)':'var(--safe)'}">${days<0?'EXPIRED':days}</td><td>${badge(statusK,statusL)}</td></tr>`;}).join('')||`<tr><td colspan="8" style="color:var(--text-faint);">No licences registered.</td></tr>`;
 }
-function applyPurchasePreset(item, price) {
-  const itemInput = document.getElementById('purchaseItem');
-  const priceInput = document.getElementById('purchaseUnitPrice');
-  if (itemInput) itemInput.value = item;
-  if (priceInput) priceInput.value = price;
-  updatePurchaseAmount();
+
+async function addLicence(ev){
+  ev.preventDefault();const f=ev.target;
+  const rec={id:uid('l'),type:f.type.value,number:f.number.value.trim(),issuer:f.issuer.value.trim(),outlet:f.outlet.value,issueDate:f.issueDate.value,expiryDate:f.expiryDate.value,notes:f.notes.value.trim()};
+  DB.licences.push(rec);if(typeof firestoreAddLicence==='function') firestoreAddLicence(rec);
+  saveToLocal();renderLicences();renderAlerts();updateAlertBadge();toast('Licence registered.');f.reset();
 }
-function initPurchaseQuickActions() {
-  const container = document.getElementById('purchaseQuickActions');
-  if (!container) return;
-  container.innerHTML = '';
-  PRODUCT_PRESETS.forEach(p => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'btn btn-ghost btn-sm';
-    button.textContent = `${p.label} — GH₵${p.price}`;
-    button.addEventListener('click', () => applyPurchasePreset(p.label, p.price));
-    container.appendChild(button);
+
+// ══════════════════════════════════════════════════════════
+//  REPORTS
+// ══════════════════════════════════════════════════════════
+function setReportRange(r){
+  reportRange=r;
+  document.querySelectorAll('#reportDateBtns button').forEach(b=>b.classList.toggle('active',b.dataset.range===r));
+  renderReports();
+}
+
+function renderReports(){
+  const sc=scopedOutlet();
+  const purchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),reportRange);
+  const rows=OUTLETS.map(o=>{
+    const inv=DB.inventory.filter(i=>i.outlet===o);
+    const rev=purchases.filter(p=>p.outlet===o).reduce((a,b)=>a+(Number(b.amount)||0),0);
+    const dels=DB.deliveries.filter(d=>d.outlet===o).length;
+    const ok=inv.filter(i=>i.status==='ok').length;
+    const passed=DB.inspections.filter(i=>i.outlet===o&&i.result==='pass').length;
+    const overdue=DB.inspections.filter(i=>i.outlet===o&&i.result==='overdue').length;
+    return{o,rev,dels,ok,passed,overdue};
   });
-}
-function gaugeSVG(pct, color) {
-  const r = 30, c = 2 * Math.PI * r;
-  const offset = c - (Math.min(100, Math.max(0, pct)) / 100) * c;
-  return `<svg viewBox="0 0 74 74">
-    <circle cx="37" cy="37" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
-    <circle cx="37" cy="37" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"
-      stroke-dasharray="${c}" stroke-dashoffset="${offset}" transform="rotate(-90 37 37)"/>
-  </svg>`;
-}
-function scopedOutlet() {
-  return currentUser && currentUser.role !== "Owner / Head Office" ? currentUser.outlet : null;
+  document.getElementById('reportsTable').innerHTML=rows.map(r=>`<tr><td style="font-weight:700;color:#fff;">${r.o}</td><td class="mono">${gh(r.rev)}</td><td class="mono">${r.dels}</td><td>${badge('safe',r.ok+' OK')}</td><td class="mono">${r.passed}</td><td>${r.overdue?badge('danger',r.overdue+' overdue'):badge('safe','0')}</td></tr>`).join('');
+  setTimeout(()=>renderReportCharts(),80);
 }
 
-// Fetch DB State from Backend (Netlify Function / Firebase fallback)
-async function fetchDatabase() {
-  try {
-    const res = await fetch('/api/data');
-    if (res.ok) {
-      const json = await res.json();
-      if (json.success && json.data) {
-        DB = { ...getDefaultDbState(), ...DB, ...json.data };
-        renderAll();
-        document.querySelectorAll('.db-indicator').forEach(el => {
-          el.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> 🔗 Live Backend Active';
-        });
-        return;
-      }
-    }
-  } catch (err) {
-    console.warn("Live API unavailable, trying Firebase fallback:", err);
+function renderReportCharts(){
+  const sc=scopedOutlet();
+  const purchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),reportRange);
+  const byStation=OUTLETS.map(o=>purchases.filter(p=>p.outlet===o).reduce((a,b)=>a+(Number(b.amount)||0),0));
+  makeChart('reportStationChart','bar',OUTLETS,[{label:'Revenue (GH₵)',data:byStation,backgroundColor:'rgba(142,27,44,0.7)',borderColor:'#a8283a',borderWidth:1,borderRadius:6}]);
+
+  // Weekly trend
+  const weeks=[];const weeklyRev=[];
+  for(let i=7;i>=0;i--){
+    const start=new Date();start.setDate(start.getDate()-i*7);const end=new Date(start);end.setDate(end.getDate()+7);
+    const label=start.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    const rev=DB.purchases.filter(p=>{const d=new Date(p.time||p.date);return d>=start&&d<end;}).reduce((a,b)=>a+(Number(b.amount)||0),0);
+    weeks.push(label);weeklyRev.push(rev);
   }
-
-  if (typeof syncFirestoreData === 'function') {
-    const synced = await syncFirestoreData((remoteData) => {
-      DB = { ...getDefaultDbState(), ...DB, ...remoteData };
-      renderAll();
-    });
-    if (synced) {
-      document.querySelectorAll('.db-indicator').forEach(el => {
-        el.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> 🔥 Firebase Cloud Active';
-      });
-      return;
-    }
-  }
+  makeChart('reportTrendChart','line',weeks,[{label:'Revenue (GH₵)',data:weeklyRev,borderColor:'var(--gold)',backgroundColor:'rgba(199,154,61,0.15)',borderWidth:2,fill:true,tension:0.4,pointBackgroundColor:'var(--gold)'}]);
 }
 
-// Navigation
-function showView(id) {
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  document.querySelectorAll(".navlist button").forEach(b => b.classList.remove("active"));
-  const targetView = document.getElementById("view-" + id);
-  if (targetView) targetView.classList.add("active");
-  const targetBtn = document.querySelector(`.navlist button[data-view="${id}"]`);
-  if (targetBtn) targetBtn.classList.add("active");
+function exportReportCSV(){
+  const sc=scopedOutlet();
+  const purchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),reportRange);
+  exportCSV(purchases,`triple_a_gas_report_${reportRange}.csv`);
 }
 
-// Render Dashboard
-function renderDashboard() {
-  const scope = scopedOutlet();
-  const inv = DB.inventory.filter(i => !scope || i.outlet === scope);
-  const totalCyl = inv.reduce((a, b) => a + b.qty, 0);
-  const lowCount = inv.filter(i => i.status === "low" || i.status === "critical").length;
-  const dueInspections = DB.inspections.filter(i => (!scope || i.outlet === scope) && i.result !== "pass").length;
-  const overdue = DB.inspections.filter(i => (!scope || i.outlet === scope) && i.result === "overdue").length;
-  const deliveriesToday = DB.deliveries.filter(d => !scope || d.outlet === scope).length;
-
-  document.getElementById("dashStats").innerHTML = `
-    <div class="stat-card"><div class="n">${totalCyl}</div><div class="l">Cylinders in stock${scope ? "" : " (all outlets)"}</div></div>
-    <div class="stat-card"><div class="n ${lowCount ? "warn" : "safe"}">${lowCount}</div><div class="l">Low / critical stock lines</div></div>
-    <div class="stat-card"><div class="n ${overdue ? "danger" : "safe"}">${dueInspections}</div><div class="l">Inspections due or overdue</div></div>
-    <div class="stat-card"><div class="n safe">${deliveriesToday}</div><div class="l">Deliveries logged</div></div>
-  `;
-
-  const compliance = DB.inspections.length ? Math.round(100 * (DB.inspections.filter(i => i.result === "pass").length / DB.inspections.length)) : 100;
-  const stockHealth = inv.length ? Math.round(100 * (inv.filter(i => i.status === "ok").length / Math.max(1, inv.length))) : 100;
-
-  document.getElementById("dashGauges").innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div class="gauge">${gaugeSVG(stockHealth, stockHealth > 60 ? "var(--safe)" : "var(--warn)")}<div class="gauge-val">${stockHealth}%</div></div>
-      <div><b style="display:block;font-size:14px;color:#fff;">Stock Health</b><span style="font-size:12px;color:var(--text-dim);">Lines at healthy stock levels</span></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div class="gauge">${gaugeSVG(compliance, compliance > 60 ? "var(--safe)" : "var(--danger)")}<div class="gauge-val">${compliance}%</div></div>
-      <div><b style="display:block;font-size:14px;color:#fff;">Inspection Compliance</b><span style="font-size:12px;color:var(--text-dim);">Passed safety inspections</span></div>
-    </div>
-  `;
-
-  const feedItems = [
-    ...DB.deliveries.map(d => ({ time: (d.time || '').slice(11), kind: "safe", text: `Delivery — ${d.size} ×${d.qty} to ${esc(d.customer)} (${d.outlet})`, outlet: d.outlet })),
-    ...DB.inspections.map(i => ({ time: (i.time || '').slice(11), kind: i.result === "pass" ? "safe" : i.result === "overdue" ? "danger" : "warn", text: `Inspection — ${esc(i.item)} (${i.outlet})`, outlet: i.outlet })),
-    ...DB.shiftNotes.map(n => ({ time: (n.time || '').slice(11), kind: "neutral", text: `Shift note — ${esc((n.note || '').slice(0, 50))}${n.note.length > 50 ? "…" : ""} (${n.outlet})`, outlet: n.outlet })),
-    ...DB.purchases.map(p => ({ time: (p.time || '').slice(11), kind: "safe", text: `Purchase — ${esc(p.item)} ×${p.qty} for GH₵${Number(p.amount || 0).toFixed(2)} (${p.outlet})`, outlet: p.outlet }))
-  ].filter(x => !scope || x.outlet === scope)
-   .sort((a, b) => b.time.localeCompare(a.time)).slice(0, 6);
-
-  document.getElementById("dashFeed").innerHTML = feedItems.length
-    ? feedItems.map(f => `<li style="display:flex;align-items:center;gap:10px;"><span class="mono" style="color:var(--text-faint);font-size:11px;">${f.time}</span><span style="width:8px;height:8px;border-radius:50%;background:${f.kind==='safe'?'var(--safe)':f.kind==='warn'?'var(--warn)':'var(--danger)'}"></span><span>${f.text}</span></li>`).join("")
-    : `<li style="color:var(--text-faint);">No recent operations logged.</li>`;
+// ══════════════════════════════════════════════════════════
+//  RENDER ALL
+// ══════════════════════════════════════════════════════════
+function renderAll(){
+  renderDashboard();renderDeliveries();renderInventory();
+  renderInspections();renderShiftNotes();renderStaff();
+  renderPresence();renderCompliance();renderPurchases();renderReports();
+  renderFleet();renderCustomers();renderSuppliers();renderPayroll();
+  renderLicences();renderAlerts();renderFinance();renderPricing();
 }
 
-// Deliveries
-function renderDeliveries() {
-  const scope = scopedOutlet();
-  const rows = DB.deliveries.filter(d => !scope || d.outlet === scope).slice().reverse();
-  document.getElementById("deliveryTable").innerHTML = rows.length ? rows.map(d => `
-    <tr>
-      <td class="mono">${esc(d.time)}</td>
-      <td>${esc(d.outlet)}</td>
-      <td>${esc(d.driver)}</td>
-      <td>${esc(d.size)} &times; ${d.qty}</td>
-      <td>${esc(d.customer)}</td>
-      <td>${d.status === "done" ? badge("safe", "Done") : badge("warn", "In Transit")}</td>
-    </tr>`).join("") : `<tr><td colspan="6" style="color:var(--text-faint);">No deliveries recorded yet.</td></tr>`;
-  document.getElementById("deliveryOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
-  document.getElementById("deliverySizeSelect").innerHTML = optionList(SIZES);
-}
+// ══════════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════════
+function doLogin(){
+  const name=document.getElementById('loginName').value.trim()||'Staff User';
+  const role=document.getElementById('loginRole').value;
+  const outlet=document.getElementById('loginOutlet').value;
+  currentUser={name,role,outlet};
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('shell').style.display='flex';
+  document.getElementById('ctxName').textContent=name;
+  document.getElementById('ctxOutlet').textContent=role==='Owner / Head Office'||role==='COO'?'All Outlets':outlet;
+  document.getElementById('ctxRole').textContent=role;
 
-async function addDelivery(ev) {
-  ev.preventDefault();
-  const f = ev.target;
-  const payload = {
-    outlet: f.outlet.value, driver: f.driver.value.trim() || (currentUser ? currentUser.name : "Staff"),
-    size: f.size.value, qty: parseInt(f.qty.value) || 1, customer: f.customer.value.trim() || "Walk-in", status: f.status.value
-  };
+  // Update restrict labels
+  const restricted=!isFinanceRole();
+  ['financeRestrict','pricingRestrict','payrollRestrict'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=restricted?'🔒':'';});
 
-  try {
-    const res = await fetch('/api/deliveries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) {
-      DB.deliveries.push(json.data);
-      toast("Delivery saved to SQLite database.");
-    }
-  } catch (err) {
-    DB.deliveries.push({ id: `d_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload });
-    toast("Delivery logged (local).");
-  }
-  f.reset();
-  renderDeliveries(); renderDashboard();
-}
-
-// Inventory
-function renderInventory() {
-  const scope = scopedOutlet();
-  const rows = DB.inventory.filter(i => !scope || i.outlet === scope);
-  document.getElementById("inventoryTable").innerHTML = rows.length ? rows.map(i => `
-    <tr>
-      <td>${esc(i.outlet)}</td>
-      <td>${esc(i.size)}</td>
-      <td class="mono" style="font-weight:700;font-size:16px;">${i.qty}</td>
-      <td>${i.status==='ok'?badge('safe','OK'):i.status==='low'?badge('warn','Low'):badge('danger','Critical')}</td>
-      <td style="text-align:right;">
-        <button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',-1)">&minus;</button>
-        <button class="btn btn-ghost btn-sm" onclick="adjustStock('${i.outlet}','${i.size}',1)">+</button>
-      </td>
-    </tr>`).join("") : `<tr><td colspan="5">No inventory rows.</td></tr>`;
-}
-
-async function adjustStock(outlet, size, delta) {
-  try {
-    const res = await fetch('/api/inventory/adjust', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ outlet, size, delta }) });
-    const json = await res.json();
-    if (json.success) {
-      const idx = DB.inventory.findIndex(i => i.outlet === outlet && i.size === size);
-      if (idx !== -1) DB.inventory[idx] = json.data;
-      toast("Stock updated in SQLite database.");
-    }
-  } catch (err) {
-    const row = DB.inventory.find(i => i.outlet === outlet && i.size === size);
-    if (row) { row.qty = Math.max(0, row.qty + delta); row.status = row.qty <= 5 ? "critical" : row.qty <= 12 ? "low" : "ok"; }
-    toast("Stock adjusted.");
-  }
-  renderInventory(); renderDashboard();
-}
-
-// Inspections
-function renderInspections() {
-  const scope = scopedOutlet();
-  const rows = DB.inspections.filter(i => !scope || i.outlet === scope).slice().reverse();
-  document.getElementById("inspectionTable").innerHTML = rows.length ? rows.map(i => `
-    <tr>
-      <td class="mono">${esc(i.time)}</td>
-      <td>${esc(i.outlet)}</td>
-      <td>${esc(i.item)}</td>
-      <td>${esc(i.inspector)}</td>
-      <td>${i.result==='pass'?badge('safe','Pass'):i.result==='due'?badge('warn','Due'):badge('danger','Overdue')}</td>
-      <td class="mono">${esc(i.nextDue)}</td>
-    </tr>`).join("") : `<tr><td colspan="6">No inspections logged.</td></tr>`;
-  document.getElementById("inspectionOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
-}
-
-async function addInspection(ev) {
-  ev.preventDefault();
-  const f = ev.target;
-  const payload = { outlet: f.outlet.value, item: f.item.value.trim(), inspector: f.inspector.value.trim() || (currentUser ? currentUser.name : "Staff"), result: f.result.value, nextDue: f.nextDue.value || "—" };
-
-  try {
-    const res = await fetch('/api/inspections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) { DB.inspections.push(json.data); toast("Inspection recorded."); }
-  } catch (err) {
-    DB.inspections.push({ id: `i_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload });
-    toast("Inspection logged.");
-  }
-  f.reset();
-  renderInspections(); renderDashboard();
-}
-
-// Shift Notes
-function renderShiftNotes() {
-  const scope = scopedOutlet();
-  const rows = DB.shiftNotes.filter(n => !scope || n.outlet === scope).slice().reverse();
-  document.getElementById("shiftNoteList").innerHTML = rows.length ? rows.map(n => `
-    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-faint);margin-bottom:8px;">
-        <span class="mono">${esc(n.time)} &middot; ${esc(n.outlet)}</span>
-        <span>${esc(n.staff)}</span>
-      </div>
-      <div style="font-size:14px;color:var(--text);">${esc(n.note)}</div>
-    </div>`).join("") : `<p style="color:var(--text-faint);font-style:italic;">No shift notes yet.</p>`;
-  document.getElementById("shiftOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
-}
-
-async function addShiftNote(ev) {
-  ev.preventDefault();
-  const f = ev.target;
-  const payload = { outlet: f.outlet.value, staff: currentUser ? currentUser.name : "Staff", note: f.note.value.trim() };
-  if (!payload.note) return;
-
-  try {
-    const res = await fetch('/api/shift-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) { DB.shiftNotes.push(json.data); toast("Shift note saved."); }
-  } catch (err) {
-    DB.shiftNotes.push({ id: `n_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload });
-    toast("Shift note saved.");
-  }
-  f.reset();
-  renderShiftNotes(); renderDashboard();
-}
-
-// Staff
-function renderStaff() {
-  const scope = scopedOutlet();
-  const rows = DB.staff.filter(s => !scope || s.outlet === scope);
-  document.getElementById("staffTable").innerHTML = rows.length ? rows.map(s => `
-    <tr>
-      <td style="font-weight:600;color:#fff;">${esc(s.name)}</td>
-      <td>${esc(s.role)}</td>
-      <td>${esc(s.outlet)}</td>
-      <td>${s.consent==='enrolled'?badge('safe','Enrolled'):badge('neutral',s.consent)}</td>
-    </tr>`).join("") : `<tr><td colspan="4">No staff members.</td></tr>`;
-  document.getElementById("staffOutletSelect").innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
-}
-
-async function addStaff(ev) {
-  ev.preventDefault();
-  const f = ev.target;
-  const payload = { name: f.name.value.trim(), role: f.role.value, outlet: f.outlet.value, consent: f.consent.value };
-  try {
-    const res = await fetch('/api/staff', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) { DB.staff.push(json.data); toast("Staff member added."); }
-  } catch (err) {
-    DB.staff.push({ id: `s_${Date.now()}`, ...payload }); toast("Staff member added.");
-  }
-  f.reset();
-  renderStaff();
-}
-
-// Presence
-function renderPresence() {
-  const scope = scopedOutlet();
-  const rows = DB.presence.filter(p => !scope || p.outlet === scope).slice().reverse();
-  document.getElementById("presenceTable").innerHTML = rows.length ? rows.map(p => `
-    <tr>
-      <td class="mono">${esc(p.time)}</td>
-      <td>${esc(p.outlet)}</td>
-      <td>${esc(p.worker)}</td>
-      <td class="mono">${p.confidence}%</td>
-      <td>${p.status==='confirmed'?badge('safe','Confirmed'):badge('warn','Review')}</td>
-    </tr>`).join("") : `<tr><td colspan="5">No presence events.</td></tr>`;
-
-  document.getElementById("cameraTable").innerHTML = (DB.cameras || []).filter(c => !scope || c.outlet === scope).map(c => `
-    <tr>
-      <td class="mono">${esc(c.name)}</td>
-      <td>${esc(c.outlet)}</td>
-      <td>${c.status==='online'?badge('safe','Online'):badge('danger','Offline')}</td>
-    </tr>`).join("");
-}
-
-async function simulateMatch() {
-  const scope = scopedOutlet();
-  const pool = DB.staff.filter(s => (!scope || s.outlet === scope) && s.consent === "enrolled");
-  if (!pool.length) { toast("No enrolled staff found.", "warn"); return; }
-  const worker = pool[Math.floor(Math.random() * pool.length)];
-  const confidence = Math.floor(75 + Math.random() * 24);
-  const payload = { outlet: worker.outlet, worker: worker.name, confidence, status: confidence >= 85 ? "confirmed" : "review" };
-
-  try {
-    const res = await fetch('/api/presence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) { DB.presence.push(json.data); toast(`Simulated match: ${worker.name} (${confidence}%).`); }
-  } catch (err) {
-    DB.presence.push({ id: `p_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload });
-    toast(`Simulated match: ${worker.name}.`);
-  }
-  renderPresence();
-}
-
-// Compliance
-function renderCompliance() {
-  const c = DB.compliance || {};
-  document.getElementById("complianceStatusCards").innerHTML = `
-    <div class="stat-card"><div class="n ${c.dpcRegistered ? 'safe' : 'danger'}">${c.dpcRegistered ? 'Registered' : 'Pending'}</div><div class="l">DPC Status (${c.dpcRegNo || 'GH'})</div></div>
-    <div class="stat-card"><div class="n ${c.dpiaComplete ? 'safe' : 'warn'}">${c.dpiaComplete ? 'Complete' : 'In Progress'}</div><div class="l">DPIA Compliance</div></div>
-    <div class="stat-card"><div class="n">${DB.staff.filter(s => s.consent === 'enrolled').length}</div><div class="l">Enrolled Staff</div></div>
-    <div class="stat-card"><div class="n ${DB.dsRequests.some(r => r.status === 'open') ? 'warn' : 'safe'}">${DB.dsRequests.filter(r => r.status === 'open').length}</div><div class="l">Open Requests</div></div>
-  `;
-
-  document.getElementById("retentionRawDays").value = c.rawVideoRetentionDays || 30;
-  document.getElementById("retentionMetaDays").value = c.matchMetadataRetentionDays || 180;
-
-  const rows = DB.dsRequests.slice().reverse();
-  document.getElementById("dsRequestTable").innerHTML = rows.length ? rows.map(r => `
-    <tr>
-      <td class="mono">${esc(r.time)}</td>
-      <td>${esc(r.staff)}</td>
-      <td>${esc(r.type)}</td>
-      <td>${esc(r.note)}</td>
-      <td>${r.status==='resolved'?badge('safe','Resolved'):badge('warn','Open')}</td>
-      <td style="text-align:right;">${r.status === 'open' ? `<button class="btn btn-ghost btn-sm" onclick="resolveRequest('${r.id}')">Resolve</button>` : ''}</td>
-    </tr>`).join("") : `<tr><td colspan="6">No requests logged.</td></tr>`;
-}
-
-async function saveRetention(ev) {
-  ev.preventDefault();
-  const rawVideoRetentionDays = document.getElementById("retentionRawDays").value;
-  const matchMetadataRetentionDays = document.getElementById("retentionMetaDays").value;
-
-  try {
-    const res = await fetch('/api/compliance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ rawVideoRetentionDays, matchMetadataRetentionDays }) });
-    const json = await res.json();
-    if (json.success) { DB.compliance = json.data; toast("Retention settings saved."); }
-  } catch (err) {
-    DB.compliance.rawVideoRetentionDays = rawVideoRetentionDays;
-    DB.compliance.matchMetadataRetentionDays = matchMetadataRetentionDays;
-    toast("Settings updated.");
-  }
-  renderCompliance();
-}
-
-async function addDsRequest(ev) {
-  ev.preventDefault();
-  const f = ev.target;
-  const payload = { staff: f.staff.value.trim(), type: f.type.value, note: f.note.value.trim() };
-  try {
-    const res = await fetch('/api/ds-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) { DB.dsRequests.push(json.data); toast("Data Subject Request submitted."); }
-  } catch (err) {
-    DB.dsRequests.push({ id: `r_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), status: 'open', ...payload });
-    toast("Request submitted.");
-  }
-  f.reset();
-  renderCompliance();
-}
-
-async function resolveRequest(id) {
-  try {
-    const res = await fetch(`/api/ds-requests/${id}/resolve`, { method: 'PATCH' });
-    const json = await res.json();
-    if (json.success) {
-      const r = DB.dsRequests.find(x => x.id === id);
-      if (r) r.status = "resolved";
-      toast("Request resolved.");
-    }
-  } catch (err) {
-    const r = DB.dsRequests.find(x => x.id === id);
-    if (r) r.status = "resolved";
-    toast("Request resolved.");
-  }
-  renderCompliance();
-}
-
-// Cashier Purchases
-function renderPurchases() {
-  const scope = scopedOutlet();
-  const rows = DB.purchases.filter(p => !scope || p.outlet === scope).slice().reverse();
-  document.getElementById("purchaseTable").innerHTML = rows.length ? rows.map(p => `
-    <tr>
-      <td class="mono">${esc(p.time)}</td>
-      <td>${esc(p.outlet)}</td>
-      <td>${esc(p.cashier)}</td>
-      <td>${esc(p.customer)}</td>
-      <td>${esc(p.item)}</td>
-      <td class="mono">${p.qty}</td>
-      <td class="mono">GH₵${Number(p.amount || 0).toFixed(2)}</td>
-      <td>${esc(p.paymentMethod || 'cash')}</td>
-      <td>${esc(p.notes || '—')}</td>
-    </tr>`).join("") : `<tr><td colspan="9" style="color:var(--text-faint);">No purchases logged yet.</td></tr>`;
-
-  const outletSelect = document.getElementById("purchaseOutletSelect");
-  if (outletSelect) outletSelect.innerHTML = optionList(OUTLETS, scope || OUTLETS[0]);
-
-  const cashierInput = document.querySelector('#purchaseForm input[name="cashier"]');
-  if (cashierInput && currentUser && !cashierInput.value) {
-    cashierInput.value = currentUser.name;
-  }
-  updatePurchaseAmount();
-}
-
-async function addPurchase(ev) {
-  ev.preventDefault();
-  const f = ev.target;
-  const payload = {
-    outlet: f.outlet.value,
-    cashier: f.cashier.value.trim() || (currentUser ? currentUser.name : 'Staff'),
-    customer: f.customer.value.trim() || 'Walk-in',
-    item: f.item.value.trim(),
-    qty: parseInt(f.qty.value) || 1,
-    unitPrice: parseFloat(f.unitPrice.value) || 0,
-    paymentMethod: f.paymentMethod.value,
-    notes: f.notes.value.trim()
-  };
-  const matchedSize = resolvePurchaseSize(payload.item);
-
-  try {
-    const res = await fetch('/api/purchases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.success) {
-      DB.purchases.push(json.data);
-      if (json.inventoryUpdate) {
-        const idx = DB.inventory.findIndex(i => i.outlet === json.inventoryUpdate.outlet && i.size === json.inventoryUpdate.size);
-        if (idx !== -1) {
-          DB.inventory[idx] = json.inventoryUpdate;
-        } else {
-          DB.inventory.push(json.inventoryUpdate);
-        }
-        toast("Purchase logged and inventory updated.");
-      } else if (!matchedSize) {
-        toast("Purchase logged, but item size was not recognized for automatic inventory adjustment.", "warn");
-      } else {
-        toast("Purchase logged to the database.");
-      }
-    }
-  } catch (err) {
-    const localPurchase = { id: `pu_${Date.now()}`, time: new Date().toISOString().slice(0,16).replace('T',' '), ...payload, amount: parseFloat((payload.qty * payload.unitPrice).toFixed(2)) };
-    DB.purchases.push(localPurchase);
-    const updatedRow = decrementInventoryForPurchase(payload.outlet, payload.item, payload.qty);
-    if (updatedRow) {
-      toast("Purchase logged locally and inventory updated.");
-    } else if (!matchedSize) {
-      toast("Purchase logged locally, but item size was not recognized for automatic inventory adjustment.", "warn");
-    } else {
-      toast("Purchase logged locally.");
-    }
-  }
-
-  f.reset();
-  const defaultOutlet = scopedOutlet() || OUTLETS[0];
-  f.outlet.value = defaultOutlet;
-  if (currentUser) f.cashier.value = currentUser.name;
-  renderPurchases();
-  renderInventory();
-  renderDashboard();
-}
-
-// Reports
-function renderReports() {
-  const rows = OUTLETS.map(o => {
-    const inv = DB.inventory.filter(i => i.outlet === o);
-    const stock = inv.reduce((a, b) => a + b.qty, 0);
-    const lowLines = inv.filter(i => i.status !== "ok").length;
-    const deliveries = DB.deliveries.filter(d => d.outlet === o).length;
-    const overdue = DB.inspections.filter(i => i.outlet === o && i.result === "overdue").length;
-    return { o, stock, lowLines, deliveries, overdue };
-  });
-  document.getElementById("reportsTable").innerHTML = rows.map(r => `
-    <tr>
-      <td style="font-weight:700;color:#fff;">${r.o}</td>
-      <td class="mono">${r.stock}</td>
-      <td>${r.lowLines ? badge("warn", r.lowLines + " low lines") : badge("safe", "Healthy")}</td>
-      <td class="mono">${r.deliveries}</td>
-      <td>${r.overdue ? badge("danger", r.overdue + " overdue") : badge("safe", "0 overdue")}</td>
-    </tr>`).join("");
-}
-
-// Render All
-function renderAll() {
-  renderDashboard(); renderDeliveries(); renderInventory();
-  renderInspections(); renderShiftNotes(); renderStaff();
-  renderPresence(); renderCompliance(); renderPurchases(); renderReports();
-}
-
-// Auth & Init
-function doLogin() {
-  const name = document.getElementById("loginName").value.trim() || "Staff User";
-  const role = document.getElementById("loginRole").value;
-  const outlet = document.getElementById("loginOutlet").value;
-  currentUser = { name, role, outlet };
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("shell").style.display = "flex";
-  document.getElementById("ctxName").textContent = name;
-  document.getElementById("ctxOutlet").textContent = role === "Owner / Head Office" ? "All Outlets" : outlet;
-  document.getElementById("ctxRole").textContent = role;
-  renderAll();
-  showView("dashboard");
-}
-
-function logout() {
-  currentUser = null;
-  document.getElementById("shell").style.display = "none";
-  document.getElementById("loginScreen").style.display = "flex";
-}
-
-document.addEventListener("DOMContentLoaded", function () {
+  loadFromLocal();
   fetchDatabase();
-  document.getElementById("loginForm").addEventListener("submit", function (e) { e.preventDefault(); doLogin(); });
-  document.getElementById("deliveryForm").addEventListener("submit", addDelivery);
-  document.getElementById("inspectionForm").addEventListener("submit", addInspection);
-  document.getElementById("shiftNoteForm").addEventListener("submit", addShiftNote);
-  document.getElementById("purchaseForm").addEventListener("submit", addPurchase);
-  document.getElementById("purchaseQty").addEventListener("input", updatePurchaseAmount);
-  document.getElementById("purchaseUnitPrice").addEventListener("input", updatePurchaseAmount);
+  showView('dashboard');
   initPurchaseQuickActions();
-  document.getElementById("staffForm").addEventListener("submit", addStaff);
-  document.getElementById("retentionForm").addEventListener("submit", saveRetention);
-  document.getElementById("dsRequestForm").addEventListener("submit", addDsRequest);
-  document.getElementById("simulateMatchBtn").addEventListener("click", simulateMatch);
-  document.querySelectorAll(".navlist button[data-view]").forEach(btn => {
-    btn.addEventListener("click", () => showView(btn.dataset.view));
+  toast(`Welcome, ${name}!`);
+}
+
+function logout(){
+  currentUser=null;
+  document.getElementById('shell').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch(e){}});
+  chartInstances={};
+}
+
+// ══════════════════════════════════════════════════════════
+//  EVENT LISTENERS & INIT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',function(){
+  // Mobile sidebar
+  const menu=document.getElementById('menuBtn');
+  const overlay=document.getElementById('overlay');
+  const sidebar=document.getElementById('sidebar');
+  if(menu){menu.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});}
+  if(overlay){overlay.addEventListener('click',()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});}
+  window.addEventListener('resize',()=>{if(window.innerWidth>900){sidebar.classList.remove('open');overlay.classList.remove('show');}});
+
+  // Nav buttons
+  document.querySelectorAll('.navlist button[data-view]').forEach(btn=>{btn.addEventListener('click',()=>{showView(btn.dataset.view);if(window.innerWidth<=900){sidebar.classList.remove('open');overlay.classList.remove('show');}});});
+
+  // Auth
+  document.getElementById('loginForm').addEventListener('submit',ev=>{ev.preventDefault();doLogin();});
+  document.getElementById('logoutBtn').addEventListener('click',logout);
+
+  // Forms
+  document.getElementById('deliveryForm').addEventListener('submit',addDelivery);
+  document.getElementById('inspectionForm').addEventListener('submit',addInspection);
+  document.getElementById('shiftNoteForm').addEventListener('submit',addShiftNote);
+  document.getElementById('purchaseForm').addEventListener('submit',addPurchase);
+  document.getElementById('purchaseQty').addEventListener('input',updatePurchaseAmount);
+  document.getElementById('purchaseUnitPrice').addEventListener('input',updatePurchaseAmount);
+  document.getElementById('staffForm').addEventListener('submit',addStaff);
+  document.getElementById('retentionForm').addEventListener('submit',saveRetention);
+  document.getElementById('dsRequestForm').addEventListener('submit',addDsRequest);
+  document.getElementById('vehicleForm').addEventListener('submit',addVehicle);
+  document.getElementById('tripForm').addEventListener('submit',addTrip);
+  document.getElementById('maintenanceForm').addEventListener('submit',addMaintenance);
+  document.getElementById('customerForm').addEventListener('submit',addCustomer);
+  document.getElementById('orderForm').addEventListener('submit',addOrder);
+  document.getElementById('supplierForm').addEventListener('submit',addSupplier);
+  document.getElementById('poForm').addEventListener('submit',addPO);
+  document.getElementById('payrollForm').addEventListener('submit',addPayrollRecord);
+  document.getElementById('licenceForm').addEventListener('submit',addLicence);
+  document.getElementById('expenseForm').addEventListener('submit',addExpense);
+  document.getElementById('pricingForm').addEventListener('submit',savePricing);
+  document.getElementById('restockForm').addEventListener('submit',addRestock);
+
+  // Payroll net pay auto-calc
+  ['payBaseSalary','payDeductions'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',calcNetPay);});
+  const bonInput=document.querySelector('#payrollForm input[name="bonus"]');if(bonInput)bonInput.addEventListener('input',calcNetPay);
+
+  // Simulate match
+  document.getElementById('simulateMatchBtn').addEventListener('click',simulateMatch);
+  document.getElementById('manualClockInBtn').addEventListener('click',manualClockIn);
+
+  // PO total auto-calc
+  document.getElementById('poForm').addEventListener('input',()=>{
+    const qty=parseFloat(document.querySelector('#poForm input[name="qty"]')?.value)||0;
+    const uc=parseFloat(document.getElementById('poUnitCost')?.value)||0;
+    const el=document.getElementById('poTotal');if(el)el.textContent=`GH₵ ${(qty*uc).toFixed(2)}`;
   });
-  document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  // Delivery revenue auto-fill
+  document.getElementById('deliverySizeSelect')?.addEventListener('change',autoCalcDeliveryRevenue);
+  document.querySelector('#deliveryForm input[name="qty"]')?.addEventListener('input',autoCalcDeliveryRevenue);
+  document.getElementById('deliveryRevenue')?.addEventListener('input',()=>{const el=document.getElementById('deliveryRevenue');if(el)el._manuallyEdited=true;});
+
+  // Date range buttons
+  document.querySelectorAll('#financeDateBtns button').forEach(b=>b.dataset.range=b.getAttribute('onclick').match(/'([^']+)'/)?.[1]||'');
+  document.querySelectorAll('#reportDateBtns button').forEach(b=>b.dataset.range=b.getAttribute('onclick').match(/'([^']+)'/)?.[1]||'');
 });
 </script>
 </body>

@@ -4,138 +4,522 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Accra Station & Head Office | Triple A Gas</title>
-<meta name="description" content="Triple A Gas Accra — Head office, main refilling plant, autogas fueling, and commercial bulk LPG supply center in Greater Accra.">
+<meta name="description" content="Triple A Gas Accra — Head office, main refilling plant, autogas fueling, and commercial bulk LPG supply center in Greater Accra. Ghana's most trusted LPG provider since 2005.">
 <link rel="icon" href="images/offical_logo.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site-polish.css">
 <link rel="stylesheet" href="apple-design.css">
+<link rel="stylesheet" href="modern-pages.css">
+<!-- Firebase for live pricing -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-db.js"></script>
 <style>
-/* Apple Spec Custom Page Enhancements for Accra */
+/* ===== ACCRA PAGE LOCAL OVERRIDES ===== */
+:root {
+  --apple-wine:       #8E1B2C;
+  --apple-wine-500:   #A8283A;
+  --apple-wine-dark:  #3E0B14;
+  --apple-gold:       #C79A3D;
+  --apple-gold-pale:  #F8EFDB;
+  --apple-safe:       #2E7D32;
+  --apple-safe-pale:  #E4F1E5;
+  --apple-ink:        #171416;
+  --apple-text:       #221417;
+  --apple-text-secondary: #6B5458;
+  --apple-text-tertiary:  #9A8487;
+  --apple-bg:         #FAF6F7;
+  --apple-surface:    #FFFFFF;
+  --apple-border:     rgba(23,20,22,0.09);
+  --apple-shadow:     0 2px 18px rgba(23,20,22,0.08);
+  --apple-shadow-lg:  0 18px 52px rgba(23,20,22,0.14);
+  --font-display:     'Archivo Expanded', sans-serif;
+  --font-body:        'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:        'IBM Plex Mono', monospace;
+}
+
+/* ── Hero ── */
 .accra-hero {
   position: relative;
-  min-height: 520px;
-  background: radial-gradient(circle at 70% 30%, #3e0b14 0%, #150508 70%);
-  color: #ffffff;
+  min-height: 600px;
+  background: #0f0508;
+  color: #fff;
   display: flex;
   align-items: center;
   overflow: hidden;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-
-.accra-hero::before {
-  content: "";
+.accra-hero-bg {
   position: absolute;
   inset: 0;
   background-image: url('images/IMG-20260722-WA0001.jpg');
   background-size: cover;
-  background-position: center;
-  opacity: 0.28;
-  filter: contrast(1.1);
+  background-position: center 30%;
+  opacity: 0.32;
+  filter: contrast(1.08) saturate(1.1);
+  transform: scale(1.03);
 }
-
-.hero-glass-pill {
+.accra-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10,3,6,0.92) 0%, rgba(62,11,20,0.6) 55%, transparent 100%);
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 100px 0 70px;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 16px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--apple-gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.hero-glow {
+  width: 8px; height: 8px;
+  background: #4caf50;
+  border-radius: 50%;
+  box-shadow: 0 0 14px #4caf50, 0 0 4px #4caf50;
+  flex-shrink: 0;
+}
+.hero-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 6vw, 78px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #fff;
+  max-width: 780px;
+  margin: 0 0 20px;
+}
+.hero-h1 em { font-style: normal; color: var(--apple-gold); }
+.hero-sub {
+  font-size: 18px;
+  color: rgba(255,255,255,0.8);
+  max-width: 560px;
+  line-height: 1.65;
+  margin-bottom: 36px;
+}
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 56px;
+}
+.btn-hero-primary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.12);
+  padding: 14px 28px;
+  background: var(--apple-wine-500);
+  color: #fff;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.btn-hero-primary:hover { background: #c0304a; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(168,40,58,0.4); }
+.btn-hero-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  background: rgba(255,255,255,0.1);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 9999px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--apple-gold);
-  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
 }
+.btn-hero-ghost:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
 
-.hero-glow-dot {
-  width: 8px;
-  height: 8px;
-  background: var(--safe);
-  border-radius: 50%;
-  box-shadow: 0 0 12px var(--safe);
-}
-
-.telemetry-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  padding: 22px 26px;
+/* Telemetry bar */
+.tele-bar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 32px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 18px;
+  overflow: hidden;
+  max-width: 780px;
+  backdrop-filter: blur(20px);
 }
-
-.telemetry-item b {
+.tele-cell {
+  padding: 18px 22px;
+  background: rgba(0,0,0,0.2);
+}
+.tele-cell + .tele-cell { border-left: 1px solid rgba(255,255,255,0.1); }
+.tele-val {
   display: block;
   font-family: var(--font-mono);
-  font-size: 24px;
-  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+.tele-val.gold { color: var(--apple-gold); }
+.tele-val.green { color: #4caf50; }
+.tele-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.52);
+  margin-top: 5px;
 }
 
-.telemetry-item span {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+/* ── Shared section chrome ── */
+.section { padding: 96px 0; }
+.section-alt { background: var(--apple-surface); }
+.section-dark { background: var(--apple-ink); color: #fff; }
+
+/* eyebrow */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--apple-wine-500);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--apple-gold); flex-shrink: 0; }
+.eyebrow.light { color: rgba(255,255,255,0.7); }
+.eyebrow.light::before { background: var(--apple-gold); }
+
+.section-head { max-width: 660px; margin-bottom: 52px; }
+.section-head h2 { font-family: var(--font-display); font-size: clamp(30px, 4vw, 48px); color: var(--apple-ink); letter-spacing: -0.03em; margin-bottom: 14px; }
+.section-head p { font-size: 17px; color: var(--apple-text-secondary); margin: 0; }
+.section-head.center { max-width: 720px; margin-left: auto; margin-right: auto; text-align: center; }
+
+/* ── Bento Grid ── */
+.bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+.bento-card {
+  background: var(--apple-surface);
+  border: 1px solid var(--apple-border);
+  border-radius: 22px;
+  padding: 32px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s var(--ease, ease), box-shadow 0.3s var(--ease, ease);
+}
+.bento-card:hover { transform: translateY(-4px); box-shadow: 0 24px 56px rgba(23,20,22,0.12); }
+.bento-card h3 { font-family: var(--font-display); font-size: 21px; color: var(--apple-ink); letter-spacing: -0.02em; margin: 0 0 10px; }
+.bento-card p { font-size: 14.5px; color: var(--apple-text-secondary); margin: 0; line-height: 1.65; }
+
+.span-5  { grid-column: span 5; }
+.span-7  { grid-column: span 7; }
+.span-4  { grid-column: span 4; }
+.span-8  { grid-column: span 8; }
+.span-6  { grid-column: span 6; }
+.span-3  { grid-column: span 3; }
+.span-12 { grid-column: span 12; }
+
+.bento-card.dark  { background: var(--apple-ink); border-color: rgba(255,255,255,0.1); }
+.bento-card.dark h3 { color: #fff; }
+.bento-card.dark p  { color: rgba(255,255,255,0.65); }
+.bento-card.wine   { background: var(--apple-wine); border-color: transparent; }
+.bento-card.wine h3 { color: #fff; }
+.bento-card.wine p  { color: rgba(255,255,255,0.75); }
+.bento-card.gold-tint { background: var(--apple-gold-pale); border-color: rgba(199,154,61,0.25); }
+.bento-card.img-card { padding: 0; }
+.bento-card.img-card img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.badge-wine  { background: rgba(142,27,44,0.1); color: var(--apple-wine); border: 1px solid rgba(142,27,44,0.2); }
+.badge-gold  { background: var(--apple-gold-pale); color: #86600d; border: 1px solid rgba(199,154,61,0.3); }
+.badge-green { background: var(--apple-safe-pale); color: var(--apple-safe); border: 1px solid rgba(46,125,50,0.25); }
+.badge-mono  { background: rgba(23,20,22,0.06); color: var(--apple-text-secondary); border: 1px solid rgba(23,20,22,0.1); }
+
+/* ── Service Icons (SVG-free emoji approach) ── */
+.icon-box {
+  width: 48px; height: 48px;
+  background: rgba(142,27,44,0.08);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+.icon-box.gold-bg { background: var(--apple-gold-pale); }
+.icon-box.green-bg { background: var(--apple-safe-pale); }
+.icon-box.dark-bg { background: rgba(255,255,255,0.1); }
+
+/* ── Stat blocks ── */
+.stat-block { text-align: left; }
+.stat-block .val {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--apple-wine);
+  line-height: 1;
+  display: block;
+}
+.stat-block.light .val { color: var(--apple-gold); }
+.stat-block .label {
+  display: block;
+  font-size: 12px;
+  color: var(--apple-text-secondary);
+  margin-top: 6px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-family: var(--font-mono);
 }
+.stat-block.light .label { color: rgba(255,255,255,0.6); }
 
-.calculator-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(251,240,242,0.95)) !important;
-  border: 1px solid rgba(142, 27, 44, 0.15) !important;
-}
-
-.calc-btn-group {
-  display: flex;
-  gap: 8px;
-  margin: 16px 0;
-  flex-wrap: wrap;
-}
-
-.calc-btn {
-  padding: 10px 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.1);
-  background: #ffffff;
+/* ── Calculator ── */
+.calc-pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+.calc-pill {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(23,20,22,0.15);
+  background: #fff;
+  font-family: var(--font-body);
+  font-size: 13px;
   font-weight: 600;
-  font-size: 13.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
+  color: var(--apple-ink);
 }
-
-.calc-btn.active, .calc-btn:hover {
-  background: var(--apple-wine-500);
-  color: #ffffff;
-  border-color: var(--apple-wine-500);
-  box-shadow: 0 4px 14px rgba(168,40,58,0.3);
+.calc-pill.active, .calc-pill:hover {
+  background: var(--apple-wine);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(142,27,44,0.3);
 }
-
-.calc-result-box {
-  background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.08);
+.calc-output {
+  background: var(--apple-bg);
+  border: 1px solid var(--apple-border);
   border-radius: 16px;
-  padding: 20px;
-  margin-top: 16px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
+}
+.calc-output-price {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--apple-wine);
+  letter-spacing: -0.03em;
+}
+.calc-output-meta { font-size: 11px; font-family: var(--font-mono); color: var(--apple-text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.calc-output-time { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--apple-ink); }
+
+/* ── Facility detail list ── */
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--apple-border);
+  font-size: 14px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row .key { color: var(--apple-text-secondary); }
+.detail-row .val-text { font-weight: 700; color: var(--apple-ink); font-family: var(--font-mono); }
+
+/* ── Hours table ── */
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+.hours-row:last-child { border-bottom: none; }
+.hours-row strong { color: #fff; font-family: var(--font-mono); }
+.hours-row .tag-open { color: #4caf50; font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
+
+/* ── Safety compliance checklist ── */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--apple-border);
+  font-size: 14px;
+}
+.check-row:last-child { border-bottom: none; }
+.check-dot {
+  width: 24px; height: 24px;
+  background: rgba(46,125,50,0.12);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.check-row h5 { margin: 0 0 3px; font-size: 14px; color: var(--apple-ink); font-weight: 700; }
+.check-row p { margin: 0; color: var(--apple-text-secondary); font-size: 13px; }
+
+/* ── Gallery masonry ── */
+.gallery-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 220px 220px; gap: 16px; }
+.gallery-mosaic .gm-1 { grid-column: 1 / 2; grid-row: 1 / 3; }
+.gallery-mosaic .gm-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
+.gallery-mosaic .gm-3 { grid-column: 3 / 4; grid-row: 1 / 2; }
+.gallery-mosaic .gm-4 { grid-column: 2 / 4; grid-row: 2 / 3; }
+.gm-frame { border-radius: 18px; overflow: hidden; width: 100%; height: 100%; position: relative; }
+.gm-frame img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.gm-frame:hover img { transform: scale(1.04); }
+
+/* ── Map embed ── */
+.map-frame { border-radius: 22px; overflow: hidden; height: 340px; border: 1px solid var(--apple-border); }
+.map-frame iframe { width: 100%; height: 100%; border: 0; }
+
+/* ── Station cards ── */
+.station-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.station-card-mini {
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--apple-surface);
+  border: 1px solid var(--apple-border);
+  text-decoration: none;
+  display: block;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.station-card-mini:hover { transform: translateY(-5px); box-shadow: var(--apple-shadow-lg); }
+.station-card-mini img { width: 100%; height: 150px; object-fit: cover; }
+.station-card-mini .card-foot { padding: 16px 18px; }
+.station-card-mini h4 { font-family: var(--font-display); font-size: 15px; color: var(--apple-ink); margin: 0 0 5px; }
+.station-card-mini .region { font-size: 11px; font-family: var(--font-mono); color: var(--apple-text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* ── CTA banner ── */
+.cta-banner {
+  background: radial-gradient(ellipse at 40% 50%, #6E1524 0%, #1a0609 100%);
+  border-radius: 28px;
+  padding: 64px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner::before {
+  content: "";
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(199,154,61,0.2), transparent 60%);
+}
+.cta-banner h2 { color: #fff; font-family: var(--font-display); font-size: clamp(24px, 3vw, 38px); letter-spacing: -0.03em; margin: 0 0 10px; }
+.cta-banner p { color: rgba(255,255,255,0.72); font-size: 16px; margin: 0; }
+
+/* ── Reveal animation ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ── Navigation (page-local, overrides site-polish for this page) ── */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.82);
+  border-bottom: 1px solid rgba(23,20,22,0.1);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+.header-inner {
+  max-width: 1180px; margin: auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 74px; gap: 24px;
+}
+.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.brand img { width: 42px; height: 42px; object-fit: contain; }
+.brand-text { font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--apple-ink); letter-spacing: 0.1em; }
+.main-nav { display: flex; align-items: center; gap: 22px; }
+.main-nav a { font-size: 13px; font-weight: 600; color: var(--apple-ink); opacity: 0.62; text-decoration: none; transition: opacity 0.2s, color 0.2s; }
+.main-nav a:hover, .main-nav a.active { opacity: 1; color: var(--apple-wine); }
+.header-cta .btn-header {
+  padding: 10px 20px; border-radius: 8px; background: var(--apple-ink); color: #fff;
+  font-size: 13px; font-weight: 700; text-decoration: none; transition: background 0.2s;
+}
+.header-cta .btn-header:hover { background: var(--apple-wine); }
+.nav-toggle { display: none; background: none; border: 1.5px solid rgba(23,20,22,0.18); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; color: var(--apple-ink); font-size: 18px; place-items: center; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .bento { grid-template-columns: 1fr 1fr; }
+  .span-5,.span-7,.span-4,.span-8,.span-3,.span-6 { grid-column: span 2; }
+  .tele-bar { grid-template-columns: repeat(2, 1fr); }
+  .station-strip { grid-template-columns: repeat(2, 1fr); }
+  .gallery-mosaic { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px 200px; }
+  .gallery-mosaic .gm-1 { grid-column: 1 / 2; grid-row: 1 / 2; }
+  .gallery-mosaic .gm-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
+  .gallery-mosaic .gm-3 { grid-column: 1 / 2; grid-row: 2 / 3; }
+  .gallery-mosaic .gm-4 { grid-column: 1 / 3; grid-row: 3 / 4; }
+  .cta-banner { flex-direction: column; padding: 44px 30px; }
+}
+@media (max-width: 600px) {
+  .bento { grid-template-columns: 1fr; }
+  .span-5,.span-7,.span-4,.span-8,.span-3,.span-6,.span-12 { grid-column: span 1; }
+  .tele-bar { grid-template-columns: repeat(2, 1fr); }
+  .tele-cell + .tele-cell { border-left: none; }
+  .tele-cell:nth-child(2n+1) { border-right: 1px solid rgba(255,255,255,0.1); }
+  .tele-cell:nth-child(n+3) { border-top: 1px solid rgba(255,255,255,0.1); }
+  .station-strip { grid-template-columns: 1fr 1fr; }
+  .main-nav { display: none; }
+  .nav-toggle { display: grid; }
+  .hero-h1 { font-size: 38px; }
+  .section { padding: 64px 0; }
 }
 </style>
-  <link rel="stylesheet" href="public-luxury.css">
 </head>
 <body>
 
-<!-- Apple Glass Navigation Header -->
-<header class="site-header apple-nav">
-  <div class="wrap header-inner">
+<!-- Navigation -->
+<header class="site-header">
+  <div class="header-inner">
     <a href="index.html" class="brand">
-      <img src="images/offical_logo.png" alt="Triple A Gas Logo">
+      <img src="images/offical_logo.png" alt="Triple A Gas logo">
       <span class="brand-text">TRIPLE A GAS</span>
     </a>
-    <nav class="main-nav">
+    <nav class="main-nav" id="mainNav">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
       <a href="products.html">Products</a>
@@ -145,124 +529,314 @@
       <a href="contact.html">Contact</a>
     </nav>
     <div class="header-cta">
-      <a href="admin.html" class="btn btn-ghost">Staff Portal</a>
+      <a href="admin.html" class="btn-header">Staff Portal</a>
     </div>
-    <button class="nav-toggle" aria-label="Open navigation">☰</button>
+    <button class="nav-toggle" id="navToggle" aria-label="Open navigation">☰</button>
   </div>
 </header>
 
 <main>
-  <!-- Hero Section -->
-  <section class="accra-hero">
-    <div class="wrap" style="position:relative;z-index:2;width:100%;padding-top:40px;padding-bottom:50px;">
-      <div class="hero-glass-pill">
-        <span class="hero-glow-dot"></span>
-        <span>HEAD OFFICE & MAIN REFILL hub &middot; GREATER ACCRA</span>
-      </div>
-      <h1 style="color:#ffffff;max-width:760px;margin-bottom:14px;">Precision Refilling.<br>Unmatched Reliability.</h1>
-      <p style="color:rgba(255,255,255,0.85);max-width:580px;font-size:18px;line-height:1.6;">
-        Serving Accra with high-capacity bulk LPG storage, automated digital refill scales, fleet refueling, and commercial delivery logistics.
-      </p>
 
-      <!-- Live Telemetry Bar -->
-      <div class="telemetry-card" style="max-width:680px;">
-        <div class="telemetry-item">
-          <b>98.4%</b>
-          <span>Bulk Storage Capacity</span>
+  <!-- ===== HERO ===== -->
+  <section class="accra-hero">
+    <div class="accra-hero-bg"></div>
+    <div class="accra-hero-overlay"></div>
+    <div class="wrap hero-inner">
+      <div class="hero-eyebrow">
+        <span class="hero-glow"></span>
+        <span>Head Office &middot; Greater Accra &middot; Live Now</span>
+      </div>
+      <h1 class="hero-h1">The Heart of<br><em>Triple A Gas.</em></h1>
+      <p class="hero-sub">Our Accra headquarters is Ghana's leading commercial LPG hub — powering homes, vehicles, and businesses with precision refills, bulk supply, and fast autogas fueling.</p>
+
+      <div class="hero-actions">
+        <a href="tel:+233240000000" class="btn-hero-primary">📞 Call the Station</a>
+        <a href="https://wa.me/233240000000" target="_blank" rel="noopener" class="btn-hero-ghost">💬 WhatsApp Dispatch</a>
+        <a href="#refill-calculator" class="btn-hero-ghost">⚡ Price Calculator</a>
+      </div>
+
+      <!-- Live telemetry bar -->
+      <div class="tele-bar">
+        <div class="tele-cell">
+          <span class="tele-val green">98.4%</span>
+          <span class="tele-label">Storage Capacity</span>
         </div>
-        <div class="telemetry-item">
-          <b>4 Lines</b>
-          <span>Active Digital Pumps</span>
+        <div class="tele-cell">
+          <span class="tele-val">4 Active</span>
+          <span class="tele-label">Digital Pump Lines</span>
         </div>
-        <div class="telemetry-item">
-          <b style="color:var(--apple-gold);">GH₵ 14.50</b>
-          <span>Current Refill / kg</span>
+        <div class="tele-cell">
+          <span class="tele-val gold">GH₵ 14.50</span>
+          <span class="tele-label">Refill / kg Today</span>
+        </div>
+        <div class="tele-cell">
+          <span class="tele-val green">Open</span>
+          <span class="tele-label">Mon–Sat 6 AM–9 PM</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Interactive Bento Layout -->
-  <section class="section">
+
+  <!-- ===== SECTION 1: KEY STATS ===== -->
+  <section class="section section-alt">
     <div class="wrap">
-      <div class="bento-grid">
-        
-        <!-- Bento 1: Refill Calculator Widget -->
-        <div class="bento-card calculator-card glass-card reveal">
-          <div>
-            <span class="badge badge-gold" style="margin-bottom:12px;">Instant Estimator</span>
-            <h2>LPG Refill Calculator</h2>
-            <p style="color:var(--apple-text-secondary);">Select your cylinder size to view refill pricing and estimated filling duration at Accra station.</p>
-            
-            <div class="calc-btn-group">
-              <button class="calc-btn active" onclick="setCalc('3kg', 43.50, '90 seconds')">3 kg Cylinder</button>
-              <button class="calc-btn" onclick="setCalc('6kg', 87.00, '2.5 minutes')">6 kg Cylinder</button>
-              <button class="calc-btn" onclick="setCalc('13kg', 188.50, '4 minutes')">13 kg Cylinder</button>
-              <button class="calc-btn" onclick="setCalc('14.5kg', 210.25, '4.5 minutes')">14.5 kg Cylinder</button>
-              <button class="calc-btn" onclick="setCalc('Bulk', 0, 'Custom Dispatch')">Commercial Bulk</button>
+      <div class="section-head reveal">
+        <div class="eyebrow">By the Numbers</div>
+        <h2>Ghana's Premier LPG Station</h2>
+        <p>Built to serve thousands of customers a day, from domestic cylinder refills to fleet fueling and commercial bulk distribution.</p>
+      </div>
+
+      <div class="bento">
+
+        <!-- Large stat card -->
+        <div class="bento-card span-7 dark reveal" style="min-height:300px;">
+          <div class="badge badge-gold" style="background:rgba(199,154,61,0.18);color:#d4a843;border-color:rgba(199,154,61,0.3);">Est. 2005</div>
+          <h3 style="font-size:28px;color:#fff;max-width:400px;">Over two decades<br>of reliable LPG service.</h3>
+          <p style="color:rgba(255,255,255,0.6);font-size:15px;max-width:480px;margin:14px 0 40px;">From our Accra headquarters we have supplied homes, restaurants, hospitals, and transport companies across Greater Accra — safely, consistently, and at fair prices.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+            <div class="stat-block light">
+              <span class="val">20+</span>
+              <span class="label">Years in Operation</span>
+            </div>
+            <div class="stat-block light">
+              <span class="val">300+</span>
+              <span class="label">Deliveries / Month</span>
+            </div>
+            <div class="stat-block light">
+              <span class="val">5</span>
+              <span class="label">Stations Nationwide</span>
             </div>
           </div>
+        </div>
 
-          <div class="calc-result-box">
+        <!-- Station photo -->
+        <div class="bento-card img-card span-5 reveal reveal-delay-1" style="min-height:300px;">
+          <img src="images/IMG-20260722-WA0002.jpg" alt="Accra LPG filling station" style="min-height:300px;object-position:center;">
+        </div>
+
+        <!-- Cylinder services -->
+        <div class="bento-card span-4 reveal reveal-delay-1">
+          <div class="icon-box">🔵</div>
+          <h3>Cylinder Refills</h3>
+          <p>3 kg, 6 kg, 13 kg, and 14.5 kg cylinders filled on digital electronic scales — gram-accurate, every time. No overfills, no shortchanging.</p>
+          <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="padding:10px;background:var(--apple-bg);border-radius:10px;text-align:center;">
+              <span style="font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--apple-wine);display:block;">3 kg</span>
+              <span style="font-size:11px;color:var(--apple-text-tertiary);">GH₵ 43.50</span>
+            </div>
+            <div style="padding:10px;background:var(--apple-bg);border-radius:10px;text-align:center;">
+              <span style="font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--apple-wine);display:block;">6 kg</span>
+              <span style="font-size:11px;color:var(--apple-text-tertiary);">GH₵ 87.00</span>
+            </div>
+            <div style="padding:10px;background:var(--apple-bg);border-radius:10px;text-align:center;">
+              <span style="font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--apple-wine);display:block;">13 kg</span>
+              <span style="font-size:11px;color:var(--apple-text-tertiary);">GH₵ 188.50</span>
+            </div>
+            <div style="padding:10px;background:var(--apple-bg);border-radius:10px;text-align:center;">
+              <span style="font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--apple-wine);display:block;">14.5 kg</span>
+              <span style="font-size:11px;color:var(--apple-text-tertiary);">GH₵ 210.25</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Autogas -->
+        <div class="bento-card span-4 wine reveal reveal-delay-2">
+          <div class="icon-box dark-bg">🚗</div>
+          <h3>Autogas Fueling</h3>
+          <p>Full-service LPG vehicle fueling lane. We support all autogas-converted vehicles — taxis, rideshare fleets, private cars, and minibuses.</p>
+          <div style="margin-top:24px;padding:14px;background:rgba(255,255,255,0.12);border-radius:14px;">
+            <span style="font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);">Current Pump Price</span>
+            <div id="autogasPrice" style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--apple-gold);letter-spacing:-0.03em;margin-top:4px;">GH&#8373; 11.80 / litre</div>
+          </div>
+          <p style="color:rgba(255,255,255,0.6);font-size:12px;margin-top:12px;">Prices updated weekly in line with NPA regulated benchmarks.</p>
+        </div>
+
+        <!-- Bulk supply -->
+        <div class="bento-card span-4 reveal reveal-delay-3">
+          <div class="icon-box gold-bg">🏭</div>
+          <h3>Commercial Bulk Supply</h3>
+          <p>Dedicated tanker dispatch for restaurants, hospitals, factories, and large residential estates. Minimum order 1 MT — nationwide delivery available.</p>
+          <div style="margin-top:20px;">
+            <div class="detail-row">
+              <span class="key">Min. Order</span>
+              <span class="val-text">1 Metric Ton</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Dispatch</span>
+              <span class="val-text">24 / 7 Hotline</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Coverage</span>
+              <span class="val-text">Greater Accra & Beyond</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== SECTION 2: CALCULATOR ===== -->
+  <section class="section" id="refill-calculator">
+    <div class="wrap">
+      <div class="bento">
+
+        <!-- Calculator card (left) -->
+        <div class="bento-card span-6 reveal" style="background:linear-gradient(145deg,#fff 60%,#fdf4f5);border-color:rgba(142,27,44,0.12);">
+          <span class="badge badge-wine">⚡ Instant Estimator</span>
+          <h3 style="font-size:26px;">LPG Refill Calculator</h3>
+          <p style="margin-bottom:0;">Pick your cylinder size to see today's estimated cost and average fill time at our Accra station.</p>
+
+          <div class="calc-pill-row" id="calcPills">
+            <button class="calc-pill active" onclick="doCalc(this,'3kg',43.50,'~90 seconds')">3 kg</button>
+            <button class="calc-pill" onclick="doCalc(this,'6kg',87.00,'~2.5 min')">6 kg</button>
+            <button class="calc-pill" onclick="doCalc(this,'13kg',188.50,'~4 min')">13 kg</button>
+            <button class="calc-pill" onclick="doCalc(this,'14.5kg',210.25,'~4.5 min')">14.5 kg</button>
+            <button class="calc-pill" onclick="doCalc(this,'Bulk',null,'Custom Dispatch')">Commercial Bulk</button>
+          </div>
+
+          <div class="calc-output">
             <div>
-              <span style="font-size:11px;font-family:var(--font-mono);color:var(--apple-text-tertiary);text-transform:uppercase;">Estimated Price</span>
-              <div id="calcPrice" style="font-family:var(--font-display);font-size:32px;font-weight:800;color:var(--apple-wine);">GH₵ 43.50</div>
+              <div class="calc-output-meta">Estimated Price</div>
+              <div class="calc-output-price" id="calcPrice">GH₵ 43.50</div>
             </div>
             <div style="text-align:right;">
-              <span style="font-size:11px;font-family:var(--font-mono);color:var(--apple-text-tertiary);text-transform:uppercase;">Avg. Pump Time</span>
-              <div id="calcTime" style="font-family:var(--font-mono);font-size:18px;font-weight:700;color:var(--apple-text);">< 90 seconds</div>
+              <div class="calc-output-meta">Avg. Fill Time</div>
+              <div class="calc-output-time" id="calcTime">~90 seconds</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--apple-text-tertiary);margin-top:12px;">Prices at GH₵ 14.50 / kg. Updated weekly per NPA benchmarks. Bulk pricing requires a quote.</p>
+        </div>
+
+        <!-- Hours card (right) -->
+        <div class="bento-card span-6 dark reveal reveal-delay-1" style="min-height:360px;">
+          <span class="badge" style="background:rgba(76,175,80,0.2);color:#4caf50;border-color:rgba(76,175,80,0.3);">🟢 Station Active</span>
+          <h3>Hours &amp; Contact</h3>
+
+          <div style="margin:22px 0;">
+            <div class="hours-row">
+              <span>Monday – Friday</span>
+              <strong>6:00 AM – 9:00 PM</strong>
+            </div>
+            <div class="hours-row">
+              <span>Saturday</span>
+              <strong>6:00 AM – 8:00 PM</strong>
+            </div>
+            <div class="hours-row">
+              <span>Sunday</span>
+              <strong>7:00 AM – 6:00 PM</strong>
+            </div>
+            <div class="hours-row">
+              <span>Commercial Bulk Hotline</span>
+              <span class="tag-open">24 / 7 Active</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;">
+            <a href="tel:+233240000000" style="flex:1;min-width:130px;text-align:center;padding:13px 18px;background:var(--apple-wine);color:#fff;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='#c0304a'" onmouseout="this.style.background='var(--apple-wine)'">📞 Call Station</a>
+            <a href="https://wa.me/233240000000" target="_blank" style="flex:1;min-width:130px;text-align:center;padding:13px 18px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:10px;font-weight:600;font-size:13px;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">💬 WhatsApp</a>
+          </div>
+          <p style="color:rgba(255,255,255,0.45);font-size:12px;margin-top:16px;">📍 Head Office, Greater Accra, Ghana</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== SECTION 3: INFRASTRUCTURE ===== -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Infrastructure</div>
+        <h2>World-Class Facilities, Right Here in Accra</h2>
+        <p>Our Accra plant is built to the highest NPA and Ghana Fire Service standards, equipped with modern infrastructure for safety, speed, and accuracy.</p>
+      </div>
+
+      <div class="bento">
+
+        <!-- Infrastructure photo -->
+        <div class="bento-card img-card span-5 reveal" style="min-height:420px;">
+          <img src="images/IMG-20260722-WA0000.jpg" alt="Triple A Gas Accra bulk storage" style="min-height:420px;object-position:center;">
+        </div>
+
+        <!-- Facility specs list -->
+        <div class="bento-card span-7 reveal reveal-delay-1" style="min-height:420px;">
+          <span class="badge badge-gold">Technical Specs</span>
+          <h3>Accra Station Specifications</h3>
+
+          <div style="margin-top:20px;">
+            <div class="detail-row">
+              <span class="key">Bulk Storage Capacity</span>
+              <span class="val-text">2 × Dual-Vessel Tanks</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Digital Scale Accuracy</span>
+              <span class="val-text">±0.1 g precision</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Filling Lines</span>
+              <span class="val-text">4 simultaneous pump lines</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Autogas Fueling Lanes</span>
+              <span class="val-text">2 dedicated vehicle bays</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Safety Shutoff System</span>
+              <span class="val-text">Automated pressure-triggered</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">CCTV Surveillance</span>
+              <span class="val-text">HD 24-hour coverage</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">NPA Certification</span>
+              <span class="val-text" style="color:var(--apple-safe);">✓ Valid &amp; Current</span>
+            </div>
+            <div class="detail-row">
+              <span class="key">Fire Service Certification</span>
+              <span class="val-text" style="color:var(--apple-safe);">✓ Valid &amp; Current</span>
             </div>
           </div>
         </div>
 
-        <!-- Bento 2: Station Hours & Contact -->
-        <div class="bento-card glass-card reveal reveal-delay-1">
-          <div>
-            <span class="badge badge-safe" style="margin-bottom:12px;">Station Active</span>
-            <h2>Hours & Direct Lines</h2>
-            <ul style="list-style:none;padding:0;margin:20px 0 0;line-height:2;">
-              <li style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:6px;">
-                <span>Monday – Saturday</span>
-                <strong class="mono">6:00 AM – 9:00 PM</strong>
-              </li>
-              <li style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:6px;padding-top:6px;">
-                <span>Sunday</span>
-                <strong class="mono">7:00 AM – 6:00 PM</strong>
-              </li>
-              <li style="display:flex;justify-content:space-between;padding-top:6px;color:var(--apple-wine-500);">
-                <span>Commercial Bulk Hotline</span>
-                <strong class="mono">24 / 7 Active</strong>
-              </li>
-            </ul>
-          </div>
-          <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;">
-            <a href="tel:+233240000000" class="btn btn-primary btn-sm">Call Station</a>
-            <a href="https://wa.me/233240000000" target="_blank" class="btn btn-ghost btn-sm" style="color:var(--apple-wine);border-color:var(--apple-wine)!important;">WhatsApp Dispatch</a>
-          </div>
-        </div>
-
-        <!-- Bento 3: Station Infrastructure & Services -->
-        <div class="bento-card bento-hero glass-card reveal reveal-delay-2" style="background:#ffffff!important;">
-          <div class="two-col" style="gap:30px;align-items:center;">
+        <!-- Safety checks -->
+        <div class="bento-card span-12 reveal reveal-delay-2" style="padding:36px 40px;">
+          <div class="eyebrow">Compliance</div>
+          <h3 style="margin-bottom:28px;">Safety Standards We Uphold Daily</h3>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 40px;">
             <div>
-              <span class="badge badge-gold" style="margin-bottom:12px;">Headquarters Capability</span>
-              <h2>Comprehensive LPG Infrastructure</h2>
-              <p style="color:var(--apple-text-secondary);margin-bottom:20px;">
-                As our primary operational hub, the Accra facility features dual bulk storage vessels, calibrated electronic digital scales, automated safety shutoff regulators, and dedicated lanes for vehicle refueling and commercial cylinder exchanges.
-              </p>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div style="padding:12px;background:var(--apple-bg);border-radius:12px;">
-                  <strong style="display:block;font-size:14px;color:var(--apple-wine);">Digital Accuracy</strong>
-                  <span style="font-size:12px;color:var(--apple-text-secondary);">Weight-guaranteed refills down to the exact gram.</span>
-                </div>
-                <div style="padding:12px;background:var(--apple-bg);border-radius:12px;">
-                  <strong style="display:block;font-size:14px;color:var(--apple-wine);">Safety Certified</strong>
-                  <span style="font-size:12px;color:var(--apple-text-secondary);">Full NPA & Fire Service certified safety infrastructure.</span>
-                </div>
+              <div class="check-row">
+                <div class="check-dot">✓</div>
+                <div><h5>NPA Licensed Operation</h5><p>Fully licensed by the National Petroleum Authority of Ghana for LPG marketing and bulk storage.</p></div>
+              </div>
+              <div class="check-row">
+                <div class="check-dot">✓</div>
+                <div><h5>Fire Service Approved</h5><p>Accra station cleared and inspected by the Ghana National Fire Service. Fire suppression systems in place.</p></div>
               </div>
             </div>
-            <div style="border-radius:18px;overflow:hidden;box-shadow:var(--apple-shadow-lg);">
-              <img src="images/IMG-20260722-WA0001.jpg" alt="Accra LPG Refilling Facility" style="width:100%;height:100%;object-fit:cover;">
+            <div>
+              <div class="check-row">
+                <div class="check-dot">✓</div>
+                <div><h5>Pressure-Tested Vessels</h5><p>All bulk storage vessels undergo scheduled pressure testing and integrity inspections.</p></div>
+              </div>
+              <div class="check-row">
+                <div class="check-dot">✓</div>
+                <div><h5>Staff Safety Training</h5><p>Every member of staff receives formal safety orientation and periodic refresher training on LPG handling protocols.</p></div>
+              </div>
+            </div>
+            <div>
+              <div class="check-row">
+                <div class="check-dot">✓</div>
+                <div><h5>Electronic Weighing Accuracy</h5><p>Digital calibrated scales certified and routinely audited — customers receive exactly what they pay for.</p></div>
+              </div>
+              <div class="check-row">
+                <div class="check-dot">✓</div>
+                <div><h5>Customer Safety Protocols</h5><p>No smoking enforced, safety briefing provided, hazard zones clearly demarcated for public safety.</p></div>
+              </div>
             </div>
           </div>
         </div>
@@ -271,116 +845,273 @@
     </div>
   </section>
 
-  <!-- Photo Gallery Showcase -->
-  <section class="section section-tight" style="background:#ffffff;border-top:1px solid rgba(0,0,0,0.06);">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="eyebrow">Accra Hub</div>
-        <h2>Facility Gallery</h2>
-        <p>A closer look at our Accra head office, forecourt, and bulk operations.</p>
-      </div>
 
-      <div class="gallery-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
-        <div class="photo-frame glass-card reveal" style="aspect-ratio:4/3;overflow:hidden;border-radius:20px;">
-          <img src="images/IMG-20260722-WA0001.jpg" alt="Accra station building" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="photo-frame glass-card reveal reveal-delay-1" style="aspect-ratio:4/3;overflow:hidden;border-radius:20px;">
-          <img src="images/IMG-20260722-WA0000.jpg" alt="Accra LPG storage tank" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="photo-frame glass-card reveal reveal-delay-2" style="aspect-ratio:4/3;overflow:hidden;border-radius:20px;">
-          <img src="images/IMG-20260722-WA0002.jpg" alt="Accra station operations" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Other Stations Navigation -->
+  <!-- ===== SECTION 4: PHOTO GALLERY ===== -->
   <section class="section">
     <div class="wrap">
-      <div class="section-head">
-        <div class="eyebrow">Network</div>
-        <h2>Explore Other Stations</h2>
+      <div class="section-head center reveal">
+        <div class="eyebrow" style="justify-content:center;">Accra Hub Gallery</div>
+        <h2>A Look Inside Our Headquarters</h2>
+        <p>Behind the scenes at the busiest LPG facility in Greater Accra.</p>
       </div>
 
-      <div class="station-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
-        <a href="antoa.html" class="station-card glass-card reveal" style="text-decoration:none;display:block;">
-          <div style="height:160px;overflow:hidden;"><img src="images/IMG-20260722-WA0004.jpg" style="height:100%;width:100%;object-fit:cover;"></div>
-          <div style="padding:18px;"><h4 style="font-size:16px;margin:0 0 4px;">Antoa</h4><span class="badge badge-neutral" style="font-size:11px;">Ashanti Region</span></div>
+      <div class="gallery-mosaic reveal">
+        <div class="gm-frame gm-1">
+          <img src="images/IMG-20260722-WA0001.jpg" alt="Accra Triple A Gas station exterior">
+        </div>
+        <div class="gm-frame gm-2">
+          <img src="images/IMG-20260722-WA0005.jpg" alt="Accra filling forecourt">
+        </div>
+        <div class="gm-frame gm-3">
+          <img src="images/IMG-20260722-WA0007.jpg" alt="LPG cylinder storage">
+        </div>
+        <div class="gm-frame gm-4">
+          <img src="images/IMG-20260722-WA0008.jpg" alt="Accra station wide view">
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== SECTION 5: MAP + HOW TO FIND US ===== -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Location</div>
+        <h2>Find Us in Accra</h2>
+        <p>Our head office and main refilling station is centrally located in Greater Accra, with easy access for both domestic and commercial customers.</p>
+      </div>
+
+      <div class="bento" style="align-items:stretch;">
+
+        <!-- Map -->
+        <div class="span-7 reveal" style="border-radius:22px;overflow:hidden;border:1px solid var(--apple-border);min-height:360px;">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127478.00!2d-0.186964!3d5.603716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2d34a3f%3A0xb48ade4e04c22cf3!2sAccra%2C%20Ghana!5e0!3m2!1sen!2sgh!4v1690000000000!5m2!1sen!2sgh"
+            style="width:100%;height:100%;min-height:360px;border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Triple A Gas Accra Location">
+          </iframe>
+        </div>
+
+        <!-- Contact details -->
+        <div class="bento-card span-5 reveal reveal-delay-1" style="min-height:360px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <span class="badge badge-wine">📍 Head Office</span>
+            <h3 style="margin-top:8px;">Get Directions</h3>
+            <div style="margin-top:24px;">
+              <div class="detail-row">
+                <span class="key">Address</span>
+                <span class="val-text" style="font-family:var(--font-body);text-align:right;max-width:200px;">Greater Accra, Ghana</span>
+              </div>
+              <div class="detail-row">
+                <span class="key">Landmark</span>
+                <span class="val-text" style="font-family:var(--font-body);">Head Office &amp; Main Depot</span>
+              </div>
+              <div class="detail-row">
+                <span class="key">Calling Hours</span>
+                <span class="val-text">7 AM – 9 PM</span>
+              </div>
+              <div class="detail-row">
+                <span class="key">Emergency / Bulk</span>
+                <span class="val-text">24 / 7</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-direction:column;">
+            <a href="https://maps.google.com/?q=Accra+Ghana+LPG" target="_blank" class="btn-hero-primary" style="justify-content:center;background:var(--apple-ink);">🗺️ Open in Google Maps</a>
+            <a href="contact.html" class="btn-hero-ghost" style="justify-content:center;color:var(--apple-ink);border-color:rgba(23,20,22,0.25);">✉️ Send an Enquiry</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== SECTION 6: CTA BANNER ===== -->
+  <section class="section">
+    <div class="wrap">
+      <div class="cta-banner reveal">
+        <div>
+          <div class="eyebrow light" style="margin-bottom:12px;">Commercial &amp; Bulk</div>
+          <h2>Need Large-Volume LPG Supply?</h2>
+          <p>Our commercial team handles bulk tanker deliveries, institutional contracts, and fleet autogas accounts for businesses across Ghana.</p>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;flex-shrink:0;">
+          <a href="tel:+233240000000" class="btn-hero-primary" style="white-space:nowrap;">📞 Talk to Sales</a>
+          <a href="contact.html" class="btn-hero-ghost" style="white-space:nowrap;">Get a Quote →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== SECTION 7: OTHER STATIONS ===== -->
+  <section class="section section-alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow">Our Network</div>
+        <h2>Explore Our Other Stations</h2>
+      </div>
+      <div class="station-strip">
+        <a href="antoa.html" class="station-card-mini reveal">
+          <img src="images/IMG-20260722-WA0004.jpg" alt="Antoa station">
+          <div class="card-foot">
+            <h4>Antoa</h4>
+            <span class="region">Ashanti Region</span>
+          </div>
         </a>
-        <a href="bonwire.html" class="station-card glass-card reveal reveal-delay-1" style="text-decoration:none;display:block;">
-          <div style="height:160px;overflow:hidden;"><img src="images/IMG-20260722-WA0003.jpg" style="height:100%;width:100%;object-fit:cover;"></div>
-          <div style="padding:18px;"><h4 style="font-size:16px;margin:0 0 4px;">Bonwire</h4><span class="badge badge-neutral" style="font-size:11px;">Ashanti Region</span></div>
+        <a href="bonwire.html" class="station-card-mini reveal reveal-delay-1">
+          <img src="images/IMG-20260722-WA0003.jpg" alt="Bonwire station">
+          <div class="card-foot">
+            <h4>Bonwire</h4>
+            <span class="region">Ashanti Region</span>
+          </div>
         </a>
-        <a href="bogoso.html" class="station-card glass-card reveal reveal-delay-2" style="text-decoration:none;display:block;">
-          <div style="height:160px;overflow:hidden;"><img src="images/IMG-20260722-WA0006.jpg" style="height:100%;width:100%;object-fit:cover;"></div>
-          <div style="padding:18px;"><h4 style="font-size:16px;margin:0 0 4px;">Bogoso</h4><span class="badge badge-neutral" style="font-size:11px;">Western Region</span></div>
+        <a href="bogoso.html" class="station-card-mini reveal reveal-delay-2">
+          <img src="images/IMG-20260722-WA0006.jpg" alt="Bogoso station">
+          <div class="card-foot">
+            <h4>Bogoso</h4>
+            <span class="region">Western Region</span>
+          </div>
         </a>
-        <a href="prestea.html" class="station-card glass-card reveal reveal-delay-3" style="text-decoration:none;display:block;">
-          <div style="height:160px;overflow:hidden;"><img src="images/IMG-20260722-WA0009.jpg" style="height:100%;width:100%;object-fit:cover;"></div>
-          <div style="padding:18px;"><h4 style="font-size:16px;margin:0 0 4px;">Prestea</h4><span class="badge badge-neutral" style="font-size:11px;">Western Region</span></div>
+        <a href="prestea.html" class="station-card-mini reveal reveal-delay-3">
+          <img src="images/IMG-20260722-WA0009.jpg" alt="Prestea station">
+          <div class="card-foot">
+            <h4>Prestea</h4>
+            <span class="region">Western Region</span>
+          </div>
         </a>
       </div>
     </div>
   </section>
+
 </main>
 
-<footer class="site-footer">
+<!-- Footer -->
+<footer style="background:#171416;color:#8a7a7d;padding:56px 0 22px;">
   <div class="wrap">
-    <div class="footer-grid">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:32px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,0.08);">
       <div>
-        <div class="footer-brand">
-          <img src="images/offical_logo.png" alt="Triple A Gas Logo">
-          <span>TRIPLE A GAS</span>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <img src="images/offical_logo.png" alt="Triple A Gas Logo" style="width:38px;height:38px;object-fit:contain;">
+          <span style="font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:0.08em;color:#fff;">TRIPLE A GAS</span>
         </div>
-        <p>Reliable LPG for homes, drivers, and businesses across Ghana.</p>
+        <p style="font-size:13px;line-height:1.65;margin:0;">Reliable LPG for homes, drivers, and businesses across Ghana since 2005.</p>
       </div>
       <div>
-        <h5>Explore</h5>
-        <ul>
-          <li><a href="about.html">About</a></li>
-          <li><a href="products.html">Products</a></li>
-          <li><a href="find-us.html">Find a Station</a></li>
-          <li><a href="gallery.html">Gallery</a></li>
+        <h5 style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#fff;margin:0 0 14px;">Explore</h5>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="margin-bottom:8px;"><a href="about.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">About</a></li>
+          <li style="margin-bottom:8px;"><a href="products.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">Products</a></li>
+          <li style="margin-bottom:8px;"><a href="find-us.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">Find a Station</a></li>
+          <li><a href="gallery.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">Gallery</a></li>
         </ul>
       </div>
       <div>
-        <h5>Support</h5>
-        <ul>
-          <li><a href="safety.html">Safety</a></li>
-          <li><a href="faq.html">FAQ</a></li>
-          <li><a href="contact.html">Contact</a></li>
+        <h5 style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#fff;margin:0 0 14px;">Support</h5>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li style="margin-bottom:8px;"><a href="safety.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">Safety</a></li>
+          <li style="margin-bottom:8px;"><a href="faq.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">FAQ</a></li>
+          <li><a href="contact.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">Contact</a></li>
         </ul>
       </div>
       <div>
-        <h5>Staff</h5>
-        <ul>
-          <li><a href="admin.html">Staff Portal</a></li>
+        <h5 style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#fff;margin:0 0 14px;">Staff</h5>
+        <ul style="list-style:none;padding:0;margin:0;">
+          <li><a href="admin.html" style="font-size:13px;color:#8a7a7d;text-decoration:none;">Staff Portal</a></li>
         </ul>
       </div>
     </div>
-    <div class="footer-bottom">
-      <span>© 2026 Triple A Gas. Est. 2005.</span>
-      <span>Licensed LPG Marketing Company</span>
+    <div style="padding-top:18px;display:flex;justify-content:space-between;gap:12px;font-size:12px;">
+      <span>© 2026 Triple A Gas. Est. 2005. Licensed LPG Marketing Company.</span>
+      <span>Accra Head Office</span>
     </div>
   </div>
 </footer>
 
 <script>
-function setCalc(size, price, time) {
-  document.querySelectorAll('.calc-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('calcPrice').textContent = price > 0 ? `GH₵ ${price.toFixed(2)}` : 'Custom Quote';
-  document.getElementById('calcTime').textContent = time;
+// ── Calculator ──
+// Default prices (overwritten by live Firestore data once loaded)
+let LIVE_PRICES = { '3kg': 43.50, '6kg': 87.00, '13kg': 188.50, '14.5kg': 210.25, autogas: 11.80, bulk_per_kg: 14.50 };
+let activePillPrice = LIVE_PRICES['3kg'];
+let activePillTime  = '~90 seconds';
+
+function doCalc(btn, size, price, time) {
+  document.querySelectorAll('.calc-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('calcPrice');
+  const et = document.getElementById('calcTime');
+  // Use live price if available
+  const livePrice = (size !== 'Bulk' && LIVE_PRICES[size] !== undefined) ? LIVE_PRICES[size] : price;
+  el.textContent = livePrice !== null ? `GH\u20b5 ${livePrice.toFixed(2)}` : 'Custom Quote';
+  et.textContent = time;
+  activePillPrice = livePrice;
+  activePillTime  = time;
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-  const toggle = document.querySelector(".nav-toggle");
-  const nav = document.querySelector(".main-nav");
-  if(toggle && nav) {
-    toggle.addEventListener("click", () => nav.classList.toggle("open"));
-  }
-});
+// ── Live pricing loader ──
+async function applyLivePricingAccra() {
+  try {
+    if (typeof initFirebase === 'function') initFirebase();
+    await new Promise(r => setTimeout(r, 900));
+    const live = typeof getPublicPricing === 'function' ? await getPublicPricing() : null;
+    if (live) {
+      LIVE_PRICES = { ...LIVE_PRICES, ...live };
+
+      // Rewire pill onclick values
+      const pills = document.querySelectorAll('.calc-pill');
+      const pillMap = [
+        ['3kg',   LIVE_PRICES['3kg'],   '~90 seconds'],
+        ['6kg',   LIVE_PRICES['6kg'],   '~2.5 min'],
+        ['13kg',  LIVE_PRICES['13kg'],  '~4 min'],
+        ['14.5kg',LIVE_PRICES['14.5kg'],'~4.5 min'],
+        ['Bulk',  null,                 'Custom Dispatch']
+      ];
+      pills.forEach((pill, i) => {
+        if (pillMap[i]) {
+          const [size, price, time] = pillMap[i];
+          pill.onclick = () => doCalc(pill, size, price, time);
+        }
+      });
+
+      // Refresh currently active pill
+      const active = document.querySelector('.calc-pill.active');
+      if (active) active.click();
+
+      // Update autogas display
+      const autogasEl = document.getElementById('autogasPrice');
+      if (autogasEl) autogasEl.textContent = `GH\u20b5 ${LIVE_PRICES.autogas.toFixed(2)} / litre`;
+
+      // Update footer note
+      const noteEl = document.querySelector('#refill-calculator p[style*="12px"]');
+      if (noteEl) noteEl.textContent = `Prices at GH\u20b5 ${LIVE_PRICES.bulk_per_kg.toFixed(2)} / kg. Updated weekly per NPA benchmarks. Bulk pricing requires a quote.`;
+    }
+  } catch(e) { /* use static defaults */ }
+}
+
+document.addEventListener('DOMContentLoaded', applyLivePricingAccra);
+
+// ── Mobile nav ──
+const toggle = document.getElementById('navToggle');
+const nav    = document.getElementById('mainNav');
+if (toggle && nav) {
+  toggle.addEventListener('click', () => nav.classList.toggle('open'));
+  document.addEventListener('click', e => {
+    if (!toggle.contains(e.target) && !nav.contains(e.target)) nav.classList.remove('open');
+  });
+}
+
+// ── Scroll reveal ──
+const revealEls = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => obs.observe(el));
 </script>
-  <script src="public-luxury.js"></script>
+
 </body>
 </html>
