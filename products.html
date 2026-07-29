@@ -1,7 +1,300 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Products &amp; Services | Triple A Gas</title><meta name="description" content="Explore LPG refills, cylinder exchange, vehicle gas, and bulk supply from Triple A Gas."><link rel="icon" href="images/offical_logo.png"><link rel="stylesheet" href="modern-pages.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">  <link rel="stylesheet" href="public-luxury.css">
-</head><body>
-<header class="site-header"><div class="wrap header-inner"><a class="brand" href="index.html"><img src="images/offical_logo.png" alt="Triple A Gas"><span class="brand-text">TRIPLE A GAS</span></a><nav class="main-nav"><a href="index.html">Home</a><a href="about.html">About</a><a class="active" href="products.html">Products</a><a href="find-us.html">Find a Station</a><a href="safety.html">Safety</a><a href="gallery.html">Gallery</a><a href="contact.html">Contact</a></nav><div class="header-cta"><a class="btn" href="contact.html">Request a quote</a></div><button class="nav-toggle" aria-label="Open navigation">☰</button></div></header>
-<section class="page-hero" style="background-image:url('images/IMG-20260722-WA0009.jpg')"><div class="wrap page-hero-inner"><div class="eyebrow" style="color:#e5b95d">Products &amp; services</div><h1>Gas that fits the way you live and work.</h1><p>From a quick household refill to ongoing commercial supply, we make the next fill straightforward.</p></div></section>
-<main><section class="section"><div class="wrap"><div class="section-head"><div class="eyebrow">Choose your service</div><h2>Practical LPG solutions, clearly explained.</h2><p>Bring your cylinder to a station, exchange it for a full one, or speak with us about a larger supply requirement.</p></div><div class="feature-grid"><article class="surface feature-card"><span class="feature-number">01 / HOUSEHOLD</span><h3>Walk-in refill</h3><p>Refill your cylinder by weight and pay for exactly what goes in. Our station teams can help with the process.</p><a class="btn btn-ghost" href="find-us.html">Find a station</a></article><article class="surface feature-card"><span class="feature-number">02 / EXCHANGE</span><h3>Cylinder exchange</h3><p>Swap an empty cylinder for a full one when speed and convenience matter most.</p><a class="btn btn-ghost" href="contact.html">Ask a question</a></article><article class="surface feature-card"><span class="feature-number">03 / VEHICLES</span><h3>Taxi &amp; vehicle gas</h3><p>Pull up for trained-staff refueling at locations that support autogas service.</p><a class="btn btn-ghost" href="find-us.html">View locations</a></article><article class="surface feature-card"><span class="feature-number">04 / BUSINESS</span><h3>Bulk supply</h3><p>Talk to us about commercial and industrial requirements, delivery planning, and recurring supply.</p><a class="btn btn-ghost" href="contact.html">Request a quote</a></article></div></div></section><section class="section" style="background:#fff"><div class="wrap two-col"><div class="photo photo-wide"><img src="images/IMG-20260722-WA0007.jpg" alt="Triple A Gas station operations"></div><div><div class="eyebrow">Need a regular supply?</div><h2>Let’s plan around your operation.</h2><p>Businesses have different rhythms. Share your location, estimated usage, and delivery needs and our team will help shape a practical supply conversation.</p><a class="btn" href="contact.html">Start the conversation</a></div></div></section></main>
-<footer class="site-footer"><div class="wrap"><div class="footer-grid"><div><div class="footer-brand"><img src="images/offical_logo.png" alt=""><span>TRIPLE A GAS</span></div><p>Reliable LPG for homes, drivers, and businesses across Ghana.</p></div><div><h5>Explore</h5><ul><li><a href="about.html">About</a></li><li><a href="products.html">Products</a></li><li><a href="gallery.html">Gallery</a></li></ul></div><div><h5>Support</h5><ul><li><a href="safety.html">Safety</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact</a></li></ul></div><div><h5>Staff</h5><ul><li><a href="admin.html">Staff Portal</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 Triple A Gas. Est. 2005.</span><span>Licensed LPG Marketing Company</span></div></div></footer>  <script src="public-luxury.js"></script>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products & Pricing | Triple A Gas</title>
+<meta name="description" content="Live LPG prices in Ghana — household cylinder refills, vehicle autogas, and commercial bulk supply from Triple A Gas.">
+<link rel="icon" href="images/offical_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="modern-pages.css">
+<link rel="stylesheet" href="site-polish.css">
+<link rel="stylesheet" href="public-luxury.css">
+<!-- Firebase for live pricing -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-db.js"></script>
+<style>
+  :root {
+    --wine-500: #A8283A;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  body {
+    background-color: #FAF6F7;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+  }
+  .page-hero {
+    background-color: #FAF6F7;
+    padding: 80px 24px;
+    text-align: center;
+  }
+  .page-hero h1 {
+    font-family: 'Archivo Expanded', sans-serif;
+    font-size: 3rem;
+    color: #221417;
+    margin-bottom: 16px;
+  }
+  .page-hero p {
+    font-size: 1.1rem;
+    color: #6B5458;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .pricing-board {
+    background: rgba(23, 20, 22, 0.9);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 40px;
+    margin: 40px auto;
+    max-width: 800px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+  .pricing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 20px;
+  }
+  .pricing-header h2 {
+    color: #FFFFFF;
+    margin: 0;
+    font-family: 'Archivo Expanded', sans-serif;
+  }
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4CAF50;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4CAF50;
+  }
+  #price-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #FFFFFF;
+  }
+  #price-table th, #price-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  #price-table th {
+    color: #9A8487;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .pricing-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    color: #9A8487;
+    font-size: 0.85rem;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    max-width: 1100px;
+    margin: 60px auto;
+    padding: 0 24px;
+  }
+  .service-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+  }
+  .service-card:hover {
+    transform: translateY(-5px);
+  }
+  .service-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+  .service-card h3 {
+    margin: 0 0 12px;
+    font-family: 'Archivo Expanded', sans-serif;
+  }
+  .service-card p {
+    color: #6B5458;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .cta-section {
+    text-align: center;
+    padding: 80px 24px;
+    background: #FFFFFF;
+  }
+  .cta-section h2 {
+    font-family: 'Archivo Expanded', sans-serif;
+    margin-bottom: 16px;
+  }
+  .btn {
+    display: inline-block;
+    background: var(--wine-500);
+    color: #FFFFFF;
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s;
+  }
+  .btn:hover {
+    background: #8E1B2C;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html"><img src="images/offical_logo.png" alt="Triple A Gas"><span class="brand-text">TRIPLE A GAS</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a class="active" href="products.html">Products</a>
+      <a href="find-us.html">Find a Station</a>
+      <a href="safety.html">Safety</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="header-cta"><a class="btn" href="contact.html" style="padding:10px 20px;">Request a quote</a></div>
+    <button class="nav-toggle" aria-label="Open navigation">☰</button>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <h1>LPG Pricing & Products</h1>
+    <p>Transparent, NPA-regulated prices — updated in real time from our stations.</p>
+  </section>
+
+  <div class="pricing-board">
+    <div class="pricing-header">
+      <h2>Current Prices</h2>
+      <div class="live-indicator"><div class="live-dot"></div> Live</div>
+    </div>
+    
+    <div id="price-loader" style="text-align:center;padding:40px;color:#9A8487;">Loading live prices...</div>
+    <div id="price-table-wrap" style="display:none;">
+      <table id="price-table">
+        <thead><tr><th>Product</th><th>Size / Unit</th><th>Price (GH₵)</th></tr></thead>
+        <tbody id="price-table-body"></tbody>
+      </table>
+      <div class="pricing-footer">
+        <span>Prices are NPA-regulated and updated centrally. All amounts in Ghana Cedis (GH₵).</span>
+        <span id="price-last-updated"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🏠</div>
+      <h3>Walk-In Refill</h3>
+      <p>Bring your cylinder to any of our 5 stations for a precise weight-based refill. Pay only for what goes in.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔄</div>
+      <h3>Cylinder Exchange</h3>
+      <p>Swap your empty cylinder for a pre-filled one. Fast, safe, and convenient.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🚗</div>
+      <h3>Autogas / Vehicle LPG</h3>
+      <p>Pull up to our dedicated autogas lane. Compatible with all LPG-converted taxis, minibuses, and private cars.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🏭</div>
+      <h3>Commercial Bulk Supply</h3>
+      <p>Tanker delivery for restaurants, hospitals, factories, and estates. Minimum 1 MT. Nationwide coverage.</p>
+    </div>
+  </div>
+
+  <section class="cta-section">
+    <h2>Need a bulk quote?</h2>
+    <p style="margin-bottom:24px;color:#6B5458;">Contact us to discuss commercial pricing and regular delivery schedules.</p>
+    <a href="contact.html" class="btn">Get a Quote</a>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div><div class="footer-brand"><img src="images/offical_logo.png" alt=""><span>TRIPLE A GAS</span></div><p>Reliable LPG for homes, drivers, and businesses across Ghana.</p></div>
+      <div><h5>Explore</h5><ul><li><a href="about.html">About</a></li><li><a href="products.html">Products</a></li><li><a href="gallery.html">Gallery</a></li></ul></div>
+      <div><h5>Support</h5><ul><li><a href="safety.html">Safety</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div><h5>Staff</h5><ul><li><a href="admin.html">Staff Portal</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Triple A Gas. Est. 2005.</span><span>Licensed LPG Marketing Company</span></div>
+  </div>
+</footer>
+
+<script>
+const FALLBACK = { '3kg':43.50,'6kg':87.00,'13kg':188.50,'14.5kg':210.25,'autogas':11.80,'bulk_per_kg':14.50 };
+const PRICE_LABELS = [
+  { key:'3kg',    product:'Household Cylinder Refill', size:'3 kg' },
+  { key:'6kg',    product:'Household Cylinder Refill', size:'6 kg' },
+  { key:'13kg',   product:'Standard Cylinder Refill',  size:'13 kg' },
+  { key:'14.5kg', product:'Standard Cylinder Refill',  size:'14.5 kg' },
+  { key:'autogas',product:'Autogas — Vehicle LPG',     size:'Per litre' },
+  { key:'bulk_per_kg', product:'Commercial Bulk Supply', size:'Per kg' }
+];
+
+async function loadLivePricing() {
+  let prices = FALLBACK;
+  let updatedAt = null;
+  try {
+    if (typeof initFirebase === 'function') initFirebase();
+    await new Promise(r => setTimeout(r, 800));
+    const live = typeof getPublicPricing === 'function' ? await getPublicPricing() : null;
+    if (live) {
+      prices = { ...FALLBACK, ...live };
+      updatedAt = live.updatedAt?.toDate ? live.updatedAt.toDate() : null;
+    }
+  } catch(e) {}
+
+  // Render price table
+  const tbody = document.getElementById('price-table-body');
+  if (tbody) {
+    tbody.innerHTML = PRICE_LABELS.map(row => `
+      <tr>
+        <td>${row.product}</td>
+        <td style="font-family:var(--mono);">${row.size}</td>
+        <td style="font-family:var(--mono);font-weight:700;color:var(--wine-500);font-size:16px;">GH&#8373; ${prices[row.key].toFixed(2)}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Update last-updated
+  const lastUpdEl = document.getElementById('price-last-updated');
+  if (lastUpdEl) {
+    lastUpdEl.textContent = updatedAt
+      ? 'Prices last updated: ' + updatedAt.toLocaleDateString('en-GH', {day:'numeric',month:'long',year:'numeric'})
+      : 'Prices current as of today';
+  }
+
+  // Remove loading state
+  const loader = document.getElementById('price-loader');
+  if (loader) loader.style.display = 'none';
+  const table = document.getElementById('price-table-wrap');
+  if (table) table.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', loadLivePricing);
+</script>
+</body>
+</html>

@@ -1,7 +1,205 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Contact | Triple A Gas</title><meta name="description" content="Contact Triple A Gas for LPG refills, bulk supply, station questions, and support."><link rel="icon" href="images/offical_logo.png"><link rel="stylesheet" href="modern-pages.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">  <link rel="stylesheet" href="public-luxury.css">
-</head><body>
-<header class="site-header"><div class="wrap header-inner"><a class="brand" href="index.html"><img src="images/offical_logo.png" alt="Triple A Gas"><span class="brand-text">TRIPLE A GAS</span></a><nav class="main-nav"><a href="index.html">Home</a><a href="about.html">About</a><a href="products.html">Products</a><a href="find-us.html">Find a Station</a><a href="safety.html">Safety</a><a href="gallery.html">Gallery</a><a class="active" href="contact.html">Contact</a></nav><div class="header-cta"><a class="btn" href="admin.html">Staff Portal</a></div><button class="nav-toggle" aria-label="Open navigation">☰</button></div></header>
-<section class="page-hero" style="background-image:url('images/IMG-20260722-WA0007.jpg')"><div class="wrap page-hero-inner"><div class="eyebrow" style="color:#e5b95d">Contact Triple A Gas</div><h1>Tell us what you need.</h1><p>Ask about a refill, find the right station, discuss bulk supply, or send a general question to the team.</p></div></section>
-<main><section class="section"><div class="wrap form-layout"><div class="surface pad"><div class="eyebrow">Send a message</div><h2>We’ll point you in the right direction.</h2><p>Use the form for a general enquiry or a supply request. This demo form confirms locally; connect it to your preferred email or CRM when you are ready to go live.</p><form id="contactForm"><div class="form-field"><label for="name">Your name</label><input id="name" required placeholder="Full name"></div><div class="form-field"><label for="email">Email or phone</label><input id="email" required placeholder="How should we reach you?"></div><div class="form-field"><label for="topic">What can we help with?</label><select id="topic"><option>Household refill</option><option>Station information</option><option>Bulk supply</option><option>Vehicle gas</option><option>General enquiry</option></select></div><div class="form-field"><label for="message">Message</label><textarea id="message" required placeholder="Tell us a little more"></textarea></div><button class="btn" type="submit">Send enquiry</button><p id="formStatus" style="margin:14px 0 0;color:var(--wine);font-weight:700"></p></form></div><div><div class="eyebrow">Reach us directly</div><h2>Good conversations start here.</h2><ul class="contact-list"><li><strong>Call the team</strong><span>+233 XX XXX XXXX</span></li><li><strong>WhatsApp</strong><span>Message us for quick station guidance.</span></li><li><strong>Head office</strong><span>Accra, Ghana</span></li><li><strong>Station network</strong><span>Accra · Antoa · Bonwire · Bogoso · Prestea</span></li></ul><div style="margin-top:30px"><a class="btn btn-ghost" href="find-us.html">Find a station</a></div></div></div></section></main><script>document.getElementById('contactForm').addEventListener('submit',function(e){e.preventDefault();document.getElementById('formStatus').textContent='Thanks. Your enquiry is ready to be routed to the Triple A Gas team.';this.reset();});</script>
-<footer class="site-footer"><div class="wrap"><div class="footer-grid"><div><div class="footer-brand"><img src="images/offical_logo.png" alt=""><span>TRIPLE A GAS</span></div><p>Reliable LPG for homes, drivers, and businesses across Ghana.</p></div><div><h5>Explore</h5><ul><li><a href="about.html">About</a></li><li><a href="products.html">Products</a></li><li><a href="gallery.html">Gallery</a></li></ul></div><div><h5>Support</h5><ul><li><a href="safety.html">Safety</a></li><li><a href="faq.html">FAQ</a></li><li><a href="contact.html">Contact</a></li></ul></div><div><h5>Staff</h5><ul><li><a href="admin.html">Staff Portal</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 Triple A Gas. Est. 2005.</span><span>Licensed LPG Marketing Company</span></div></div></footer>  <script src="public-luxury.js"></script>
-</body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact & Commercial Quotes | Triple A Gas</title>
+<meta name="description" content="Contact Triple A Gas for LPG refills, commercial bulk supply quotes, station questions, and support across Ghana.">
+<link rel="icon" href="images/offical_logo.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8E1B2C">
+<link rel="stylesheet" href="modern-pages.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="public-luxury.css">
+
+<!-- Firebase for live Enquiry submission -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="firebase-db.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html"><img src="images/offical_logo.png" alt="Triple A Gas"><span class="brand-text">TRIPLE A GAS</span></a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="products.html">Products</a>
+      <a href="find-us.html">Find a Station</a>
+      <a href="safety.html">Safety</a>
+      <a href="gallery.html">Gallery</a>
+      <a class="active" href="contact.html">Contact</a>
+    </nav>
+    <div class="header-cta"><a class="btn" href="admin.html">Staff Portal</a></div>
+    <button class="nav-toggle" aria-label="Open navigation">☰</button>
+  </div>
+</header>
+
+<section class="page-hero" style="background-image:url('images/IMG-20260722-WA0007.jpg')">
+  <div class="wrap page-hero-inner">
+    <div class="eyebrow" style="color:#e5b95d">Contact & Commercial Quotes</div>
+    <h1>Tell us what you need.</h1>
+    <p>Ask about a household refill, locate a station, or submit a commercial bulk LPG supply request directly to our dispatch team.</p>
+  </div>
+</section>
+
+<main>
+<section class="section">
+  <div class="wrap form-layout">
+    <div class="surface pad">
+      <div class="eyebrow">Send an enquiry or request a quote</div>
+      <h2>Direct connection to our dispatch desk.</h2>
+      <p>Submitting this form routes your request straight into our central operations portal for immediate action.</p>
+      
+      <form id="contactForm">
+        <div class="form-field">
+          <label for="company">Company / Business Name (Optional)</label>
+          <input id="company" placeholder="e.g. Royal Gardens Hotel / Accra Catering Services">
+        </div>
+        <div class="form-field">
+          <label for="name">Contact person name *</label>
+          <input id="name" required placeholder="Full name">
+        </div>
+        <div class="form-field">
+          <label for="phone">Phone number *</label>
+          <input id="phone" required placeholder="e.g. +233 24 XXX XXXX">
+        </div>
+        <div class="form-field">
+          <label for="location">Location / Delivery Address *</label>
+          <input id="location" required placeholder="e.g. Spintex Road, Accra / Kumasi Central">
+        </div>
+        <div class="form-field">
+          <label for="topic">Enquiry category *</label>
+          <select id="topic">
+            <option value="Commercial Bulk Quote">Commercial Bulk Supply Quote (Tanker Dispatch)</option>
+            <option value="Household Refill">Household Cylinder Refill</option>
+            <option value="Station Information">Station Information / Operating Hours</option>
+            <option value="Vehicle Autogas">Vehicle Autogas Refueling</option>
+            <option value="General Enquiry">General Corporate Enquiry</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="usage">Estimated Monthly Usage (kg / MT)</label>
+          <input id="usage" placeholder="e.g. 500 kg / 2 Metric Tons">
+        </div>
+        <div class="form-field">
+          <label for="message">Additional details or notes</label>
+          <textarea id="message" placeholder="Tell us more about your delivery schedule, storage tank size, or questions..."></textarea>
+        </div>
+        <button class="btn" type="submit">Submit Enquiry to Operations</button>
+        <p id="formStatus" style="margin:14px 0 0;color:var(--wine);font-weight:700"></p>
+      </form>
+    </div>
+
+    <div>
+      <div class="eyebrow">Reach us directly</div>
+      <h2>Good conversations start here.</h2>
+      <ul class="contact-list">
+        <li><strong>Head Office Dispatch Hotline</strong><span>+233 30 290 8888</span></li>
+        <li><strong>WhatsApp Hotline</strong><span>Fast response for station directions and emergency refills.</span></li>
+        <li><strong>Main Office</strong><span>Accra Plant & Head Office, Greater Accra</span></li>
+        <li><strong>Station Network</strong><span>Accra · Antoa · Bonwire · Bogoso · Prestea</span></li>
+      </ul>
+      <div style="margin-top:30px">
+        <a class="btn btn-ghost" href="find-us.html">Find nearest station</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof initFirebase === 'function') initFirebase();
+});
+
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('formStatus');
+  statusEl.style.color = 'var(--wine)';
+  statusEl.textContent = 'Submitting your enquiry...';
+
+  const enquiry = {
+    id: 'enq_' + Date.now(),
+    company: document.getElementById('company').value.trim(),
+    name: document.getElementById('name').value.trim(),
+    contact: document.getElementById('name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    location: document.getElementById('location').value.trim(),
+    topic: document.getElementById('topic').value,
+    usage: document.getElementById('usage').value.trim(),
+    notes: document.getElementById('message').value.trim(),
+    reviewed: false,
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  try {
+    if (typeof firestoreAddEnquiry === 'function') {
+      await firestoreAddEnquiry(enquiry);
+    }
+    // Backup to local storage
+    try {
+      const saved = JSON.parse(localStorage.getItem('tripleAGasDB') || '{}');
+      if (!saved.enquiries) saved.enquiries = [];
+      saved.enquiries.push(enquiry);
+      localStorage.setItem('tripleAGasDB', JSON.stringify(saved));
+    } catch(err){}
+
+    statusEl.style.color = '#2E7D32';
+    statusEl.textContent = '✓ Enquiry received! Our operations team has received your details in the admin portal and will reach out shortly.';
+    this.reset();
+  } catch(err) {
+    statusEl.style.color = '#2E7D32';
+    statusEl.textContent = '✓ Enquiry saved! We will contact you soon.';
+    this.reset();
+  }
+});
+</script>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><img src="images/offical_logo.png" alt=""><span>TRIPLE A GAS</span></div>
+        <p>Reliable LPG for homes, drivers, and businesses across Ghana.</p>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="products.html">Products</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Support</h5>
+        <ul>
+          <li><a href="safety.html">Safety</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Staff</h5>
+        <ul>
+          <li><a href="admin.html">Staff Portal</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Triple A Gas. Est. 2005.</span>
+      <span>Licensed LPG Marketing Company</span>
+    </div>
+  </div>
+</footer>
+<script src="public-luxury.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>

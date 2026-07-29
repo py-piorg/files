@@ -230,6 +230,31 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   .form-grid-2,.form-grid-3,.form-grid-4,.form-grid-5{grid-template-columns:1fr;}
   .licence-alert-cards,.payroll-summary{grid-template-columns:1fr;}
 }
+
+/* ── Mobile Responsive ── */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--text);}
+.hamburger span{display:block;width:20px;height:2px;background:currentColor;margin:4px 0;border-radius:2px;transition:all .25s;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px);}
+@media(max-width:900px){
+  .hamburger{display:block;}
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;z-index:100;transition:left .3s var(--ease);width:248px;}
+  .sidebar.open{left:0;}
+  .sidebar-overlay.open{display:block;}
+  .shell{display:block;height:100vh;overflow:hidden;}
+  .main{height:100vh;overflow-y:auto;padding:16px 16px 60px;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .form-grid-3,.form-grid-4,.form-grid-5{grid-template-columns:repeat(2,1fr);}
+  .form-grid-2{grid-template-columns:1fr;}
+  .view-head{flex-direction:column;align-items:flex-start;}
+  .licence-alert-cards{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .stat-grid{grid-template-columns:1fr;}
+  .form-grid-2,.form-grid-3,.form-grid-4,.form-grid-5{grid-template-columns:1fr;}
+  .licence-alert-cards{grid-template-columns:1fr;}
+  .main{padding:12px 12px 60px;}
+}
 </style>
 </head>
 <body>
@@ -274,6 +299,14 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <!-- ═══════════════════════════════════ SHELL ═══════════════════════════════════ -->
 <div id="shell" class="shell" style="display:none;">
+<div class="mobile-topbar" style="display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(16,18,22,0.97);border-bottom:1px solid rgba(255,255,255,0.1);position:sticky;top:0;z-index:90;" id="mobileTopbar">
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div style="font-family:var(--display);font-weight:800;font-size:13px;color:#fff;">Triple A Gas</div>
+  <div style="font-size:11px;font-family:var(--mono);color:var(--gold);">ADMIN</div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
@@ -296,6 +329,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       <li><div class="nav-section-label">Operations</div></li>
       <li><button data-view="deliveries"><span class="nav-icon">📦</span>Deliveries</button></li>
       <li><button data-view="inventory"><span class="nav-icon">🗃️</span>Inventory</button></li>
+      <li><button onclick="showView('stockcount')" id="nav-stockcount"><span class="nav-icon">📋</span>Stock Count</button></li>
       <li><button data-view="fleet"><span class="nav-icon">🚛</span>Fleet &amp; Drivers</button></li>
       <li><button data-view="cashier"><span class="nav-icon">🛒</span>Cashier Sales</button></li>
       <li><div class="nav-section-label">Business</div></li>
@@ -344,11 +378,24 @@ tr:hover td{background:rgba(255,255,255,0.02);}
           </div>
         </div>
         <div>
+          <div class="panel" style="margin-top:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <h3>🚦 Station Status Control</h3>
+              <button class="btn btn-sm btn-primary" onclick="saveStationStatuses()">Publish Status</button>
+            </div>
+            <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Toggle the live status shown on each station's public page.</p>
+            <div id="station-status-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;"></div>
+          </div>
           <div class="panel">
             <h3>Revenue by Station (This Month)</h3>
             <div class="chart-wrap"><canvas id="dashRevenueChart"></canvas></div>
           </div>
         </div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <h3>🏆 Station Leaderboard — This Week</h3>
+        <div id="leaderboard-list" style="margin-top:12px;"></div>
       </div>
     </div>
 
@@ -410,6 +457,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="view-head">
           <div><h2>Pricing Control</h2><p>Prices saved here are automatically published to the public website in real time.</p></div>
         </div>
+        <button class="btn btn-ghost" onclick="document.getElementById('npa-modal').style.display='flex'" style="margin-bottom:16px;">📋 Import NPA Bulletin</button>
         <div class="two-col">
           <div class="panel">
             <h3>Current Prices</h3>
@@ -500,6 +548,49 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </div>
     </div>
 
+<!-- ══════════════════════════════ STOCK COUNT ══════════════════════════════ -->
+<div id="view-stockcount" class="view">
+  <div class="view-head">
+    <div><h2>📋 Daily Stock Count</h2><p>Record opening and closing cylinder counts each shift. Discrepancies are flagged automatically.</p></div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>Log Stock Count</h3>
+      <div class="form-grid-3">
+        <div class="field"><label>Outlet</label><select id="sc-outlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+        <div class="field"><label>Date</label><input type="date" id="sc-date"></div>
+        <div class="field"><label>Shift</label><select id="sc-shift"><option>Morning</option><option>Evening</option><option>Night</option></select></div>
+        <div class="field"><label>Type</label><select id="sc-type"><option>Opening</option><option>Closing</option></select></div>
+        <div class="field"><label>Counted by</label><input id="sc-staff" placeholder="Staff name"></div>
+      </div>
+      <div style="margin:16px 0 12px;"><strong style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;">Cylinder Counts</strong></div>
+      <div class="form-grid-3">
+        <div class="field"><label>3 kg</label><input type="number" id="sc-3kg" min="0" value="0"></div>
+        <div class="field"><label>6 kg</label><input type="number" id="sc-6kg" min="0" value="0"></div>
+        <div class="field"><label>13 kg</label><input type="number" id="sc-13kg" min="0" value="0"></div>
+        <div class="field"><label>14.5 kg</label><input type="number" id="sc-14kg" min="0" value="0"></div>
+        <div class="field"><label>Bulk (MT)</label><input type="number" id="sc-bulk" min="0" step="0.1" value="0"></div>
+        <div class="field"><label>Notes</label><input id="sc-notes" placeholder="Any remarks"></div>
+      </div>
+      <button class="btn btn-primary" onclick="submitStockCount()">Save Count</button>
+    </div>
+
+    <div class="panel">
+      <h3>Discrepancy Summary</h3>
+      <p style="font-size:12px;">Compares today's opening vs closing counts. Negative variance = unexplained loss.</p>
+      <div id="sc-discrepancy-table"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px;">
+    <h3>Count History</h3>
+    <div class="table-wrap"><table><thead><tr>
+      <th>Date</th><th>Outlet</th><th>Shift</th><th>Type</th><th>3kg</th><th>6kg</th><th>13kg</th><th>14.5kg</th><th>Bulk</th><th>Staff</th><th>Notes</th>
+    </tr></thead><tbody id="sc-history-body"></tbody></table></div>
+  </div>
+</div>
+
     <!-- ──────────────── FLEET ──────────────── -->
     <div id="view-fleet" class="view">
       <div class="view-head"><div><h2>Fleet &amp; Driver Management</h2><p>Vehicles, trips, fuel costs, and maintenance schedules.</p></div></div>
@@ -557,6 +648,15 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <!-- ──────────────── CUSTOMERS ──────────────── -->
     <div id="view-customers" class="view">
       <div class="view-head"><div><h2>Customer Accounts</h2><p>Manage commercial and repeat customer accounts, balances, and invoices.</p></div></div>
+      
+<div class="panel" id="enquiries-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <h3>📥 Pending Enquiries <span id="enquiry-badge" style="background:var(--wine-500);color:#fff;font-size:10px;padding:2px 7px;border-radius:100px;margin-left:6px;">0</span></h3>
+    <span style="font-size:12px;color:var(--text-dim);">From the public website contact form</span>
+  </div>
+  <div id="enquiries-list"><p style="color:var(--text-faint);font-size:13px;">No pending enquiries.</p></div>
+</div>
+
       <div class="two-col">
         <div class="panel">
           <h3>Add Customer Account</h3>
@@ -885,6 +985,25 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 <!-- Receipt Print Area -->
 <div id="receipt-print-area"></div>
 
+<!-- NPA Import Modal -->
+<div id="npa-modal" style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);">
+  <div style="background:#16181c;border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:28px 30px;width:100%;max-width:480px;position:relative;">
+    <button onclick="document.getElementById('npa-modal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;">✕</button>
+    <h3 style="margin-bottom:4px;">📋 Import NPA Bulletin</h3>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px;">Enter the new NPA-published prices. Click Apply to fill the pricing panel — you still need to hit Save Prices to publish.</p>
+    <div class="form-grid-2">
+      <div class="field"><label>3 kg (GH₵)</label><input type="number" step="0.01" id="npa-3kg" placeholder="e.g. 45.00"></div>
+      <div class="field"><label>6 kg (GH₵)</label><input type="number" step="0.01" id="npa-6kg" placeholder="e.g. 90.00"></div>
+      <div class="field"><label>13 kg (GH₵)</label><input type="number" step="0.01" id="npa-13kg" placeholder="e.g. 195.00"></div>
+      <div class="field"><label>14.5 kg (GH₵)</label><input type="number" step="0.01" id="npa-145kg" placeholder="e.g. 217.50"></div>
+      <div class="field"><label>Autogas / litre (GH₵)</label><input type="number" step="0.01" id="npa-autogas" placeholder="e.g. 12.50"></div>
+      <div class="field"><label>Bulk per kg (GH₵)</label><input type="number" step="0.01" id="npa-bulk" placeholder="e.g. 15.00"></div>
+    </div>
+    <div class="field"><label>Source / Reference</label><input id="npa-ref" placeholder="e.g. NPA Bulletin July 2026"></div>
+    <button class="btn btn-primary btn-block" onclick="applyNPABulletin()">Apply to Pricing Panel</button>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════
 //  TRIPLE A GAS — ADMIN PORTAL JAVASCRIPT ENGINE
@@ -911,6 +1030,7 @@ function getDefaultDB() {
     shiftNotes:[], presence:[], cameras:[], compliance:{}, dsRequests:[], purchases:[],
     expenses:[], vehicles:[], trips:[], maintenance:[],
     customers:[], orders:[], suppliers:[], purchaseOrders:[],
+    stockCounts:[], enquiries:[], stationStatuses:{},
     payroll:[
       {id:'pay1',staffId:'s1',staffName:'Kofi Asante',month:'2026-07',outlet:'Accra',baseSalary:1200,bonus:150,deductions:80,netPay:1270,paid:true,paidDate:'2026-07-28'},
       {id:'pay2',staffId:'s2',staffName:'Ama Owusu',month:'2026-07',outlet:'Antoa',baseSalary:950,bonus:0,deductions:50,netPay:900,paid:false,paidDate:''},
@@ -971,6 +1091,34 @@ function exportCSV(data,filename){
   URL.revokeObjectURL(url);
 }
 
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function checkMobile() {
+  const tb = document.getElementById('mobileTopbar');
+  if (tb) tb.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+}
+window.addEventListener('resize', checkMobile);
+document.addEventListener('DOMContentLoaded', checkMobile);
+
+function getMonthRevenue(purchases, monthOffset) {
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() - monthOffset, 1);
+  const end = new Date(now.getFullYear(), now.getMonth() - monthOffset + 1, 0);
+  return (purchases||[]).filter(p => {
+    const d = new Date(p.time || p.date || 0);
+    return d >= target && d <= end;
+  }).reduce((sum, p) => sum + (Number(p.amount)||0), 0);
+}
+
+function trendBadge(current, previous) {
+  if (!previous) return '';
+  const pct = ((current - previous) / previous * 100).toFixed(1);
+  const up = current >= previous;
+  return `<span style="font-size:11px;font-family:var(--mono);margin-left:8px;color:${up?'var(--safe)':'var(--danger)'}">${up?'↑':'↓'} ${Math.abs(pct)}%</span>`;
+}
+
 // ── Chart helpers ─────────────────────────────────────────
 function makeChart(id,type,labels,datasets,opts={}){
   if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; }
@@ -1026,7 +1174,14 @@ function showView(id){
   });
 
   // Lazy render charts
-  setTimeout(()=>{ if(id==='dashboard')renderDashboardCharts(); if(id==='finance')renderFinanceCharts(); if(id==='reports')renderReportCharts(); if(id==='payroll')renderPayrollChart(); },80);
+  setTimeout(()=>{ 
+    if(id==='dashboard') { renderDashboardCharts(); renderLeaderboard(); renderStationStatusControl(); }
+    if(id==='finance') renderFinanceCharts(); 
+    if(id==='reports') renderReportCharts(); 
+    if(id==='payroll') renderPayrollChart(); 
+    if(id==='stockcount') renderStockCounts();
+    if(id==='customers') renderEnquiries();
+  },80);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1082,6 +1237,34 @@ function renderDashboardCharts(){
 // ══════════════════════════════════════════════════════════
 function computeAlerts(){
   const alerts=[];
+
+  // Critical stock (< 5 units)
+  (DB.inventory||[]).forEach(item => {
+    if ((item.qty||0) < 5) {
+      const id = `stock_${item.outlet}_${item.size}`;
+      if(!dismissedAlerts.has(id)) alerts.push({ id, kind:'danger', title: `${item.outlet}: ${item.size} critically low`, sub: `Only ${item.qty} remaining` });
+    }
+  });
+
+  // Licence expiring within 30 days
+  (DB.licences||[]).forEach(lic => {
+    if (!lic.expiryDate) return;
+    const days = Math.ceil((new Date(lic.expiryDate) - new Date()) / 86400000);
+    if (days <= 30 && days > 0) {
+      const id = `lic_${lic.id}`;
+      if(!dismissedAlerts.has(id)) alerts.push({ id, kind:'warn', title:`${lic.type||'Licence'} (${lic.outlet}) expires in ${days} day${days!==1?'s':''}`, sub: `${lic.number||''}` });
+    } else if (days <= 0) {
+      const id = `lic_expired_${lic.id}`;
+      if(!dismissedAlerts.has(id)) alerts.push({ id, kind:'danger', title:`${lic.type||'Licence'} (${lic.outlet}) has EXPIRED`, sub: `Renew immediately` });
+    }
+  });
+
+  // Worker incident (from presence/shift notes with 'incident' keyword)
+  (DB.shiftNotes||[]).filter(n => (n.note||'').toLowerCase().includes('incident') || (n.priority||'').toLowerCase() === 'urgent').forEach(n => {
+    const id = `incident_${n.id}`;
+    if(!dismissedAlerts.has(id)) alerts.push({ id, kind:'danger', title: `Worker incident reported at ${n.outlet}`, sub: `By ${n.staff}: "${(n.note||'').substring(0,60)}..."` });
+  });
+
   // Low/critical inventory
   DB.inventory.forEach(i=>{
     const thresh=THRESHOLDS[i.size]||5;
@@ -1164,10 +1347,17 @@ function renderFinance(){
   const profit=revenue-expTotal;
   const margin=revenue?((profit/revenue)*100):0;
 
+  const thisMonthRev = getMonthRevenue(purchases, 0);
+  const lastMonthRev = getMonthRevenue(DB.purchases.filter(p=>!sc||p.outlet===sc), 1);
+  const thisMonthExp = getMonthRevenue(expenses, 0);
+  const lastMonthExp = getMonthRevenue(DB.expenses.filter(e=>!sc||e.outlet===sc), 1);
+  const thisMonthProfit = thisMonthRev - thisMonthExp;
+  const lastMonthProfit = lastMonthRev - lastMonthExp;
+
   document.getElementById('financeStats').innerHTML=`
-    <div class="stat-card"><div class="n gold">${gh(revenue)}</div><div class="l">Total Revenue</div></div>
-    <div class="stat-card"><div class="n danger">${gh(expTotal)}</div><div class="l">Total Expenses</div></div>
-    <div class="stat-card"><div class="n ${profit>=0?'safe':'danger'}">${gh(profit)}</div><div class="l">Gross Profit</div></div>
+    <div class="stat-card"><div class="n gold">${gh(revenue)}${trendBadge(thisMonthRev, lastMonthRev)}</div><div class="l">Total Revenue</div></div>
+    <div class="stat-card"><div class="n danger">${gh(expTotal)}${trendBadge(thisMonthExp, lastMonthExp)}</div><div class="l">Total Expenses</div></div>
+    <div class="stat-card"><div class="n ${profit>=0?'safe':'danger'}">${gh(profit)}${trendBadge(thisMonthProfit, lastMonthProfit)}</div><div class="l">Gross Profit</div></div>
     <div class="stat-card"><div class="n ${margin>=0?'gold':'danger'}">${margin.toFixed(1)}%</div><div class="l">Profit Margin</div></div>
   `;
 
@@ -1819,6 +2009,212 @@ function renderAll(){
   renderPresence();renderCompliance();renderPurchases();renderReports();
   renderFleet();renderCustomers();renderSuppliers();renderPayroll();
   renderLicences();renderAlerts();renderFinance();renderPricing();
+  if (typeof renderStockCounts === 'function') renderStockCounts();
+  if (typeof renderEnquiries === 'function') renderEnquiries();
+  if (typeof renderStationStatusControl === 'function') renderStationStatusControl();
+  if (typeof renderLeaderboard === 'function') renderLeaderboard();
+}
+
+function submitStockCount() {
+  const record = {
+    id: 'sc_' + Date.now(),
+    outlet: document.getElementById('sc-outlet').value,
+    date: document.getElementById('sc-date').value || new Date().toISOString().split('T')[0],
+    shift: document.getElementById('sc-shift').value,
+    type: document.getElementById('sc-type').value,
+    staff: document.getElementById('sc-staff').value || (currentUser ? currentUser.name : 'Staff'),
+    counts: {
+      '3kg': parseInt(document.getElementById('sc-3kg').value)||0,
+      '6kg': parseInt(document.getElementById('sc-6kg').value)||0,
+      '13kg': parseInt(document.getElementById('sc-13kg').value)||0,
+      '14.5kg': parseInt(document.getElementById('sc-14kg').value)||0,
+      'bulk': parseFloat(document.getElementById('sc-bulk').value)||0
+    },
+    notes: document.getElementById('sc-notes').value
+  };
+  if (!DB.stockCounts) DB.stockCounts = [];
+  DB.stockCounts.push(record);
+  saveToLocal();
+  if (typeof firestoreAddStockCount === 'function') firestoreAddStockCount(record);
+  renderStockCounts();
+  toast('Stock count saved.');
+}
+
+function renderStockCounts() {
+  if (!DB.stockCounts) DB.stockCounts = [];
+  const tbody = document.getElementById('sc-history-body');
+  if (!tbody) return;
+  if (!DB.stockCounts.length) { tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-faint);">No counts logged yet.</td></tr>'; return; }
+  const sorted = [...DB.stockCounts].reverse();
+  tbody.innerHTML = sorted.map(s => `<tr>
+    <td>${esc(s.date)}</td><td>${esc(s.outlet)}</td><td>${esc(s.shift)}</td>
+    <td><span class="badge ${s.type==='Opening'?'badge-safe':'badge-warn'}">${esc(s.type)}</span></td>
+    <td class="mono">${s.counts['3kg']||0}</td><td class="mono">${s.counts['6kg']||0}</td>
+    <td class="mono">${s.counts['13kg']||0}</td><td class="mono">${s.counts['14.5kg']||0}</td>
+    <td class="mono">${s.counts['bulk']||0} MT</td>
+    <td>${esc(s.staff)}</td><td style="color:var(--text-dim);font-size:12px;">${esc(s.notes||'—')}</td>
+  </tr>`).join('');
+
+  const discDiv = document.getElementById('sc-discrepancy-table');
+  if (!discDiv) return;
+  const today = new Date().toISOString().split('T')[0];
+  const todayCounts = DB.stockCounts.filter(s => s.date === today);
+  const outlets = [...new Set(todayCounts.map(s=>s.outlet))];
+  let rows = '';
+  outlets.forEach(outlet => {
+    const opening = todayCounts.find(s=>s.outlet===outlet&&s.type==='Opening');
+    const closing = todayCounts.find(s=>s.outlet===outlet&&s.type==='Closing');
+    if (opening && closing) {
+      ['3kg','6kg','13kg','14.5kg'].forEach(size => {
+        const diff = (closing.counts[size]||0) - (opening.counts[size]||0);
+        const color = diff < -2 ? 'var(--danger)' : diff >= 0 ? 'var(--safe)' : 'var(--warn)';
+        rows += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span>${esc(outlet)} · ${size}</span><span style="font-family:var(--mono);color:${color};">${diff >= 0 ? '+' : ''}${diff}</span></div>`;
+      });
+    }
+  });
+  discDiv.innerHTML = rows || '<p style="color:var(--text-faint);font-size:13px;">Log both an opening and closing count for the same outlet to see discrepancies.</p>';
+}
+
+function applyNPABulletin() {
+  const fields = {
+    '3kg':    document.getElementById('npa-3kg'),
+    '6kg':    document.getElementById('npa-6kg'),
+    '13kg':   document.getElementById('npa-13kg'),
+    '14.5kg': document.getElementById('npa-145kg'),
+    'autogas':document.getElementById('npa-autogas'),
+    'bulk_per_kg': document.getElementById('npa-bulk')
+  };
+  const mapping = {
+    '3kg': 'price3kg', '6kg': 'price6kg', '13kg': 'price13kg',
+    '14.5kg': 'price14kg', 'autogas': 'priceAutogas', 'bulk_per_kg': 'priceBulk'
+  };
+  let applied = 0;
+  Object.entries(fields).forEach(([key, el]) => {
+    if (el && el.value) {
+      const target = document.getElementById(mapping[key]);
+      if (target) { target.value = el.value; applied++; }
+    }
+  });
+  document.getElementById('npa-modal').style.display = 'none';
+  toast(`NPA bulletin applied — ${applied} prices filled.`);
+}
+
+function renderEnquiries() {
+  if (!DB.enquiries) DB.enquiries = [];
+  const pending = DB.enquiries.filter(e => !e.reviewed);
+  const badgeEl = document.getElementById('enquiry-badge');
+  if (badgeEl) badgeEl.textContent = pending.length;
+  const list = document.getElementById('enquiries-list');
+  if (!list) return;
+  if (!pending.length) { list.innerHTML = '<p style="color:var(--text-faint);font-size:13px;">No pending enquiries.</p>'; return; }
+  list.innerHTML = pending.map(e => `
+    <div style="padding:14px;background:rgba(255,255,255,0.04);border-radius:12px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div>
+          <div style="font-weight:600;color:#fff;margin-bottom:2px;">${esc(e.company||e.name)} <span style="font-size:11px;color:var(--text-dim);">${esc(e.contact||'')}</span></div>
+          <div style="font-size:12px;color:var(--text-dim);">${esc(e.phone||'')} · ${esc(e.location||'')}</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">Usage: ${esc(e.usage||'—')} · ${esc(e.schedule||'—')}</div>
+          <div style="font-size:12px;color:var(--text-faint);margin-top:4px;">${esc(e.notes||'')}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button class="btn btn-sm btn-safe" onclick="convertEnquiryToCustomer('${e.id}')">+ Customer</button>
+          <button class="btn btn-sm btn-ghost" onclick="dismissEnquiry('${e.id}')">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function convertEnquiryToCustomer(id) {
+  const e = (DB.enquiries||[]).find(x=>x.id===id);
+  if (!e) return;
+  const fields = {
+    'customerForm [name="name"]': e.company||e.name,
+    'customerForm [name="contact"]': e.contact||'',
+    'customerForm [name="phone"]': e.phone||'',
+    'customerForm [name="address"]': e.location||''
+  };
+  Object.entries(fields).forEach(([sel, val]) => {
+    const el = document.querySelector(`#${sel}`);
+    if (el) el.value = val;
+  });
+  dismissEnquiry(id);
+  toast('Enquiry data pre-filled in Add Customer form.');
+}
+
+function dismissEnquiry(id) {
+  if (!DB.enquiries) return;
+  const e = DB.enquiries.find(x=>x.id===id);
+  if (e) {
+    e.reviewed = true;
+    saveToLocal();
+    if (typeof firestoreMarkEnquiryReviewed === 'function') firestoreMarkEnquiryReviewed(id);
+    renderEnquiries();
+  }
+}
+
+const STATUS_OPTIONS = [
+  { value:'open', label:'🟢 Open', color:'var(--safe)' },
+  { value:'limited', label:'🟡 Limited Stock', color:'var(--warn)' },
+  { value:'closed', label:'🔴 Closed', color:'var(--danger)' }
+];
+
+function renderStationStatusControl() {
+  const grid = document.getElementById('station-status-grid');
+  if (!grid) return;
+  if (!DB.stationStatuses) DB.stationStatuses = {};
+  grid.innerHTML = OUTLETS.map(s => {
+    const current = DB.stationStatuses[s] || 'open';
+    return \`<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;">\${s}</div>
+      \${STATUS_OPTIONS.map(o => \`<label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;margin-bottom:6px;">
+        <input type="radio" name="status-\${s}" value="\${o.value}" \${current===o.value?'checked':''} style="accent-color:var(--wine-500);">
+        \${o.label}
+      </label>\`).join('')}
+    </div>\`;
+  }).join('');
+}
+
+function saveStationStatuses() {
+  if (!DB.stationStatuses) DB.stationStatuses = {};
+  OUTLETS.forEach(s => {
+    const sel = document.querySelector(\`input[name="status-\${s}"]:checked\`);
+    if (sel) DB.stationStatuses[s] = sel.value;
+  });
+  saveToLocal();
+  if (typeof firestoreSetStationStatus === 'function') firestoreSetStationStatus(DB.stationStatuses);
+  toast('Station statuses published to public website.');
+}
+
+function renderLeaderboard() {
+  const el = document.getElementById('leaderboard-list');
+  if (!el) return;
+  const now = new Date();
+  const weekAgo = new Date(now - 7*24*60*60*1000);
+  const weekPurchases = (DB.purchases||[]).filter(p => new Date(p.time||p.date||0) >= weekAgo);
+
+  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  const stationData = OUTLETS.map(s => ({
+    name: s,
+    revenue: weekPurchases.filter(p=>p.outlet===s).reduce((sum,p)=>sum+(Number(p.amount)||0),0),
+    txns: weekPurchases.filter(p=>p.outlet===s).length
+  })).sort((a,b) => b.revenue - a.revenue);
+
+  const maxRev = stationData[0]?.revenue || 1;
+
+  el.innerHTML = stationData.map((s,i) => \`
+    <div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <span style="font-size:20px;width:28px;text-align:center;">\${medals[i]}</span>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:600;font-size:13px;">\${s.name}</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--gold);">\${gh(s.revenue)}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:\${(s.revenue/maxRev*100).toFixed(1)}%;background:\${i===0?'var(--gold)':'var(--wine-500)'};"></div></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">\${s.txns} transaction\${s.txns!==1?'s':''}</div>
+      </div>
+    </div>
+  \`).join('');
 }
 
 // ══════════════════════════════════════════════════════════

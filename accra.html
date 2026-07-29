@@ -577,6 +577,8 @@
     </div>
   </section>
 
+<!-- Station Status Badge -->
+<div id="station-status-bar" style="display:none;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace;letter-spacing:0.04em;"></div>
 
   <!-- ===== SECTION 1: KEY STATS ===== -->
   <section class="section section-alt">
@@ -1113,5 +1115,30 @@ const obs = new IntersectionObserver(entries => {
 revealEls.forEach(el => obs.observe(el));
 </script>
 
+<script>
+// Station status from Firestore
+(async function() {
+  const STATION_NAME = 'Accra'; // Change per file
+  const bar = document.getElementById('station-status-bar');
+  if (!bar) return;
+  try {
+    if (typeof initFirebase === 'function') initFirebase();
+    await new Promise(r => setTimeout(r, 900));
+    if (typeof db === 'undefined' || !db) return;
+    const doc = await db.collection('settings').doc('stationStatus').get();
+    if (!doc.exists) return;
+    const data = doc.data();
+    const status = data[STATION_NAME] || 'open';
+    const configs = {
+      open:    { text: '🟢 Station Open — Serving customers now', bg: 'rgba(46,125,50,0.1)', color: '#2E7D32', border: 'rgba(46,125,50,0.3)' },
+      limited: { text: '🟡 Limited Stock — Some products may be unavailable', bg: 'rgba(217,154,43,0.12)', color: '#9A6F00', border: 'rgba(217,154,43,0.4)' },
+      closed:  { text: '🔴 Station Closed — Please check our other locations', bg: 'rgba(198,40,40,0.1)', color: '#C62828', border: 'rgba(198,40,40,0.3)' }
+    };
+    const cfg = configs[status] || configs.open;
+    bar.textContent = cfg.text;
+    bar.style.cssText += `;background:${cfg.bg};color:${cfg.color};border-top:1px solid ${cfg.border};border-bottom:1px solid ${cfg.border};display:block;`;
+  } catch(e) { /* status bar stays hidden */ }
+})();
+</script>
 </body>
 </html>

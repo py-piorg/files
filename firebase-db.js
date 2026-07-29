@@ -310,7 +310,82 @@ async function firestoreUpdateLicence(licenceId, updates) {
   } catch (e) { console.error("Firestore updateLicence error:", e); return null; }
 }
 
-// ── Auto Init on script load ───────────────────────────────────────────────
+// ── NEW: Stock Counts ───────────────────────────────────────────────────────────────────────────────────────
+async function firestoreAddStockCount(record) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('stockCounts').add({
+      ...record,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...record };
+  } catch (e) { console.error('Firestore addStockCount error:', e); return null; }
+}
+
+// ── NEW: Enquiries (from public contact form) ───────────────────────────────────────────────
+async function firestoreAddEnquiry(enquiry) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('enquiries').add({
+      ...enquiry,
+      reviewed: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...enquiry };
+  } catch (e) { console.error('Firestore addEnquiry error:', e); return null; }
+}
+
+async function firestoreMarkEnquiryReviewed(enquiryId) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    await db.collection('enquiries').doc(enquiryId).update({
+      reviewed: true,
+      reviewedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: enquiryId, reviewed: true };
+  } catch (e) { console.error('Firestore markEnquiryReviewed error:', e); return null; }
+}
+
+// ── NEW: Station Status ──────────────────────────────────────────────────────────────────────────────
+async function firestoreSetStationStatus(statuses) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    await db.collection('settings').doc('stationStatus').set(
+      { ...statuses, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    console.log('✅ Station statuses published to Firestore.');
+    return statuses;
+  } catch (e) { console.error('Firestore setStationStatus error:', e); return null; }
+}
+
+async function firestoreGetStationStatus() {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const doc = await db.collection('settings').doc('stationStatus').get();
+    if (doc.exists) return doc.data();
+  } catch (e) { console.warn('Could not fetch station status:', e); }
+  return null;
+}
+
+// ── NEW: Alert Log ─────────────────────────────────────────────────────────────────────────────────────────
+async function firestoreLogAlert(alert) {
+  if (!isFirebaseInitialized || !db) return null;
+  try {
+    const docRef = await db.collection('alertLog').add({
+      ...alert,
+      loggedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return { id: docRef.id, ...alert };
+  } catch (e) { console.error('Firestore logAlert error:', e); return null; }
+}
+
+// Also extend syncFirestoreData to pull enquiries and stockCounts
+// (the existing syncFirestoreData already pulls all collections listed;
+//  'enquiries' and 'stockCounts' will be picked up automatically since
+//  they are in the collections array above)
+
+// ── Auto Init on script load ─────────────────────────────────────────────────────────────────────────────────
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', initFirebase);
 }
