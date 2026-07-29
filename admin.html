@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2254,54 +2254,65 @@ function logout(){
 //  EVENT LISTENERS & INIT
 // ══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',function(){
+  function safeOn(id, evt, fn){ const el=document.getElementById(id); if(el) el.addEventListener(evt,fn); }
+
   // Mobile sidebar
   const menu=document.getElementById('menuBtn');
   const overlay=document.getElementById('overlay');
   const sidebar=document.getElementById('sidebar');
-  if(menu){menu.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});}
-  if(overlay){overlay.addEventListener('click',()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});}
-  window.addEventListener('resize',()=>{if(window.innerWidth>900){sidebar.classList.remove('open');overlay.classList.remove('show');}});
+  if(menu && sidebar && overlay){
+    menu.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});
+    overlay.addEventListener('click',()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});
+    window.addEventListener('resize',()=>{if(window.innerWidth>900){sidebar.classList.remove('open');overlay.classList.remove('show');}});
+  }
 
   // Nav buttons
-  document.querySelectorAll('.navlist button[data-view]').forEach(btn=>{btn.addEventListener('click',()=>{showView(btn.dataset.view);if(window.innerWidth<=900){sidebar.classList.remove('open');overlay.classList.remove('show');}});});
+  document.querySelectorAll('.navlist button[data-view]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      showView(btn.dataset.view);
+      if(window.innerWidth<=900 && sidebar && overlay){sidebar.classList.remove('open');overlay.classList.remove('show');}
+    });
+  });
 
-  // Auth
-  document.getElementById('loginForm').addEventListener('submit',ev=>{ev.preventDefault();doLogin();});
-  document.getElementById('logoutBtn').addEventListener('click',logout);
+  // Auth — MUST be first and wrapped defensively
+  const loginForm = document.getElementById('loginForm');
+  if(loginForm) loginForm.addEventListener('submit',ev=>{ev.preventDefault();doLogin();});
+  safeOn('logoutBtn','click',logout);
 
   // Forms
-  document.getElementById('deliveryForm').addEventListener('submit',addDelivery);
-  document.getElementById('inspectionForm').addEventListener('submit',addInspection);
-  document.getElementById('shiftNoteForm').addEventListener('submit',addShiftNote);
-  document.getElementById('purchaseForm').addEventListener('submit',addPurchase);
-  document.getElementById('purchaseQty').addEventListener('input',updatePurchaseAmount);
-  document.getElementById('purchaseUnitPrice').addEventListener('input',updatePurchaseAmount);
-  document.getElementById('staffForm').addEventListener('submit',addStaff);
-  document.getElementById('retentionForm').addEventListener('submit',saveRetention);
-  document.getElementById('dsRequestForm').addEventListener('submit',addDsRequest);
-  document.getElementById('vehicleForm').addEventListener('submit',addVehicle);
-  document.getElementById('tripForm').addEventListener('submit',addTrip);
-  document.getElementById('maintenanceForm').addEventListener('submit',addMaintenance);
-  document.getElementById('customerForm').addEventListener('submit',addCustomer);
-  document.getElementById('orderForm').addEventListener('submit',addOrder);
-  document.getElementById('supplierForm').addEventListener('submit',addSupplier);
-  document.getElementById('poForm').addEventListener('submit',addPO);
-  document.getElementById('payrollForm').addEventListener('submit',addPayrollRecord);
-  document.getElementById('licenceForm').addEventListener('submit',addLicence);
-  document.getElementById('expenseForm').addEventListener('submit',addExpense);
-  document.getElementById('pricingForm').addEventListener('submit',savePricing);
-  document.getElementById('restockForm').addEventListener('submit',addRestock);
+  safeOn('deliveryForm','submit',addDelivery);
+  safeOn('inspectionForm','submit',addInspection);
+  safeOn('shiftNoteForm','submit',addShiftNote);
+  safeOn('purchaseForm','submit',addPurchase);
+  safeOn('purchaseQty','input',updatePurchaseAmount);
+  safeOn('purchaseUnitPrice','input',updatePurchaseAmount);
+  safeOn('staffForm','submit',addStaff);
+  safeOn('retentionForm','submit',saveRetention);
+  safeOn('dsRequestForm','submit',addDsRequest);
+  safeOn('vehicleForm','submit',addVehicle);
+  safeOn('tripForm','submit',addTrip);
+  safeOn('maintenanceForm','submit',addMaintenance);
+  safeOn('customerForm','submit',addCustomer);
+  safeOn('orderForm','submit',addOrder);
+  safeOn('supplierForm','submit',addSupplier);
+  safeOn('poForm','submit',addPO);
+  safeOn('payrollForm','submit',addPayrollRecord);
+  safeOn('licenceForm','submit',addLicence);
+  safeOn('expenseForm','submit',addExpense);
+  safeOn('pricingForm','submit',savePricing);
+  safeOn('restockForm','submit',addRestock);
 
   // Payroll net pay auto-calc
   ['payBaseSalary','payDeductions'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',calcNetPay);});
   const bonInput=document.querySelector('#payrollForm input[name="bonus"]');if(bonInput)bonInput.addEventListener('input',calcNetPay);
 
-  // Simulate match
-  document.getElementById('simulateMatchBtn').addEventListener('click',simulateMatch);
-  document.getElementById('manualClockInBtn').addEventListener('click',manualClockIn);
+  // Simulate match / manual clock-in
+  safeOn('simulateMatchBtn','click',simulateMatch);
+  safeOn('manualClockInBtn','click',manualClockIn);
 
   // PO total auto-calc
-  document.getElementById('poForm').addEventListener('input',()=>{
+  const poFormEl=document.getElementById('poForm');
+  if(poFormEl) poFormEl.addEventListener('input',()=>{
     const qty=parseFloat(document.querySelector('#poForm input[name="qty"]')?.value)||0;
     const uc=parseFloat(document.getElementById('poUnitCost')?.value)||0;
     const el=document.getElementById('poTotal');if(el)el.textContent=`GH₵ ${(qty*uc).toFixed(2)}`;
@@ -2313,8 +2324,8 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('deliveryRevenue')?.addEventListener('input',()=>{const el=document.getElementById('deliveryRevenue');if(el)el._manuallyEdited=true;});
 
   // Date range buttons
-  document.querySelectorAll('#financeDateBtns button').forEach(b=>b.dataset.range=b.getAttribute('onclick').match(/'([^']+)'/)?.[1]||'');
-  document.querySelectorAll('#reportDateBtns button').forEach(b=>b.dataset.range=b.getAttribute('onclick').match(/'([^']+)'/)?.[1]||'');
+  document.querySelectorAll('#financeDateBtns button').forEach(b=>b.dataset.range=b.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||'');
+  document.querySelectorAll('#reportDateBtns button').forEach(b=>b.dataset.range=b.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]||'');
 });
 </script>
 </body>
