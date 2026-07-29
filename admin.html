@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2165,20 +2165,20 @@ function renderStationStatusControl() {
   if (!DB.stationStatuses) DB.stationStatuses = {};
   grid.innerHTML = OUTLETS.map(s => {
     const current = DB.stationStatuses[s] || 'open';
-    return \`<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.08);">
+    return `<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.08);">
       <div style="font-weight:700;font-size:13px;margin-bottom:10px;">\${s}</div>
-      \${STATUS_OPTIONS.map(o => \`<label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;margin-bottom:6px;">
+      \${STATUS_OPTIONS.map(o => `<label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;margin-bottom:6px;">
         <input type="radio" name="status-\${s}" value="\${o.value}" \${current===o.value?'checked':''} style="accent-color:var(--wine-500);">
         \${o.label}
-      </label>\`).join('')}
-    </div>\`;
+      </label>`).join('')}
+    </div>`;
   }).join('');
 }
 
 function saveStationStatuses() {
   if (!DB.stationStatuses) DB.stationStatuses = {};
   OUTLETS.forEach(s => {
-    const sel = document.querySelector(\`input[name="status-\${s}"]:checked\`);
+    const sel = document.querySelector(`input[name="status-\${s}"]:checked`);
     if (sel) DB.stationStatuses[s] = sel.value;
   });
   saveToLocal();
@@ -2202,7 +2202,7 @@ function renderLeaderboard() {
 
   const maxRev = stationData[0]?.revenue || 1;
 
-  el.innerHTML = stationData.map((s,i) => \`
+  el.innerHTML = stationData.map((s,i) => `
     <div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
       <span style="font-size:20px;width:28px;text-align:center;">\${medals[i]}</span>
       <div style="flex:1;">
@@ -2214,7 +2214,7 @@ function renderLeaderboard() {
         <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">\${s.txns} transaction\${s.txns!==1?'s':''}</div>
       </div>
     </div>
-  \`).join('');
+  `).join('');
 }
 
 // ══════════════════════════════════════════════════════════
