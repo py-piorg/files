@@ -209,7 +209,11 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .alert-item .al-title{font-size:13.5px;color:#fff;font-weight:500;margin-bottom:3px;}
 .alert-item .al-sub{font-size:11.5px;color:var(--text-dim);}
 .alert-empty{text-align:center;padding:40px;color:var(--text-faint);}
-
+.kiosk-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:24px;z-index:2000;}
+.kiosk-card{width:min(900px,100%);max-height:90vh;overflow:auto;background:rgba(16,18,22,0.97);border:1px solid var(--border-strong);border-radius:24px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.45);}
+.kiosk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px;}
+.kiosk-grid .stat-card{padding:16px;}
+  
 /* ── Responsive ── */
 #menuBtn{display:none;position:fixed;top:12px;left:12px;z-index:1200;border:none;background:var(--panel-solid);color:var(--text);padding:8px 10px;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.5);}
 .overlay{display:none;pointer-events:none;}
@@ -299,6 +303,15 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 <!-- ═══════════════════════════════════ SHELL ═══════════════════════════════════ -->
 <div id="shell" class="shell" style="display:none;">
+<div id="kioskModal" class="kiosk-modal" onclick="if (event.target.id === 'kioskModal') closeKioskMode()">
+  <div class="kiosk-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+      <h3>🖥 HQ Kiosk Mode</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeKioskMode()">Close</button>
+    </div>
+    <div id="kioskContent"></div>
+  </div>
+</div>
 <div class="mobile-topbar" style="display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(16,18,22,0.97);border-bottom:1px solid rgba(255,255,255,0.1);position:sticky;top:0;z-index:90;" id="mobileTopbar">
   <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Open menu">
     <span></span><span></span><span></span>
@@ -366,6 +379,13 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div><h2>Operational Overview</h2><p>Live snapshot of stock, revenue, compliance, and alerts across all stations.</p></div>
       </div>
       <div id="dashStats" class="stat-grid"></div>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h3>🧠 Outlet Health Scorecards</h3>
+          <button class="btn btn-ghost btn-sm" onclick="openKioskMode()">🖥 HQ Kiosk</button>
+        </div>
+        <div id="healthCards" class="three-col"></div>
+      </div>
       <div class="two-col">
         <div>
           <div class="panel">
@@ -393,6 +413,146 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         </div>
       </div>
 
+      <div class="two-col" style="margin-top:20px;">
+        <div class="panel">
+          <h3>📦 Restocking Signals</h3>
+          <div id="restockSignals"></div>
+        </div>
+        <div class="panel">
+          <h3>⚡ Mobile Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="btn btn-ghost btn-sm" onclick="showView('deliveries')">Log Delivery</button>
+            <button class="btn btn-ghost btn-sm" onclick="showView('inventory')">Restock Stock</button>
+            <button class="btn btn-ghost btn-sm" onclick="quickClockIn()">Clock In</button>
+            <button class="btn btn-ghost btn-sm" onclick="showView('inspections')">Log Inspection</button>
+          </div>
+          <div id="quickActionSummary" style="font-size:12px;color:var(--text-dim);"></div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:20px;">
+        <div class="panel">
+          <h3>🚨 Incident &amp; Task Board</h3>
+          <form id="incidentForm" onsubmit="addOperationsTask(event)" class="form-grid-3">
+            <div class="field field-m0"><label>Station</label><select name="outlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+            <div class="field field-m0"><label>Title</label><input type="text" name="title" placeholder="e.g. Camera offline"></div>
+            <div class="field field-m0"><label>Severity</label><select name="severity"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+            <div class="field field-m0"><label>Owner</label><input type="text" name="owner" placeholder="Supervisor"></div>
+            <div class="field field-m0"><label>Due</label><input type="date" name="due"></div>
+            <div class="field field-m0"><label>Notes</label><input type="text" name="notes" placeholder="Short note"></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 3;">Add Incident</button>
+          </form>
+          <div id="incidentBoard" style="margin-top:14px;"></div>
+        </div>
+        <div class="panel">
+          <h3>🛠 Shift Handover Summary</h3>
+          <div class="field field-m0"><label>Station</label><select id="handoverOutlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+          <div class="field field-m0"><label>Summary</label><textarea id="handoverSummary" placeholder="Capture the key handover points for the next shift..."></textarea></div>
+          <div class="quick-actions">
+            <button class="btn btn-ghost btn-sm" onclick="generateHandoverSummary()">Generate Summary</button>
+            <button class="btn btn-primary btn-sm" onclick="saveHandoverSummary()">Save Handover</button>
+          </div>
+          <div id="handoverList"></div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:20px;">
+        <div class="panel">
+          <h3>📅 Compliance Calendar</h3>
+          <div id="complianceCalendar"></div>
+        </div>
+        <div class="panel">
+          <h3>🏢 Customer Intelligence</h3>
+          <div id="customerIntel"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h3>🧭 Command Center Controls</h3>
+          <button class="btn btn-gold btn-sm" onclick="generateAISummary()">🧠 AI Summary</button>
+        </div>
+        <div class="two-col">
+          <div class="panel" style="background:rgba(63,162,74,0.06);border-color:rgba(63,162,74,0.2);margin-bottom:0;">
+            <h3>✅ Approval Workflow</h3>
+            <form id="approvalForm" onsubmit="submitApproval(event)" class="form-grid-2">
+              <div class="field field-m0"><label>Station</label><select name="outlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+              <div class="field field-m0"><label>Type</label><select name="requestType"><option value="expense">Expense</option><option value="inventory">Inventory</option><option value="task">Task Closure</option><option value="incident">Incident</option></select></div>
+              <div class="field field-m0"><label>Title</label><input type="text" name="title" placeholder="e.g. Emergency fuel top-up"></div>
+              <div class="field field-m0"><label>Requested By</label><input type="text" name="requestedBy" placeholder="Supervisor"></div>
+              <div class="field field-m0"><label>Priority</label><select name="priority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+              <div class="field field-m0"><label>Amount (GH₵)</label><input type="number" name="amount" min="0" step="0.01" value="0"></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>Notes</label><input type="text" name="notes" placeholder="Context for approval"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Queue Approval</button>
+            </form>
+            <div id="approvalQueue" style="margin-top:14px;"></div>
+          </div>
+          <div class="panel" style="background:rgba(199,154,61,0.06);border-color:rgba(199,154,61,0.2);margin-bottom:0;">
+            <h3>🧾 Audit Trail</h3>
+            <div id="auditTrailList"></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:20px;">
+          <div class="panel" style="background:rgba(224,82,71,0.05);border-color:rgba(224,82,71,0.2);margin-bottom:0;">
+            <h3>📱 Offline Mobile Capture</h3>
+            <form id="mobileCaptureForm" onsubmit="submitMobileCapture(event)" class="form-grid-2">
+              <div class="field field-m0"><label>Station</label><select name="outlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+              <div class="field field-m0"><label>Capture Type</label><select name="captureType"><option value="delivery">Delivery</option><option value="stock">Stock Count</option><option value="inspection">Inspection</option><option value="incident">Incident</option></select></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>Notes</label><input type="text" name="notes" placeholder="Capture details while offline"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Queue Offline Capture</button>
+            </form>
+            <div id="mobileCaptureList" style="margin-top:14px;"></div>
+          </div>
+          <div class="panel" style="background:rgba(142,27,44,0.06);border-color:rgba(142,27,44,0.2);margin-bottom:0;">
+            <h3>📋 SOP / Checklist Module</h3>
+            <form id="sopChecklistForm" onsubmit="submitSopChecklist(event)">
+              <div class="field field-m0"><label>Checklist Template</label><select name="template"><option value="opening">Opening Shift</option><option value="closing">Closing Shift</option><option value="inspection">Inspection Walk</option><option value="security">Security / Incident</option></select></div>
+              <div id="sopChecklist" style="display:grid;gap:8px;margin:12px 0;"></div>
+              <button type="submit" class="btn btn-primary">Save Checklist</button>
+            </form>
+            <div id="sopChecklistList" style="margin-top:14px;"></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:20px;">
+          <div class="panel" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);margin-bottom:0;">
+            <h3>🗂 Attachments &amp; Evidence</h3>
+            <form id="attachmentForm" onsubmit="submitAttachment(event)" class="form-grid-2">
+              <div class="field field-m0"><label>Title</label><input type="text" name="title" placeholder="Photo / invoice / report"></div>
+              <div class="field field-m0"><label>Related To</label><input type="text" name="relatedTo" placeholder="Inspection / incident / task"></div>
+              <div class="field field-m0"><label>File / Reference</label><input type="text" name="fileName" placeholder="IMG_001.jpg"></div>
+              <div class="field field-m0"><label>Owner</label><input type="text" name="owner" placeholder="Assigned staff"></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>Notes</label><input type="text" name="notes" placeholder="What evidence supports this item?"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Attach Evidence</button>
+            </form>
+            <div id="attachmentList" style="margin-top:14px;"></div>
+          </div>
+          <div class="panel" style="background:rgba(199,154,61,0.05);border-color:rgba(199,154,61,0.2);margin-bottom:0;">
+            <h3>🚚 Driver Route / Geolocation View</h3>
+            <form id="routeFeedForm" onsubmit="submitRouteFeed(event)" class="form-grid-2">
+              <div class="field field-m0"><label>Driver</label><input type="text" name="driver" placeholder="Driver name"></div>
+              <div class="field field-m0"><label>Station</label><select name="outlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+              <div class="field field-m0"><label>Route</label><input type="text" name="route" placeholder="e.g. East Legon loop"></div>
+              <div class="field field-m0"><label>Status</label><select name="status"><option value="en_route">En Route</option><option value="arrived">Arrived</option><option value="delayed">Delayed</option></select></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>ETA</label><input type="text" name="eta" placeholder="15 mins / 10:40"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Set Route Status</button>
+            </form>
+            <div id="routeFeedList" style="margin-top:14px;"></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:20px;">
+          <div class="panel" style="background:rgba(63,162,74,0.05);border-color:rgba(63,162,74,0.2);margin-bottom:0;">
+            <h3>🗓 Daily Digest / Scheduled Report</h3>
+            <div class="quick-actions">
+              <button class="btn btn-ghost btn-sm" onclick="generateDailyDigest()">Generate Digest</button>
+            </div>
+            <div id="dailyDigestList"></div>
+          </div>
+          <div class="panel" style="background:rgba(142,27,44,0.05);border-color:rgba(142,27,44,0.2);margin-bottom:0;">
+            <h3>🧠 AI Summary Assistant</h3>
+            <div id="aiSummaryPanel" style="font-size:13px;color:var(--text-dim);"></div>
+          </div>
+        </div>
+      </div>
       <div class="panel" style="margin-top:20px;">
         <h3>🏆 Station Leaderboard — This Week</h3>
         <div id="leaderboard-list" style="margin-top:12px;"></div>
@@ -446,6 +606,10 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="panel">
           <h3>Expense Log</h3>
           <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Outlet</th><th>Amount</th></tr></thead><tbody id="expenseTable"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <h3>📍 Station Profit Drill-Down</h3>
+          <div id="financeDrilldown"></div>
         </div>
       </div>
     </div>
@@ -1037,7 +1201,33 @@ function getDefaultDB() {
       {id:'pay3',staffId:'s3',staffName:'Kwame Boateng',month:'2026-07',outlet:'Accra',baseSalary:1500,bonus:200,deductions:100,netPay:1600,paid:true,paidDate:'2026-07-27'}
     ],
     licences:[],
-    pricing:{'3kg':43.50,'6kg':87.00,'13kg':188.50,'14.5kg':210.25,'autogas':11.80,'bulk_per_kg':14.50}
+    pricing:{'3kg':43.50,'6kg':87.00,'13kg':188.50,'14.5kg':210.25,'autogas':11.80,'bulk_per_kg':14.50},
+    operationsTasks:[
+      {id:'task1',outlet:'Accra',title:'Camera offline',severity:'high',owner:'Efua Owusu',due:'2026-07-30',notes:'Check network at forecourt',status:'open'},
+      {id:'task2',outlet:'Prestea',title:'Low stock on 13kg',severity:'medium',owner:'Adjoa Mensah',due:'2026-07-31',notes:'Priority restock',status:'in_progress'}
+    ],
+    handoverSummaries:[],
+    approvals:[
+      {id:'apr-demo',outlet:'Bonwire',requestType:'expense',title:'Emergency fuel top-up',requestedBy:'Abena Osei',priority:'high',amount:350,notes:'Needed for urgent deliveries',status:'pending',createdAt:'2026-07-30 08:00'}
+    ],
+    auditTrail:[
+      {id:'audit-demo',time:'2026-07-30 08:00',actor:'HQ Ops',action:'approval queued',target:'Emergency fuel top-up',detail:'Bonwire · expense'}
+    ],
+    offlineCaptures:[
+      {id:'capture-demo',outlet:'Bogoso',captureType:'stock',notes:'Captured closing counts while network was weak',createdAt:'2026-07-30 07:45',status:'pending'}
+    ],
+    sopChecklists:[
+      {id:'sop-demo',template:'opening',items:['Open tills','Verify stock counts','Check pump readiness'],notes:'Opening checklist completed',status:'complete',createdAt:'2026-07-30 06:30'}
+    ],
+    attachments:[
+      {id:'att-demo',title:'Photo evidence',relatedTo:'Inspection',fileName:'IMG_0832.jpg',owner:'Efua',notes:'Captured after regulator check',createdAt:'2026-07-30 07:20'}
+    ],
+    routeFeeds:[
+      {id:'route-demo',driver:'Kojo Mensah',outlet:'Accra',route:'East Legon loop',status:'en_route',eta:'15 mins',createdAt:'2026-07-30 07:50'}
+    ],
+    dailyReports:[],
+    aiSummaries:[],
+    kioskMode:{enabled:false}
   };
 }
 
@@ -1050,8 +1240,36 @@ function saveToLocal() {
 function loadFromLocal() {
   try {
     const s = localStorage.getItem('tAG_db');
-    if (s) { const p = JSON.parse(s); DB = { ...getDefaultDB(), ...p }; }
+    if (s) {
+      const p = JSON.parse(s);
+      DB = { ...getDefaultDB(), ...p };
+      if (!Array.isArray(DB.operationsTasks)) DB.operationsTasks = getDefaultDB().operationsTasks;
+      if (!Array.isArray(DB.handoverSummaries)) DB.handoverSummaries = getDefaultDB().handoverSummaries;
+      if (!Array.isArray(DB.approvals)) DB.approvals = getDefaultDB().approvals;
+      if (!Array.isArray(DB.auditTrail)) DB.auditTrail = getDefaultDB().auditTrail;
+      if (!Array.isArray(DB.offlineCaptures)) DB.offlineCaptures = getDefaultDB().offlineCaptures;
+      if (!Array.isArray(DB.sopChecklists)) DB.sopChecklists = getDefaultDB().sopChecklists;
+      if (!Array.isArray(DB.attachments)) DB.attachments = getDefaultDB().attachments;
+      if (!Array.isArray(DB.routeFeeds)) DB.routeFeeds = getDefaultDB().routeFeeds;
+      if (!Array.isArray(DB.dailyReports)) DB.dailyReports = getDefaultDB().dailyReports;
+      if (!Array.isArray(DB.aiSummaries)) DB.aiSummaries = getDefaultDB().aiSummaries;
+      if (!DB.kioskMode) DB.kioskMode = getDefaultDB().kioskMode;
+    }
   } catch(e){}
+}
+
+function ensureDashboardCollections(){
+  if (!Array.isArray(DB.operationsTasks)) DB.operationsTasks = [];
+  if (!Array.isArray(DB.handoverSummaries)) DB.handoverSummaries = [];
+  if (!Array.isArray(DB.approvals)) DB.approvals = [];
+  if (!Array.isArray(DB.auditTrail)) DB.auditTrail = [];
+  if (!Array.isArray(DB.offlineCaptures)) DB.offlineCaptures = [];
+  if (!Array.isArray(DB.sopChecklists)) DB.sopChecklists = [];
+  if (!Array.isArray(DB.attachments)) DB.attachments = [];
+  if (!Array.isArray(DB.routeFeeds)) DB.routeFeeds = [];
+  if (!Array.isArray(DB.dailyReports)) DB.dailyReports = [];
+  if (!Array.isArray(DB.aiSummaries)) DB.aiSummaries = [];
+  if (!DB.kioskMode) DB.kioskMode = {enabled:false};
 }
 
 // ── Helpers ───────────────────────────────────────────────
@@ -1185,16 +1403,318 @@ function showView(id){
 }
 
 // ══════════════════════════════════════════════════════════
+//  OPERATIONS GOVERNANCE
+// ══════════════════════════════════════════════════════════
+function recordAudit(action, target, detail, actor = currentUser?.name || 'System') {
+  if (!DB.auditTrail) DB.auditTrail = [];
+  const entry = { id: uid('audit'), time: now(), actor, action, target, detail };
+  DB.auditTrail.push(entry);
+  saveToLocal();
+  return entry;
+}
+
+function renderOperationsGovernance(){
+  ensureDashboardCollections();
+
+  const approvalQueue = document.getElementById('approvalQueue');
+  if (approvalQueue) {
+    const approvals = (DB.approvals || []).filter(a => a.status === 'pending');
+    approvalQueue.innerHTML = approvals.length ? approvals.map(a => `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div>
+          <div style="font-weight:600;color:#fff;">${esc(a.title)}</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${esc(a.outlet)} · ${esc(a.requestType)} · ${esc(a.requestedBy || 'Unassigned')}</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(a.notes || 'No notes')}</div>
+        </div>
+        <div style="text-align:right;">
+          ${badge(a.priority === 'high' ? 'danger' : a.priority === 'medium' ? 'warn' : 'neutral', a.priority || 'low')}
+          <div style="font-size:12px;color:var(--text-dim);margin-top:6px;">${gh(a.amount || 0)}</div>
+          <div class="quick-actions" style="margin-top:8px;justify-content:flex-end;">
+            <button class="btn btn-safe btn-sm" onclick="actOnApproval('${a.id}','approved')">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="actOnApproval('${a.id}','rejected')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No pending approvals.</div>';
+  }
+
+  const auditTrailList = document.getElementById('auditTrailList');
+  if (auditTrailList) {
+    const items = (DB.auditTrail || []).slice().reverse().slice(0, 8);
+    auditTrailList.innerHTML = items.length ? items.map(item => `
+      <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+          <strong style="color:#fff;">${esc(item.action)}</strong>
+          <span class="mono" style="font-size:11px;color:var(--text-faint);">${esc(item.time)}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.target)} · ${esc(item.detail)}</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:4px;">By ${esc(item.actor)}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No audit events recorded yet.</div>';
+  }
+
+  const mobileCaptureList = document.getElementById('mobileCaptureList');
+  if (mobileCaptureList) {
+    const captures = (DB.offlineCaptures || []).slice().reverse();
+    mobileCaptureList.innerHTML = captures.length ? captures.map(item => `
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div>
+          <div style="font-weight:600;color:#fff;">${esc(item.captureType)} · ${esc(item.outlet)}</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${esc(item.notes || 'No notes')}</div>
+        </div>
+        <div style="text-align:right;">
+          ${badge(item.status === 'synced' ? 'safe' : 'warn', item.status === 'synced' ? 'Synced' : 'Pending')}
+          <div style="font-size:11px;color:var(--text-faint);margin-top:6px;">${esc(item.createdAt || '—')}</div>
+        </div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No mobile captures queued.</div>';
+  }
+
+  const sopChecklistList = document.getElementById('sopChecklistList');
+  if (sopChecklistList) {
+    const items = (DB.sopChecklists || []).slice().reverse().slice(0, 6);
+    sopChecklistList.innerHTML = items.length ? items.map(item => `
+      <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+          <strong style="color:#fff;">${esc(item.template)}</strong>
+          <span class="badge ${item.status === 'complete' ? 'badge-safe' : 'badge-warn'}">${esc(item.status === 'complete' ? 'Complete' : 'In Progress')}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.notes || 'No notes')}</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:4px;">${(item.items || []).join(' • ')}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No SOP checklists saved yet.</div>';
+  }
+
+  const attachmentList = document.getElementById('attachmentList');
+  if (attachmentList) {
+    const items = (DB.attachments || []).slice().reverse().slice(0, 6);
+    attachmentList.innerHTML = items.length ? items.map(item => `
+      <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+          <strong style="color:#fff;">${esc(item.title)}</strong>
+          <span class="mono" style="font-size:11px;color:var(--text-faint);">${esc(item.fileName || 'No file')}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.relatedTo || 'General')} · ${esc(item.owner || 'Unassigned')}</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.notes || 'No notes')}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No attachments logged yet.</div>';
+  }
+
+  const routeFeedList = document.getElementById('routeFeedList');
+  if (routeFeedList) {
+    const items = (DB.routeFeeds || []).slice().reverse().slice(0, 6);
+    routeFeedList.innerHTML = items.length ? items.map(item => `
+      <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;">
+          <strong style="color:#fff;">${esc(item.driver)} · ${esc(item.route)}</strong>
+          ${badge(item.status === 'delayed' ? 'danger' : item.status === 'arrived' ? 'safe' : 'warn', item.status === 'delayed' ? 'Delayed' : item.status === 'arrived' ? 'Arrived' : 'En Route')}</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.outlet)} · ETA ${esc(item.eta || '—')}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No route feeds yet.</div>';
+  }
+
+  const digestList = document.getElementById('dailyDigestList');
+  if (digestList) {
+    const items = (DB.dailyReports || []).slice().reverse().slice(0, 4);
+    digestList.innerHTML = items.length ? items.map(item => `
+      <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <div style="font-weight:600;color:#fff;">${esc(item.headline || 'Daily digest')}</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.summary || 'No summary')}</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:4px;">${esc(item.generatedAt || '—')}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);padding:8px 0;">No digest generated yet.</div>';
+  }
+
+  const aiPanel = document.getElementById('aiSummaryPanel');
+  if (aiPanel) {
+    const aiItems = (DB.aiSummaries || []).slice().reverse();
+    aiPanel.innerHTML = aiItems.length ? `<div style="padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.04);">${esc(aiItems[0].summary || 'No AI summary yet.')}</div>` : '<div style="color:var(--text-faint);">Press AI Summary to get a quick executive brief.</div>';
+  }
+
+  const sopChecklist = document.getElementById('sopChecklist');
+  if (sopChecklist) {
+    const templates = {
+      opening: ['Open tills','Verify stock counts','Check pump readiness','Brief team'],
+      closing: ['Secure tills','Log stock counts','Inspect forecourt','Hand over notes'],
+      inspection: ['Check regulators','Verify hose condition','Record compliance status','Escalate defects'],
+      security: ['Secure incident log','Notify supervisor','Capture evidence','Follow escalation steps']
+    };
+    const value = document.querySelector('#sopChecklistForm select[name="template"]')?.value || 'opening';
+    sopChecklist.innerHTML = templates[value].map(item => `
+      <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.03);font-size:12px;">
+        <input type="checkbox" value="${esc(item)}" data-label="${esc(item)}">
+        <span>${esc(item)}</span>
+      </label>
+    `).join('');
+  }
+}
+
+function actOnApproval(id, decision) {
+  const approval = (DB.approvals || []).find(item => item.id === id);
+  if (!approval) return;
+  approval.status = decision === 'approved' ? 'approved' : 'rejected';
+  approval.decidedAt = now();
+  approval.decidedBy = currentUser?.name || 'Admin';
+  recordAudit('approval ' + decision, approval.title, `${approval.outlet} · ${approval.requestType}`, approval.decidedBy);
+  saveToLocal();
+  renderOperationsGovernance();
+  toast(`Approval ${decision}.`);
+}
+
+function submitApproval(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const record = {
+    id: uid('apr'),
+    outlet: f.outlet.value,
+    requestType: f.requestType.value,
+    title: f.title.value.trim(),
+    requestedBy: f.requestedBy.value.trim() || 'Supervisor',
+    priority: f.priority.value,
+    amount: parseFloat(f.amount.value) || 0,
+    notes: f.notes.value.trim(),
+    status: 'pending',
+    createdAt: now()
+  };
+  if (!record.title) return toast('Add an approval title first.','warn');
+  (DB.approvals || []).push(record);
+  recordAudit('approval queued', record.title, `${record.outlet} · ${record.requestType}`, currentUser?.name || 'Admin');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('Approval queued.');
+  f.reset();
+}
+
+function submitMobileCapture(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const record = {
+    id: uid('capture'),
+    outlet: f.outlet.value,
+    captureType: f.captureType.value,
+    notes: f.notes.value.trim(),
+    createdAt: now(),
+    status: 'pending'
+  };
+  (DB.offlineCaptures || []).push(record);
+  recordAudit('offline capture queued', record.captureType, `${record.outlet} · ${record.notes}`, currentUser?.name || 'Mobile Staff');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('Offline capture queued.');
+  f.reset();
+}
+
+function submitSopChecklist(ev) {
+  ev.preventDefault();
+  const form = ev.target;
+  const checked = Array.from(form.querySelectorAll('#sopChecklist input[type="checkbox"]:checked')).map(item => item.value);
+  const template = form.template.value;
+  const record = {
+    id: uid('sop'),
+    template,
+    items: checked,
+    notes: `Checklist completed for ${template}`,
+    status: checked.length ? 'complete' : 'in_progress',
+    createdAt: now()
+  };
+  (DB.sopChecklists || []).push(record);
+  recordAudit('SOP checklist saved', template, checked.join(' • ') || 'No items completed', currentUser?.name || 'Manager');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('Checklist saved.');
+  form.reset();
+}
+
+function submitAttachment(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const record = {
+    id: uid('att'),
+    title: f.title.value.trim(),
+    relatedTo: f.relatedTo.value.trim(),
+    fileName: f.fileName.value.trim(),
+    owner: f.owner.value.trim(),
+    notes: f.notes.value.trim(),
+    createdAt: now()
+  };
+  if (!record.title) return toast('Add an attachment title first.','warn');
+  (DB.attachments || []).push(record);
+  recordAudit('evidence attached', record.relatedTo || 'General', record.title, currentUser?.name || 'Staff');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('Evidence attached.');
+  f.reset();
+}
+
+function submitRouteFeed(ev) {
+  ev.preventDefault();
+  const f = ev.target;
+  const record = {
+    id: uid('route'),
+    driver: f.driver.value.trim(),
+    outlet: f.outlet.value,
+    route: f.route.value.trim(),
+    status: f.status.value,
+    eta: f.eta.value.trim(),
+    createdAt: now()
+  };
+  if (!record.driver) return toast('Add a driver name first.','warn');
+  (DB.routeFeeds || []).push(record);
+  recordAudit('route updated', record.route || 'route', `${record.outlet} · ${record.status}`, currentUser?.name || 'Ops Desk');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('Route status updated.');
+  f.reset();
+}
+
+function generateDailyDigest() {
+  ensureDashboardCollections();
+  const lowStock = (DB.inventory || []).filter(item => item.qty <= (THRESHOLDS[item.size] || 5)).map(item => `${item.outlet} ${item.size} (${item.qty})`).slice(0, 4);
+  const dueInspections = (DB.inspections || []).filter(item => item.result !== 'pass').map(item => `${item.outlet} ${item.item}`).slice(0, 4);
+  const openTasks = (DB.operationsTasks || []).filter(task => task.status !== 'closed').map(task => `${task.outlet}: ${task.title}`).slice(0, 4);
+  const summary = `Low stock: ${lowStock.join(', ') || 'none'}; due follow-ups: ${dueInspections.join(', ') || 'none'}; open tasks: ${openTasks.join(', ') || 'none'}`;
+  const record = {
+    id: uid('digest'),
+    generatedAt: now(),
+    headline: 'Daily operations digest',
+    summary,
+    lowStock,
+    dueInspections,
+    openTasks
+  };
+  (DB.dailyReports || []).push(record);
+  recordAudit('daily digest generated', 'operations', summary, currentUser?.name || 'HQ');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('Daily digest generated.');
+}
+
+function generateAISummary() {
+  ensureDashboardCollections();
+  const latestDigest = (DB.dailyReports || []).slice().reverse()[0];
+  const lowStockCount = (DB.inventory || []).filter(item => item.qty <= (THRESHOLDS[item.size] || 5)).length;
+  const dueCount = (DB.inspections || []).filter(item => item.result !== 'pass').length;
+  const taskCount = (DB.operationsTasks || []).filter(task => task.status !== 'closed').length;
+  const summary = `HQ AI summary: ${lowStockCount} low stock lines, ${dueCount} inspection follow-ups, ${taskCount} open tasks. ${latestDigest ? latestDigest.summary : 'No digest available yet.'}`;
+  const record = { id: uid('ai'), generatedAt: now(), summary };
+  (DB.aiSummaries || []).push(record);
+  recordAudit('AI summary generated', 'executive summary', summary, currentUser?.name || 'AI Assistant');
+  saveToLocal();
+  renderOperationsGovernance();
+  toast('AI summary ready.');
+}
+
+// ══════════════════════════════════════════════════════════
 //  DASHBOARD
 // ══════════════════════════════════════════════════════════
 function renderDashboard(){
+  ensureDashboardCollections();
   const sc=scopedOutlet();
   const inv=DB.inventory.filter(i=>!sc||i.outlet===sc);
   const totalCyl=inv.reduce((a,b)=>a+b.qty,0);
   const lowCnt=inv.filter(i=>i.status==='low'||i.status==='critical').length;
   const due=DB.inspections.filter(i=>(!sc||i.outlet===sc)&&i.result!=='pass').length;
   const overdueI=DB.inspections.filter(i=>(!sc||i.outlet===sc)&&i.result==='overdue').length;
-  const dels=DB.deliveries.filter(d=>!sc||d.outlet===sc).length;
   const todayPurchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),'today');
   const todayRev=todayPurchases.reduce((a,b)=>a+(Number(b.amount)||0),0);
   const alertCnt=computeAlerts().length;
@@ -1224,7 +1744,188 @@ function renderDashboard(){
     ?feed.map(f=>`<li style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span class="mono" style="color:var(--text-faint);font-size:11px;min-width:100px;">${f.time.slice(11)||f.time.slice(0,10)}</span><span style="width:8px;height:8px;border-radius:50%;background:${f.kind==='safe'?'var(--safe)':f.kind==='warn'?'var(--warn)':f.kind==='danger'?'var(--danger)':'var(--text-faint)'};flex-shrink:0;"></span><span style="font-size:12.5px;">${f.text}</span></li>`).join('')
     :`<li style="color:var(--text-faint);padding:12px 0;">No recent activity.</li>`;
 
+  renderOutletHealthCards();
+  renderRestockingSignals();
+  renderOperationsTasks();
+  renderShiftHandover();
+  renderComplianceCalendar();
+  renderCustomerIntelligence();
+  renderQuickActionsSummary();
+  renderOperationsGovernance();
   updateAlertBadge();
+}
+
+function inferSizeFromItem(item){
+  if(!item) return null;
+  const normalized = String(item).toLowerCase().replace(/\s+/g,'');
+  if (normalized.includes('14.5kg') || normalized.includes('14.5')) return '14.5kg';
+  if (normalized.includes('13kg') || normalized.includes('13')) return '13kg';
+  if (normalized.includes('6kg') || normalized.includes('6')) return '6kg';
+  if (normalized.includes('3kg') || normalized.includes('3')) return '3kg';
+  return null;
+}
+
+function renderOutletHealthCards(){
+  const container=document.getElementById('healthCards');
+  if(!container)return;
+  const cards=OUTLETS.map(outlet=>{
+    const inventory=(DB.inventory||[]).filter(i=>i.outlet===outlet);
+    const okCount=inventory.filter(i=>i.status==='ok').length;
+    const totalCount=inventory.length||4;
+    const stockScore=Math.round((okCount/Math.max(1,totalCount))*100);
+    const latestInspection=(DB.inspections||[]).filter(i=>i.outlet===outlet).slice().reverse()[0];
+    const inspectionState=latestInspection?.result==='overdue'?'danger':latestInspection?.result==='due'?'warn':'safe';
+    const camera=(DB.cameras||[]).find(c=>c.outlet===outlet);
+    const cameraState=camera?.status==='online'?'safe':'warn';
+    const monthStart=new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+    const revenue=(DB.purchases||[]).filter(p=>p.outlet===outlet&&new Date(p.time||p.date||0)>=monthStart).reduce((sum,p)=>sum+(Number(p.amount)||0),0);
+    const score=Math.min(100,Math.max(0,Math.round(stockScore*0.45+(inspectionState==='safe'?100:inspectionState==='warn'?70:40)*0.25+(cameraState==='safe'?100:60)*0.15+(revenue>0?100:60)*0.15)));
+    const tone=score>=80?'safe':score>=60?'warn':'danger';
+    return `<div class="stat-card"><div class="n ${tone}">${score}%</div><div class="l">${esc(outlet)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:8px;">${badge(inspectionState, latestInspection?latestInspection.result:'No inspection')}</div><div style="font-size:12px;color:var(--text-dim);margin-top:6px;">Stock ${okCount}/${totalCount} lines · ${gh(revenue)} this month</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${badge(cameraState,camera?.status||'unknown')} ${badge(score>=70?'safe':'warn', score>=70?'Healthy':'Needs attention')}</div></div>`;
+  }).join('');
+  container.innerHTML=cards;
+}
+
+function renderRestockingSignals(){
+  const container=document.getElementById('restockSignals');
+  if(!container)return;
+  const rows=(DB.inventory||[]).map(item=>{
+    const sales=(DB.purchases||[]).filter(p=>p.outlet===item.outlet&&inferSizeFromItem(p.item)===item.size).reduce((sum,p)=>sum+(Number(p.qty)||0),0);
+    const weeklySales=(DB.purchases||[]).filter(p=>p.outlet===item.outlet&&inferSizeFromItem(p.item)===item.size&&new Date(p.time||p.date||0)>=new Date(Date.now()-7*24*60*60*1000)).reduce((sum,p)=>sum+(Number(p.qty)||0),0);
+    const avgDaily=weeklySales/7;
+    const daysRemaining=avgDaily>0?Math.round(item.qty/avgDaily):null;
+    const threshold=THRESHOLDS[item.size]||5;
+    const recommendedQty=Math.max(10, threshold+10-item.qty);
+    const tone=item.qty<=threshold?'danger':daysRemaining!==null&&daysRemaining<=7?'warn':'safe';
+    const label=item.qty<=threshold?'Order now':daysRemaining!==null&&daysRemaining<=7?'Watchlist':'Healthy';
+    return {outlet:item.outlet,size:item.size,qty:item.qty,daysRemaining,recommendedQty,tone,label,sales,weeklySales};
+  }).filter(r=>r.qty<=Math.max(THRESHOLDS[r.size]||5,10)||r.daysRemaining!==null).sort((a,b)=>a.qty-b.qty);
+  container.innerHTML=rows.length?rows.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;color:#fff;">${esc(r.outlet)} · ${esc(r.size)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${r.weeklySales} units sold this week · ${r.daysRemaining!==null?`${r.daysRemaining} days remaining`: 'No sales trend'}</div></div><div style="text-align:right;"><div>${badge(r.tone,r.label)}</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Recommend +${r.recommendedQty}</div></div></div>`).join(''):`<div style="color:var(--text-faint);padding:8px 0;">No restock actions needed right now.</div>`;
+}
+
+function renderQuickActionsSummary(){
+  const container=document.getElementById('quickActionSummary');
+  if(!container)return;
+  const lowLines=(DB.inventory||[]).filter(i=>i.qty<=(THRESHOLDS[i.size]||5)).length;
+  const reviewCount=(DB.presence||[]).filter(p=>p.status==='review').length;
+  const openTasks=(DB.operationsTasks||[]).filter(t=>t.status!=='closed').length;
+  container.innerHTML=`<div style="padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.03);">${lowLines} low stock lines • ${reviewCount} presence reviews • ${openTasks} open operations tasks</div>`;
+}
+
+function renderOperationsTasks(){
+  const container=document.getElementById('incidentBoard');
+  if(!container)return;
+  const tasks=(DB.operationsTasks||[]).slice().sort((a,b)=>{
+    const order={open:0,in_progress:1,closed:2}; return (order[a.status]||0)-(order[b.status]||0);
+  });
+  container.innerHTML=tasks.length?tasks.map(task=>`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;color:#fff;">${esc(task.title)} <span style="margin-left:6px;">${badge(task.severity==='high'?'danger':task.severity==='medium'?'warn':'neutral', task.severity)}</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(task.outlet)} · Owner: ${esc(task.owner||'Unassigned')} · Due: ${esc(task.due||'—')}</div>${task.notes?`<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(task.notes)}</div>`:''}</div><div style="text-align:right;"><div>${badge(task.status==='closed'?'safe':task.status==='in_progress'?'gold':'warn', task.status==='closed'?'Closed':task.status==='in_progress'?'In Progress':'Open')}</div><button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="cycleTaskStatus('${task.id}')">${task.status==='closed'?'Reopen':'Advance'}</button></div></div>`).join(''):`<div style="color:var(--text-faint);padding:8px 0;">No active incidents.</div>`;
+}
+
+function addOperationsTask(ev){
+  ev.preventDefault();
+  const f=ev.target;
+  const record={id:uid('task'),outlet:f.outlet.value,title:f.title.value.trim(),severity:f.severity.value,owner:f.owner.value.trim(),due:f.due.value,notes:f.notes.value.trim(),status:'open'};
+  if(!record.title)return;
+  (DB.operationsTasks||[]).push(record);
+  saveToLocal();
+  renderOperationsTasks();
+  renderQuickActionsSummary();
+  renderDashboard();
+  toast('Incident logged.');
+  f.reset();
+}
+
+function cycleTaskStatus(id){
+  const task=(DB.operationsTasks||[]).find(t=>t.id===id);
+  if(!task)return;
+  const flow=['open','in_progress','closed'];
+  const idx=flow.indexOf(task.status||'open');
+  task.status=flow[(idx+1)%flow.length];
+  saveToLocal();
+  renderOperationsTasks();
+  renderQuickActionsSummary();
+  toast('Task updated.');
+}
+
+function renderShiftHandover(){
+  const outletEl=document.getElementById('handoverOutlet');
+  if(outletEl) outletEl.value=currentUser?.outlet||'Accra';
+  const list=document.getElementById('handoverList');
+  if(!list)return;
+  const summaries=(DB.handoverSummaries||[]).slice().reverse();
+  list.innerHTML=summaries.length?summaries.map(item=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;"><strong style="color:#fff;">${esc(item.outlet)}</strong><span class="mono" style="font-size:11px;color:var(--text-faint);">${esc(item.time)}</span></div><div style="font-size:12px;color:var(--text-dim);">${esc(item.summary)}</div></div>`).join(''):`<div style="color:var(--text-faint);padding:8px 0;">No handover summaries saved yet.</div>`;
+}
+
+function generateHandoverSummary(){
+  const outletEl=document.getElementById('handoverOutlet');
+  const summaryEl=document.getElementById('handoverSummary');
+  if(!summaryEl)return;
+  const outlet=outletEl?outletEl.value:'Accra';
+  const lowLines=(DB.inventory||[]).filter(i=>i.outlet===outlet&&i.qty<=(THRESHOLDS[i.size]||5)).map(i=>`${i.size} (${i.qty})`).slice(0,3);
+  const alertTitles=computeAlerts().slice(0,3).map(a=>a.title);
+  summaryEl.value=`${outlet} handover: ${lowLines.length?`Stock watch: ${lowLines.join(', ')}.`:'Stock looks steady.'} ${alertTitles.length?`Follow-up: ${alertTitles.join('; ')}`:'No urgent alerts.'}`;
+  toast('Handover summary generated.');
+}
+
+function saveHandoverSummary(){
+  const outletEl=document.getElementById('handoverOutlet');
+  const summaryEl=document.getElementById('handoverSummary');
+  if(!summaryEl||!summaryEl.value.trim())return toast('Add a summary before saving.','warn');
+  const record={id:uid('handover'),outlet:outletEl?outletEl.value:'Accra',summary:summaryEl.value.trim(),time:now()};
+  (DB.handoverSummaries||[]).push(record);
+  saveToLocal();
+  renderShiftHandover();
+  toast('Handover saved.');
+}
+
+function renderComplianceCalendar(){
+  const container=document.getElementById('complianceCalendar');
+  if(!container)return;
+  const items=[
+    ...((DB.inspections||[]).filter(i=>i.nextDue&&i.nextDue!=='—').map(i=>({kind:'inspection',label:`${i.item}`,date:i.nextDue,detail:`${i.outlet} · ${i.result}`}))),
+    ...((DB.licences||[]).filter(l=>l.expiryDate).map(l=>({kind:'licence',label:l.type,date:l.expiryDate,detail:`${l.outlet} · ${l.number||'No number'}`}))),
+    ...((DB.dsRequests||[]).filter(r=>r.status==='open').map(r=>({kind:'request',label:r.type,date:r.time,detail:`${r.staff} · ${r.note}`})))
+  ].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  container.innerHTML=items.length?items.map(item=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><strong style="color:#fff;">${esc(item.label)}</strong><span class="mono" style="font-size:11px;color:${daysUntil(item.date)<=30?'var(--danger)':'var(--gold)'};">${esc(item.date)}</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${esc(item.detail)}</div></div>`).join(''):`<div style="color:var(--text-faint);padding:8px 0;">Nothing due in the near term.</div>`;
+}
+
+function renderCustomerIntelligence(){
+  const container=document.getElementById('customerIntel');
+  if(!container)return;
+  const rows=(DB.customers||[]).map(customer=>({
+    ...customer,
+    orders:(DB.orders||[]).filter(o=>o.customerId===customer.id).length,
+    spend:(DB.orders||[]).filter(o=>o.customerId===customer.id).reduce((sum,o)=>sum+(Number(o.total)||0),0),
+    balance:Number(customer.balance||0)
+  })).sort((a,b)=>b.spend-a.spend).slice(0,4);
+  container.innerHTML=rows.length?rows.map(row=>`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;color:#fff;">${esc(row.name)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${row.orders} orders · ${gh(row.spend)} lifetime</div></div><div style="text-align:right;">${badge(row.balance>Number(row.creditLimit||0)?'danger':row.spend>1000?'warn':'safe', row.balance>Number(row.creditLimit||0)?'Over limit':'Healthy')}</div></div>`).join(''):`<div style="color:var(--text-faint);padding:8px 0;">No customer history yet.</div>`;
+}
+
+function openKioskMode(){
+  ensureDashboardCollections();
+  const modal=document.getElementById('kioskModal');
+  const content=document.getElementById('kioskContent');
+  if(!modal||!content)return;
+  const lowLines=(DB.inventory||[]).filter(i=>i.qty<=(THRESHOLDS[i.size]||5)).length;
+  const activeAlerts=computeAlerts().length;
+  const monthlyRevenue=(DB.purchases||[]).reduce((sum,p)=>sum+(Number(p.amount)||0),0);
+  content.innerHTML=`<div class="kiosk-grid"><div class="stat-card"><div class="n ${activeAlerts?'danger':'safe'}">${activeAlerts}</div><div class="l">Active Alerts</div></div><div class="stat-card"><div class="n gold">${gh(monthlyRevenue)}</div><div class="l">Monthly Revenue</div></div><div class="stat-card"><div class="n ${lowLines?'warn':'safe'}">${lowLines}</div><div class="l">Low Stock Lines</div></div><div class="stat-card"><div class="n">${(DB.operationsTasks||[]).filter(t=>t.status!=='closed').length}</div><div class="l">Open Tasks</div></div></div><div class="panel" style="margin-top:16px;"><h3>Live Summary</h3><p>${activeAlerts?'Immediate attention is required.':'All stations are in a healthy state.'}</p><div style="display:flex;gap:10px;flex-wrap:wrap;">${OUTLETS.map(o=>`<span class="badge ${badge('neutral','').includes('badge-neutral')?'badge-neutral':'badge-neutral'}">${esc(o)}</span>`).join('')}</div></div>`;
+  modal.style.display='flex';
+}
+
+function closeKioskMode(){
+  const modal=document.getElementById('kioskModal');
+  if(modal) modal.style.display='none';
+}
+
+function quickClockIn(){
+  if(!currentUser){toast('Sign in first to clock in.','warn');return;}
+  const rec={id:uid('p'),time:now(),outlet:currentUser.outlet,worker:currentUser.name,confidence:100,status:'confirmed'};
+  DB.presence.push(rec);
+  saveToLocal();
+  renderPresence();
+  renderDashboard();
+  toast(`${currentUser.name} clocked in.`);
 }
 
 function renderDashboardCharts(){
@@ -1373,11 +2074,27 @@ function renderFinance(){
   const et=document.getElementById('expenseTable');
   if(et) et.innerHTML=expenses.length?expenses.slice().reverse().map(e=>`<tr><td class="mono">${esc(e.date)}</td><td>${esc(e.category)}</td><td>${esc(e.description)}</td><td>${esc(e.outlet)}</td><td class="mono">${gh(e.amount)}</td></tr>`).join(''):`<tr><td colspan="5" style="color:var(--text-faint);">No expenses logged.</td></tr>`;
 
+  renderFinanceDrilldown();
+
   // Populate outlet select
   const es=document.getElementById('expenseOutletSelect');
   if(es) es.innerHTML=opts(OUTLETS,scopedOutlet()||OUTLETS[0]);
 
   setTimeout(()=>renderFinanceCharts(),80);
+}
+
+function renderFinanceDrilldown(){
+  const container=document.getElementById('financeDrilldown');
+  if(!container)return;
+  const rows=OUTLETS.map(outlet=>{
+    const stationPurchases=(DB.purchases||[]).filter(p=>p.outlet===outlet);
+    const stationExpenses=(DB.expenses||[]).filter(e=>e.outlet===outlet);
+    const revenue=stationPurchases.reduce((sum,p)=>sum+(Number(p.amount)||0),0);
+    const expenses=stationExpenses.reduce((sum,e)=>sum+(Number(e.amount)||0),0);
+    const profit=revenue-expenses;
+    return {outlet,revenue,expenses,profit};
+  });
+  container.innerHTML=rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><div><div style="font-weight:600;color:#fff;">${esc(r.outlet)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Revenue ${gh(r.revenue)} · Expenses ${gh(r.expenses)}</div></div><div style="text-align:right;"><div class="mono" style="font-size:14px;color:${r.profit>=0?'var(--safe)':'var(--danger)'};">${gh(r.profit)}</div><div>${badge(r.profit>=0?'safe':'danger', r.profit>=0?'Profit':'Loss')}</div></div></div>`).join('');
 }
 
 function renderFinanceCharts(){
@@ -2301,7 +3018,14 @@ document.addEventListener('DOMContentLoaded',function(){
   safeOn('expenseForm','submit',addExpense);
   safeOn('pricingForm','submit',savePricing);
   safeOn('restockForm','submit',addRestock);
-
+  safeOn('approvalForm','submit',submitApproval);
+  safeOn('mobileCaptureForm','submit',submitMobileCapture);
+  safeOn('sopChecklistForm','submit',submitSopChecklist);
+  safeOn('attachmentForm','submit',submitAttachment);
+  safeOn('routeFeedForm','submit',submitRouteFeed);
+  const sopTemplate=document.querySelector('#sopChecklistForm select[name="template"]');
+  if(sopTemplate) sopTemplate.addEventListener('change', renderOperationsGovernance);
+  
   // Payroll net pay auto-calc
   ['payBaseSalary','payDeductions'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',calcNetPay);});
   const bonInput=document.querySelector('#payrollForm input[name="bonus"]');if(bonInput)bonInput.addEventListener('input',calcNetPay);
