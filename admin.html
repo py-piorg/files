@@ -109,8 +109,22 @@ button{font-family:var(--body);}
 /* ── Panels ── */
 .panel{background:var(--panel);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:20px;padding:22px 24px;margin-bottom:20px;}
 .panel h3{font-size:14px;margin-bottom:16px;color:#fff;}
+.panel h4{font-size:13px;margin-bottom:10px;color:#fff;}
 .panel-tight{padding:16px 20px;}
+.panel-subtle{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 15px;}
 .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+.control-tower-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;}
+.control-tower-card{background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;min-height:92px;display:flex;flex-direction:column;justify-content:space-between;}
+.control-tower-card .label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;}
+.control-tower-card .value{font-size:24px;font-family:var(--mono);font-weight:700;color:#fff;margin:6px 0 2px;}
+.control-tower-card .hint{font-size:11px;color:var(--text-faint);} 
+.action-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);} 
+.action-row:first-of-type{border-top:none;padding-top:0;}
+.action-title{font-weight:600;color:#fff;font-size:13px;}
+.action-sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.mini-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.07);color:var(--text-dim);font-size:11px;border:1px solid rgba(255,255,255,0.08);} 
+.reminder-item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);} 
+.reminder-item:first-of-type{border-top:none;padding-top:0;}
 .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
 
 /* ── Stat Cards ── */
@@ -155,6 +169,23 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 
 /* ── Quick actions ── */
 .quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+
+/* ── Executive cockpit ── */
+.owner-cockpit-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px;align-items:start;}
+.owner-cockpit-card{display:flex;flex-direction:column;gap:12px;}
+.owner-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.owner-kpi{padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);}
+.owner-kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);margin-bottom:6px;}
+.owner-kpi .value{font-size:18px;font-weight:700;color:#fff;font-family:var(--mono);}
+.owner-kpi .hint{font-size:11px;color:var(--text-faint);margin-top:4px;}
+.owner-list{display:grid;gap:8px;}
+.owner-list-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);font-size:12px;color:var(--text-dim);}
+.owner-list-item strong{color:#fff;font-weight:600;}
+.owner-quick-links{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.owner-quick-links .btn{justify-content:flex-start;min-height:42px;}
+.owner-highlight{padding:12px;border-radius:12px;background:linear-gradient(135deg, rgba(142,27,44,0.2), rgba(199,154,61,0.12));border:1px solid rgba(255,255,255,0.08);}
+.owner-highlight .title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);margin-bottom:6px;}
+.owner-highlight .copy{font-size:13px;color:#fff;}
 
 /* ── Charts ── */
 .chart-wrap{position:relative;height:240px;}
@@ -449,8 +480,78 @@ input, select, textarea{font-size:16px;}
     <div id="view-dashboard" class="view active">
       <div class="view-head">
         <div><h2>Operational Overview</h2><p>Live snapshot of stock, revenue, compliance, and alerts across all stations.</p></div>
+        <div class="view-head-actions">
+          <div class="mini-pill" id="dashboardRolePill">Role: Guest</div>
+          <div class="mini-pill" id="dashboardAccessPill">Access: View-only</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h3>🛰 Command Center Tower</h3>
+            <p style="font-size:12px;color:var(--text-dim);margin-bottom:0;">A live control surface for the most urgent operational signals and the actions that matter now.</p>
+          </div>
+          <div class="field field-m0" style="min-width:190px;margin-bottom:0;">
+            <label style="margin-bottom:6px;">Focus View</label>
+            <select id="dashboardFocusSelect" onchange="setDashboardFocus(this.value)">
+              <option value="all">All outlets</option>
+              <option value="critical">Critical watch</option>
+              <option value="compliance">Compliance focus</option>
+              <option value="revenue">Revenue focus</option>
+            </select>
+          </div>
+        </div>
+        <div id="controlTowerCards" class="control-tower-grid"></div>
+        <div class="two-col" style="margin-top:16px;">
+          <div class="panel-subtle">
+            <h4>⚡ Quick controls</h4>
+            <div class="quick-actions">
+              <button class="btn btn-ghost btn-sm" onclick="showView('deliveries')">Log delivery</button>
+              <button class="btn btn-ghost btn-sm" onclick="showView('inspections')">Log inspection</button>
+              <button class="btn btn-ghost btn-sm" onclick="showView('inventory')">Restock stock</button>
+              <button class="btn btn-ghost btn-sm" onclick="showView('cashier')">Open cashier</button>
+            </div>
+            <div class="quick-actions" style="margin-top:8px;">
+              <button class="btn btn-gold btn-sm" onclick="applyBulkReview()">Review urgent tasks</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeAllReminders()">Complete reminders</button>
+            </div>
+          </div>
+          <div class="panel-subtle">
+            <h4>🗂 Action queue</h4>
+            <div id="actionQueueList"></div>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:16px;">
+          <div class="panel-subtle">
+            <h4>📝 Reminder board</h4>
+            <form id="reminderForm" onsubmit="addReminder(event)" class="form-grid-2">
+              <div class="field field-m0"><label>Title</label><input type="text" name="title" placeholder="Reminder title"></div>
+              <div class="field field-m0"><label>Outlet</label><select name="outlet"><option>Accra</option><option>Antoa</option><option>Bonwire</option><option>Bogoso</option><option>Prestea</option></select></div>
+              <div class="field field-m0"><label>Due</label><input type="date" name="due"></div>
+              <div class="field field-m0"><label>Priority</label><select name="priority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+              <div class="field field-m0" style="grid-column:span 2;"><label>Notes</label><input type="text" name="notes" placeholder="Any follow-up detail"></div>
+              <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Add Reminder</button>
+            </form>
+            <div id="reminderBoardList" style="margin-top:12px;"></div>
+          </div>
+          <div class="panel-subtle">
+            <h4>🧭 Saved views</h4>
+            <div class="quick-actions" id="savedViewsPanel"></div>
+            <div style="margin-top:10px;font-size:12px;color:var(--text-dim);">Switch views to surface the metrics that matter most for the current shift, compliance audit, or revenue pulse.</div>
+          </div>
+        </div>
       </div>
       <div id="dashStats" class="stat-grid"></div>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h3>🏛 Owner Cockpit</h3>
+            <p style="font-size:12px;color:var(--text-dim);margin-bottom:0;">A sharper executive view of spend, priorities, and the next best actions for ownership.</p>
+          </div>
+          <div class="mini-pill">Board-ready summary</div>
+        </div>
+        <div id="ownerCockpit" class="owner-cockpit-grid"></div>
+      </div>
       <div class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
           <h3>🧠 Outlet Health Scorecards</h3>
@@ -543,6 +644,10 @@ input, select, textarea{font-size:16px;}
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
           <h3>🧭 Command Center Controls</h3>
           <button class="btn btn-gold btn-sm" onclick="generateAISummary()">🧠 AI Summary</button>
+        </div>
+        <div class="filter-row" style="margin-top:14px;">
+          <input id="approvalSearch" type="search" placeholder="Search approvals or audit events" oninput="renderOperationsGovernance()" style="min-width:240px;">
+          <button class="btn btn-ghost btn-sm" onclick="exportDashboardSnapshot()">⬇ Export snapshot</button>
         </div>
         <div class="two-col">
           <div class="panel" style="background:rgba(63,162,74,0.06);border-color:rgba(63,162,74,0.2);margin-bottom:0;">
@@ -648,6 +753,10 @@ input, select, textarea{font-size:16px;}
           </div>
         </div>
         <div id="financeStats" class="stat-grid"></div>
+        <div class="panel">
+          <h3>💸 Where the money is going</h3>
+          <div id="spendBreakdown" class="two-col"></div>
+        </div>
         <div class="two-col">
           <div class="panel">
             <h3>Revenue by Station</h3>
@@ -1366,6 +1475,7 @@ let dismissedAlerts = new Set(JSON.parse(localStorage.getItem('tAG_dismissedAler
 let THRESHOLDS = JSON.parse(localStorage.getItem('tAG_thresholds')||'{"3kg":10,"6kg":8,"13kg":5,"14.5kg":5}');
 let PRICE_HISTORY = JSON.parse(localStorage.getItem('tAG_priceHistory')||'[]');
 let COMPETITOR_NOTES = localStorage.getItem('tAG_competitorNotes')||'';
+let dashboardFocus = localStorage.getItem('tAG_dashboardFocus') || 'all';
 let reportRange = 'month';
 let financeRange = 'month';
 let chartInstances = {};
@@ -1387,6 +1497,9 @@ function getDefaultDB() {
     operationsTasks:[
       {id:'task1',outlet:'Accra',title:'Camera offline',severity:'high',owner:'Efua Owusu',due:'2026-07-30',notes:'Check network at forecourt',status:'open'},
       {id:'task2',outlet:'Prestea',title:'Low stock on 13kg',severity:'medium',owner:'Adjoa Mensah',due:'2026-07-31',notes:'Priority restock',status:'in_progress'}
+    ],
+    reminders:[
+      {id:'rem-demo',title:'Supervisor check-in',outlet:'Bonwire',due:'2026-07-31',priority:'high',notes:'Confirm fuel top-up',status:'scheduled',createdAt:'2026-07-30 08:30'}
     ],
     handoverSummaries:[],
     approvals:[
@@ -1429,6 +1542,7 @@ function loadFromLocal() {
       const p = JSON.parse(s);
       DB = { ...getDefaultDB(), ...p };
       if (!Array.isArray(DB.operationsTasks)) DB.operationsTasks = getDefaultDB().operationsTasks;
+      if (!Array.isArray(DB.reminders)) DB.reminders = getDefaultDB().reminders;
       if (!Array.isArray(DB.handoverSummaries)) DB.handoverSummaries = getDefaultDB().handoverSummaries;
       if (!Array.isArray(DB.approvals)) DB.approvals = getDefaultDB().approvals;
       if (!Array.isArray(DB.auditTrail)) DB.auditTrail = getDefaultDB().auditTrail;
@@ -1451,6 +1565,7 @@ function ensureNewCollections(){
 
 function ensureDashboardCollections(){
   if (!Array.isArray(DB.operationsTasks)) DB.operationsTasks = [];
+  if (!Array.isArray(DB.reminders)) DB.reminders = [];
   if (!Array.isArray(DB.handoverSummaries)) DB.handoverSummaries = [];
   if (!Array.isArray(DB.approvals)) DB.approvals = [];
   if (!Array.isArray(DB.auditTrail)) DB.auditTrail = [];
@@ -1612,9 +1727,12 @@ function recordAudit(action, target, detail, actor = currentUser?.name || 'Syste
 function renderOperationsGovernance(){
   ensureDashboardCollections();
 
+  const search = (document.getElementById('approvalSearch')?.value || '').trim().toLowerCase();
+  const matchesQuery = (values) => !search || values.some(value => String(value || '').toLowerCase().includes(search));
+
   const approvalQueue = document.getElementById('approvalQueue');
   if (approvalQueue) {
-    const approvals = (DB.approvals || []).filter(a => a.status === 'pending');
+    const approvals = (DB.approvals || []).filter(a => a.status === 'pending' && matchesQuery([a.title, a.outlet, a.requestType, a.requestedBy, a.notes]));
     approvalQueue.innerHTML = approvals.length ? approvals.map(a => `
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
         <div>
@@ -1636,7 +1754,7 @@ function renderOperationsGovernance(){
 
   const auditTrailList = document.getElementById('auditTrailList');
   if (auditTrailList) {
-    const items = (DB.auditTrail || []).slice().reverse().slice(0, 8);
+    const items = (DB.auditTrail || []).filter(item => matchesQuery([item.action, item.target, item.detail, item.actor])).slice().reverse().slice(0, 8);
     auditTrailList.innerHTML = items.length ? items.map(item => `
       <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,0.05);">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
@@ -1745,6 +1863,32 @@ function renderOperationsGovernance(){
   }
 }
 
+function exportDashboardSnapshot(){
+  ensureDashboardCollections();
+  const payload = {
+    generatedAt: now(),
+    currentUser: currentUser ? { name: currentUser.name, role: currentUser.role, outlet: currentUser.outlet } : null,
+    focus: dashboardFocus,
+    summary: {
+      openTasks: (DB.operationsTasks || []).filter(task => task.status !== 'closed').length,
+      pendingApprovals: (DB.approvals || []).filter(a => a.status === 'pending').length,
+      reminders: (DB.reminders || []).filter(r => r.status !== 'done').length,
+      lowStockLines: (DB.inventory || []).filter(item => item.qty <= (THRESHOLDS[item.size] || 5)).length
+    },
+    approvals: (DB.approvals || []).filter(a => a.status === 'pending'),
+    reminders: (DB.reminders || []).filter(r => r.status !== 'done'),
+    auditTrail: (DB.auditTrail || []).slice().reverse().slice(0, 20)
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `triple-a-dashboard-${now().replace(/[: ]/g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Dashboard snapshot exported.');
+}
+
 function actOnApproval(id, decision) {
   const approval = (DB.approvals || []).find(item => item.id === id);
   if (!approval) return;
@@ -1753,7 +1897,7 @@ function actOnApproval(id, decision) {
   approval.decidedBy = currentUser?.name || 'Admin';
   recordAudit('approval ' + decision, approval.title, `${approval.outlet} · ${approval.requestType}`, approval.decidedBy);
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast(`Approval ${decision}.`);
 }
 
@@ -1776,7 +1920,7 @@ function submitApproval(ev) {
   (DB.approvals || []).push(record);
   recordAudit('approval queued', record.title, `${record.outlet} · ${record.requestType}`, currentUser?.name || 'Admin');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('Approval queued.');
   f.reset();
 }
@@ -1795,7 +1939,7 @@ function submitMobileCapture(ev) {
   (DB.offlineCaptures || []).push(record);
   recordAudit('offline capture queued', record.captureType, `${record.outlet} · ${record.notes}`, currentUser?.name || 'Mobile Staff');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('Offline capture queued.');
   f.reset();
 }
@@ -1816,7 +1960,7 @@ function submitSopChecklist(ev) {
   (DB.sopChecklists || []).push(record);
   recordAudit('SOP checklist saved', template, checked.join(' • ') || 'No items completed', currentUser?.name || 'Manager');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('Checklist saved.');
   form.reset();
 }
@@ -1837,7 +1981,7 @@ function submitAttachment(ev) {
   (DB.attachments || []).push(record);
   recordAudit('evidence attached', record.relatedTo || 'General', record.title, currentUser?.name || 'Staff');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('Evidence attached.');
   f.reset();
 }
@@ -1858,7 +2002,7 @@ function submitRouteFeed(ev) {
   (DB.routeFeeds || []).push(record);
   recordAudit('route updated', record.route || 'route', `${record.outlet} · ${record.status}`, currentUser?.name || 'Ops Desk');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('Route status updated.');
   f.reset();
 }
@@ -1881,7 +2025,7 @@ function generateDailyDigest() {
   (DB.dailyReports || []).push(record);
   recordAudit('daily digest generated', 'operations', summary, currentUser?.name || 'HQ');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('Daily digest generated.');
 }
 
@@ -1896,15 +2040,261 @@ function generateAISummary() {
   (DB.aiSummaries || []).push(record);
   recordAudit('AI summary generated', 'executive summary', summary, currentUser?.name || 'AI Assistant');
   saveToLocal();
-  renderOperationsGovernance();
+  renderDashboard();
   toast('AI summary ready.');
+}
+
+function setDashboardFocus(value){
+  dashboardFocus = value || 'all';
+  localStorage.setItem('tAG_dashboardFocus', dashboardFocus);
+  const select = document.getElementById('dashboardFocusSelect');
+  if (select) select.value = dashboardFocus;
+  renderDashboard();
+}
+
+function renderOwnerCockpit(){
+  ensureDashboardCollections();
+  const sc = scopedOutlet();
+  const monthPurchases = filterByRange((DB.purchases || []).filter(p => !sc || p.outlet === sc), 'month');
+  const monthExpenses = filterByRange((DB.expenses || []).filter(e => !sc || e.outlet === sc), 'month', 'date');
+  const revenue = monthPurchases.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const expenses = monthExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const profit = revenue - expenses;
+  const topCategories = EXPENSE_CATEGORIES.map(category => {
+    const total = monthExpenses.filter(item => item.category === category).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    return { category, total };
+  }).filter(item => item.total > 0).sort((a, b) => b.total - a.total).slice(0, 4);
+  const outletSpend = OUTLETS.map(outlet => {
+    const total = monthExpenses.filter(item => item.outlet === outlet).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    return { outlet, total };
+  }).filter(item => item.total > 0).sort((a, b) => b.total - a.total).slice(0, 3);
+  const lowStockCount = (DB.inventory || []).filter(item => (!sc || item.outlet === sc) && item.qty <= (THRESHOLDS[item.size] || 5)).length;
+  const openTasks = (DB.operationsTasks || []).filter(task => (!sc || task.outlet === sc) && task.status !== 'closed').length;
+  const pendingApprovals = (DB.approvals || []).filter(app => (!sc || app.outlet === sc) && app.status === 'pending').length;
+  const bestAction = pendingApprovals ? 'Review pending approvals before the next leadership check-in.' : lowStockCount ? 'Replenish the weakest stock lines before the next delivery run.' : 'The business is steady — keep the weekly review cadence and protect margin.';
+  const container = document.getElementById('ownerCockpit');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="panel-subtle owner-cockpit-card">
+      <h4>💸 Cash flow snapshot</h4>
+      <div class="owner-kpi-row">
+        <div class="owner-kpi"><div class="label">Revenue</div><div class="value">${gh(revenue)}</div><div class="hint">This month</div></div>
+        <div class="owner-kpi"><div class="label">Spend</div><div class="value">${gh(expenses)}</div><div class="hint">Tracked outflows</div></div>
+        <div class="owner-kpi"><div class="label">Profit</div><div class="value">${gh(profit)}</div><div class="hint">Margin health</div></div>
+      </div>
+      <div class="owner-list">
+        ${topCategories.length ? topCategories.map(item => `<div class="owner-list-item"><strong>${esc(item.category)}</strong><span>${gh(item.total)}</span></div>`).join('') : '<div class="owner-list-item"><strong>No major spend yet</strong><span>—</span></div>'}
+      </div>
+    </div>
+    <div class="panel-subtle owner-cockpit-card">
+      <h4>⚙️ Owner shortcuts</h4>
+      <div class="owner-quick-links">
+        <button class="btn btn-ghost btn-sm" onclick="showView('finance')">Open finance</button>
+        <button class="btn btn-ghost btn-sm" onclick="showView('pricing')">Pricing control</button>
+        <button class="btn btn-ghost btn-sm" onclick="showView('reports')">Reports</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportDashboardSnapshot()">Export snapshot</button>
+      </div>
+      <div class="owner-highlight">
+        <div class="title">Best next move</div>
+        <div class="copy">${esc(bestAction)}</div>
+      </div>
+      <div class="owner-list">
+        <div class="owner-list-item"><strong>Low stock lines</strong><span>${lowStockCount}</span></div>
+        <div class="owner-list-item"><strong>Open tasks</strong><span>${openTasks}</span></div>
+        <div class="owner-list-item"><strong>Pending approvals</strong><span>${pendingApprovals}</span></div>
+        ${outletSpend.length ? outletSpend.map(item => `<div class="owner-list-item"><strong>${esc(item.outlet)}</strong><span>${gh(item.total)}</span></div>`).join('') : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderControlTower(){
+  ensureDashboardCollections();
+  const sc = scopedOutlet();
+  const inv = (DB.inventory || []).filter(i => !sc || i.outlet === sc);
+  const lowLines = inv.filter(i => i.status === 'low' || i.status === 'critical').length;
+  const dueInspections = (DB.inspections || []).filter(i => (!sc || i.outlet === sc) && i.result !== 'pass').length;
+  const openTasks = (DB.operationsTasks || []).filter(task => (!sc || task.outlet === sc) && task.status !== 'closed').length;
+  const pendingApprovals = (DB.approvals || []).filter(a => (!sc || a.outlet === sc) && a.status === 'pending').length;
+  const reminders = (DB.reminders || []).filter(r => (!sc || r.outlet === sc) && r.status !== 'done').length;
+  const todayRevenue = (DB.purchases || []).filter(p => (!sc || p.outlet === sc)).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  const focusCards = dashboardFocus === 'critical'
+    ? [
+        {label:'Critical stock', value:lowLines, hint:'restock watchlist'},
+        {label:'Open tasks', value:openTasks, hint:'follow-up queue'},
+        {label:'Pending approvals', value:pendingApprovals, hint:'review required'},
+        {label:'Reminders', value:reminders, hint:'scheduled follow-ups'}
+      ]
+    : dashboardFocus === 'compliance'
+      ? [
+          {label:'Inspections due', value:dueInspections, hint:'safety follow-ups'},
+          {label:'Open tasks', value:openTasks, hint:'action backlog'},
+          {label:'Approvals', value:pendingApprovals, hint:'governance queue'},
+          {label:'Reminders', value:reminders, hint:'due follow-ups'}
+        ]
+      : dashboardFocus === 'revenue'
+        ? [
+            {label:'Revenue today', value:gh(todayRevenue), hint:'cash movement'},
+            {label:'Open tasks', value:openTasks, hint:'operational load'},
+            {label:'Pending approvals', value:pendingApprovals, hint:'finance requests'},
+            {label:'Reminders', value:reminders, hint:'review cadence'}
+          ]
+        : [
+            {label:'Open tasks', value:openTasks, hint:'active incidents'},
+            {label:'Pending approvals', value:pendingApprovals, hint:'awaiting action'},
+            {label:'Low stock lines', value:lowLines, hint:'restock watch'},
+            {label:'Reminders', value:reminders, hint:'scheduled follow-ups'}
+          ];
+
+  const container = document.getElementById('controlTowerCards');
+  if (container) {
+    container.innerHTML = focusCards.map(card => `
+      <div class="control-tower-card">
+        <div class="label">${esc(card.label)}</div>
+        <div class="value">${esc(card.value)}</div>
+        <div class="hint">${esc(card.hint)}</div>
+      </div>
+    `).join('');
+  }
+
+  const savedViews = document.getElementById('savedViewsPanel');
+  if (savedViews) {
+    savedViews.innerHTML = `
+      <div class="quick-actions">
+        <button class="btn btn-ghost btn-sm ${dashboardFocus === 'all' ? 'btn-primary' : ''}" onclick="setDashboardFocus('all')">All</button>
+        <button class="btn btn-ghost btn-sm ${dashboardFocus === 'critical' ? 'btn-primary' : ''}" onclick="setDashboardFocus('critical')">Critical</button>
+        <button class="btn btn-ghost btn-sm ${dashboardFocus === 'compliance' ? 'btn-primary' : ''}" onclick="setDashboardFocus('compliance')">Compliance</button>
+        <button class="btn btn-ghost btn-sm ${dashboardFocus === 'revenue' ? 'btn-primary' : ''}" onclick="setDashboardFocus('revenue')">Revenue</button>
+      </div>
+      <div class="mini-pill" style="margin-top:10px;">Current focus: ${esc(dashboardFocus === 'critical' ? 'Critical watch' : dashboardFocus === 'compliance' ? 'Compliance focus' : dashboardFocus === 'revenue' ? 'Revenue focus' : 'All outlets')}</div>
+    `;
+  }
+}
+
+function renderActionQueue(){
+  ensureDashboardCollections();
+  const sc = scopedOutlet();
+  const queue = [];
+  (DB.operationsTasks || []).filter(task => (!sc || task.outlet === sc) && task.status !== 'closed').forEach(task => {
+    queue.push({kind:'task', id:task.id, title:task.title, sub:`${task.outlet} · ${task.severity} · ${task.owner || 'Unassigned'}`, status:task.status});
+  });
+  (DB.approvals || []).filter(a => (!sc || a.outlet === sc) && a.status === 'pending').forEach(a => {
+    queue.push({kind:'approval', id:a.id, title:a.title, sub:`${a.outlet} · ${a.requestType} · ${gh(a.amount || 0)}`, status:a.status});
+  });
+  (DB.reminders || []).filter(r => (!sc || r.outlet === sc) && r.status !== 'done').forEach(r => {
+    queue.push({kind:'reminder', id:r.id, title:r.title, sub:`${r.outlet} · due ${r.due || '—'}`, status:r.status});
+  });
+  const container = document.getElementById('actionQueueList');
+  if (container) {
+    container.innerHTML = queue.length ? queue.map(item => `
+      <div class="action-row">
+        <div>
+          <div class="action-title">${esc(item.title)}</div>
+          <div class="action-sub">${esc(item.sub)}</div>
+        </div>
+        <div class="quick-actions" style="margin:0;">
+          ${item.kind === 'task' ? `<button class="btn btn-ghost btn-sm" onclick="markTaskReviewed('${item.id}')">Review</button>` : ''}
+          ${item.kind === 'approval' ? `<button class="btn btn-safe btn-sm" onclick="actOnApproval('${item.id}','approved')">Approve</button>` : ''}
+          ${item.kind === 'reminder' ? `<button class="btn btn-ghost btn-sm" onclick="markReminderDone('${item.id}')">Done</button>` : ''}
+        </div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);font-size:12px;">No urgent actions right now.</div>';
+  }
+}
+
+function renderReminderBoard(){
+  ensureDashboardCollections();
+  const sc = scopedOutlet();
+  const container = document.getElementById('reminderBoardList');
+  if (container) {
+    const reminders = (DB.reminders || []).filter(r => !sc || r.outlet === sc).slice().reverse();
+    container.innerHTML = reminders.length ? reminders.map(item => `
+      <div class="reminder-item">
+        <div>
+          <div class="action-title">${esc(item.title)}</div>
+          <div class="action-sub">${esc(item.outlet)} · ${esc(item.notes || 'No notes')} · due ${esc(item.due || '—')}</div>
+        </div>
+        <div style="text-align:right;">
+          ${badge(item.priority === 'high' ? 'danger' : item.priority === 'medium' ? 'warn' : 'neutral', (item.priority || 'low').toUpperCase())}
+          <div style="font-size:11px;color:var(--text-faint);margin-top:6px;">${esc(item.status || 'scheduled')}</div>
+        </div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);font-size:12px;">No reminders yet.</div>';
+  }
+}
+
+function markTaskReviewed(id){
+  const task = (DB.operationsTasks || []).find(item => item.id === id);
+  if (!task) return;
+  task.status = task.status === 'closed' ? 'closed' : 'in_progress';
+  task.lastAction = now();
+  recordAudit('task reviewed', task.title, `${task.outlet} · ${task.severity}`, currentUser?.name || 'Ops');
+  saveToLocal();
+  renderDashboard();
+  toast('Task updated.');
+}
+
+function markReminderDone(id){
+  const reminder = (DB.reminders || []).find(item => item.id === id);
+  if (!reminder) return;
+  reminder.status = 'done';
+  recordAudit('reminder completed', reminder.title, `${reminder.outlet} · ${reminder.priority}`, currentUser?.name || 'Ops');
+  saveToLocal();
+  renderDashboard();
+  toast('Reminder completed.');
+}
+
+function addReminder(ev){
+  ev.preventDefault();
+  const form = ev.target;
+  const record = {
+    id: uid('rem'),
+    title: form.title.value.trim(),
+    outlet: form.outlet.value,
+    due: form.due.value,
+    priority: form.priority.value,
+    notes: form.notes.value.trim(),
+    status: 'scheduled',
+    createdAt: now()
+  };
+  if (!record.title) return toast('Add a reminder title first.','warn');
+  (DB.reminders || []).push(record);
+  recordAudit('reminder created', record.title, `${record.outlet} · ${record.priority}`, currentUser?.name || 'Ops');
+  saveToLocal();
+  renderDashboard();
+  toast('Reminder added.');
+  form.reset();
+}
+
+function applyBulkReview(){
+  (DB.operationsTasks || []).forEach(task => { if (task.status !== 'closed') task.status = 'in_progress'; });
+  (DB.reminders || []).forEach(item => { if (item.status !== 'done') item.status = 'done'; });
+  recordAudit('bulk review', 'dashboard', 'Reviewed open tasks and reminders', currentUser?.name || 'Ops');
+  saveToLocal();
+  renderDashboard();
+  toast('Urgent items reviewed.');
+}
+
+function closeAllReminders(){
+  (DB.reminders || []).forEach(item => { if (item.status !== 'done') item.status = 'done'; });
+  saveToLocal();
+  renderDashboard();
+  toast('Reminders completed.');
 }
 
 // ══════════════════════════════════════════════════════════
 //  DASHBOARD
 // ══════════════════════════════════════════════════════════
+function updateDashboardHeaderContext(){
+  const roleEl=document.getElementById('dashboardRolePill');
+  const accessEl=document.getElementById('dashboardAccessPill');
+  if(roleEl) roleEl.textContent = currentUser ? `Role: ${currentUser.role}` : 'Role: Guest';
+  if(accessEl) accessEl.textContent = currentUser ? (isFinanceRole() ? 'Access: Full admin' : 'Access: Station scope') : 'Access: View-only';
+}
+
 function renderDashboard(){
   ensureDashboardCollections();
+  updateDashboardHeaderContext();
   const sc=scopedOutlet();
   const inv=DB.inventory.filter(i=>!sc||i.outlet===sc);
   const totalCyl=inv.reduce((a,b)=>a+b.qty,0);
@@ -1940,6 +2330,10 @@ function renderDashboard(){
     ?feed.map(f=>`<li style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><span class="mono" style="color:var(--text-faint);font-size:11px;min-width:100px;">${f.time.slice(11)||f.time.slice(0,10)}</span><span style="width:8px;height:8px;border-radius:50%;background:${f.kind==='safe'?'var(--safe)':f.kind==='warn'?'var(--warn)':f.kind==='danger'?'var(--danger)':'var(--text-faint)'};flex-shrink:0;"></span><span style="font-size:12.5px;">${f.text}</span></li>`).join('')
     :`<li style="color:var(--text-faint);padding:12px 0;">No recent activity.</li>`;
 
+  renderOwnerCockpit();
+  renderControlTower();
+  renderActionQueue();
+  renderReminderBoard();
   renderOutletHealthCards();
   renderRestockingSignals();
   renderOperationsTasks();
@@ -2235,6 +2629,36 @@ function setFinanceRange(r){
   document.querySelectorAll('#financeDateBtns button').forEach(b=>b.classList.toggle('active',b.dataset.range===r));
   renderFinance();
 }
+function renderSpendBreakdown(){
+  const sc=scopedOutlet();
+  const expenses=(DB.expenses||[]).filter(e=>!sc||e.outlet===sc);
+  const monthExpenses = filterByRange(expenses, 'month', 'date');
+  const categoryBreakdown = EXPENSE_CATEGORIES.map(category => {
+    const total = monthExpenses.filter(item => item.category === category).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    return { category, total };
+  }).filter(item => item.total > 0).sort((a, b) => b.total - a.total);
+  const outletBreakdown = OUTLETS.map(outlet => {
+    const total = monthExpenses.filter(item => item.outlet === outlet).reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    return { outlet, total };
+  }).filter(item => item.total > 0).sort((a, b) => b.total - a.total);
+  const container = document.getElementById('spendBreakdown');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="panel-subtle" style="margin-bottom:0;">
+      <h4>Spend by category</h4>
+      <div class="owner-list">
+        ${categoryBreakdown.length ? categoryBreakdown.map(item => `<div class="owner-list-item"><strong>${esc(item.category)}</strong><span>${gh(item.total)}</span></div>`).join('') : '<div class="owner-list-item"><strong>No expense entries yet</strong><span>—</span></div>'}
+      </div>
+    </div>
+    <div class="panel-subtle" style="margin-bottom:0;">
+      <h4>Spend by station</h4>
+      <div class="owner-list">
+        ${outletBreakdown.length ? outletBreakdown.map(item => `<div class="owner-list-item"><strong>${esc(item.outlet)}</strong><span>${gh(item.total)}</span></div>`).join('') : '<div class="owner-list-item"><strong>No outlet spend yet</strong><span>—</span></div>'}
+      </div>
+    </div>
+  `;
+}
+
 function renderFinance(){
   const sc=scopedOutlet();
   const purchases=filterByRange(DB.purchases.filter(p=>!sc||p.outlet===sc),financeRange);
@@ -2271,6 +2695,7 @@ function renderFinance(){
   if(et) et.innerHTML=expenses.length?expenses.slice().reverse().map(e=>`<tr><td class="mono">${esc(e.date)}</td><td>${esc(e.category)}</td><td>${esc(e.description)}</td><td>${esc(e.outlet)}</td><td class="mono">${gh(e.amount)}</td></tr>`).join(''):`<tr><td colspan="5" style="color:var(--text-faint);">No expenses logged.</td></tr>`;
 
   renderFinanceDrilldown();
+  renderSpendBreakdown();
 
   // Populate outlet select
   const es=document.getElementById('expenseOutletSelect');
@@ -3490,9 +3915,16 @@ async function doLogin(){
 
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('shell').style.display='flex';
+<<<<<<< HEAD
   document.getElementById('ctxName').textContent=currentUser.name;
   document.getElementById('ctxOutlet').textContent=currentUser.role==='Owner / Head Office'||currentUser.role==='COO'?'All Outlets':currentUser.outlet;
   document.getElementById('ctxRole').textContent=currentUser.role;
+=======
+  document.getElementById('ctxName').textContent=name;
+  document.getElementById('ctxOutlet').textContent=role==='Owner / Head Office'||role==='COO'?'All Outlets':outlet;
+  document.getElementById('ctxRole').textContent=role;
+  updateDashboardHeaderContext();
+>>>>>>> e795df8aa78d879cefe43c945538c17cfa3b854e
 
   // Update restrict labels
   const restricted=!isFinanceRole();
@@ -3548,6 +3980,7 @@ document.addEventListener('DOMContentLoaded',function(){
   safeOn('logoutBtn','click',logout);
 
   // Forms
+  safeOn('reminderForm','submit',addReminder);
   safeOn('deliveryForm','submit',addDelivery);
   safeOn('inspectionForm','submit',addInspection);
   safeOn('shiftNoteForm','submit',addShiftNote);
