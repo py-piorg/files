@@ -567,5 +567,9 @@
       "item": "Purchase",
       "purchaseId": null
     }
-  ]
+  ],
+  "auditLogs": [],
+  "publicOrders": [],
+  "hydroTests": [],
+  "vehicleTrips": []
 }

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track LPG Delivery Order | Triple A Gas</title>
+<link rel="icon" href="images/offical_logo.png" type="image/png">
+<link rel="stylesheet" href="site-polish.css">
+<link rel="stylesheet" href="apple-design.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { background: var(--cloud); font-family: var(--body); color: var(--ink); margin: 0; padding: 0; }
+  .nav-bar { background: var(--wine-900); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; color: #fff; }
+  .nav-logo { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-weight: 800; font-size: 16px; color: #fff; text-decoration: none; }
+  .nav-logo img { height: 36px; }
+  
+  .hero-track { background: linear-gradient(135deg, var(--wine-900) 0%, var(--wine-700) 100%); color: #fff; padding: 60px 24px 80px; text-align: center; }
+  .hero-track h1 { font-size: 36px; color: #fff; margin-bottom: 12px; }
+  .hero-track p { color: var(--steel-300); max-width: 540px; margin: 0 auto 28px; }
+  
+  .track-search-box { max-width: 520px; margin: 0 auto; display: flex; gap: 10px; background: rgba(255,255,255,0.12); padding: 8px; border-radius: 14px; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); }
+  .track-search-box input { flex: 1; border: none; background: transparent; color: #fff; font-size: 16px; font-family: var(--mono); padding: 10px 14px; outline: none; }
+  .track-search-box input::placeholder { color: rgba(255,255,255,0.6); }
+  .track-search-box button { background: var(--gold); color: var(--wine-900); border: none; font-weight: 700; padding: 12px 24px; border-radius: 9px; cursor: pointer; transition: transform 0.15s ease; }
+  .track-search-box button:hover { transform: scale(1.02); }
+
+  .track-card-container { max-width: 720px; margin: -40px auto 60px; padding: 0 24px; }
+  .track-card { background: #fff; border-radius: 20px; padding: 36px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); border: 1px solid var(--steel-300); }
+  
+  .stepper { display: flex; justify-content: space-between; position: relative; margin: 32px 0 40px; }
+  .stepper::before { content: ""; position: absolute; top: 22px; left: 10%; right: 10%; height: 3px; background: var(--steel-300); z-index: 1; }
+  .stepper-progress { position: absolute; top: 22px; left: 10%; height: 3px; background: var(--safe); z-index: 1; transition: width 0.4s ease; width: 0%; }
+  
+  .step-item { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 25%; }
+  .step-circle { width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 3px solid var(--steel-300); display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.3s ease; }
+  .step-item.active .step-circle { border-color: var(--safe); background: var(--safe-pale); color: var(--safe); }
+  .step-item.done .step-circle { border-color: var(--safe); background: var(--safe); color: #fff; }
+  .step-label { font-size: 12px; font-weight: 700; margin-top: 10px; color: var(--steel-500); text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+  .step-item.active .step-label, .step-item.done .step-label { color: var(--ink); }
+
+  .order-details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; background: var(--cloud); padding: 20px; border-radius: 14px; margin-top: 24px; }
+  .detail-label { font-size: 11px; text-transform: uppercase; font-family: var(--mono); color: var(--steel-500); }
+  .detail-value { font-size: 15px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+
+  .track-error { text-align: center; padding: 40px 20px; color: var(--steel-500); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <a href="index.html" class="nav-logo">
+    <img src="images/offical_logo.png" alt="Triple A Gas">
+    TRIPLE A GAS
+  </a>
+  <a href="index.html" style="color:var(--gold);font-weight:700;font-size:14px;">Back to Home ➔</a>
+</nav>
+
+<div class="hero-track">
+  <h1>Track Your LPG Refill Delivery</h1>
+  <p>Enter your Order ID (e.g. <code>TAG-7821</code>) or registered phone number below to view real-time delivery status.</p>
+
+  <form id="trackForm" class="track-search-box">
+    <input type="text" id="trackInput" placeholder="Enter Order ID (e.g. TAG-7821) or Phone..." required autocomplete="off" />
+    <button type="submit">Track Order</button>
+  </form>
+</div>
+
+<div class="track-card-container">
+  <div class="track-card" id="trackResultCard" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--steel-300);padding-bottom:16px;">
+      <div>
+        <div style="font-size:12px;font-family:var(--mono);color:var(--steel-500);">ORDER ID</div>
+        <div style="font-family:var(--display);font-size:24px;font-weight:800;color:var(--wine-900);" id="resOrderId">TAG-0000</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;font-family:var(--mono);color:var(--steel-500);">STATION OUTLET</div>
+        <div style="font-weight:700;font-size:16px;color:var(--ink);" id="resOutlet">Accra</div>
+      </div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper">
+      <div class="stepper-progress" id="stepperProgress"></div>
+      <div class="step-item" id="step1">
+        <div class="step-circle">📝</div>
+        <div class="step-label">Received</div>
+      </div>
+      <div class="step-item" id="step2">
+        <div class="step-circle">⚙️</div>
+        <div class="step-label">Confirmed</div>
+      </div>
+      <div class="step-item" id="step3">
+        <div class="step-circle">🚚</div>
+        <div class="step-label">Dispatched</div>
+      </div>
+      <div class="step-item" id="step4">
+        <div class="step-circle">✅</div>
+        <div class="step-label">Delivered</div>
+      </div>
+    </div>
+
+    <!-- Order Details -->
+    <div class="order-details-grid">
+      <div>
+        <div class="detail-label">Customer Name</div>
+        <div class="detail-value" id="resName">—</div>
+      </div>
+      <div>
+        <div class="detail-label">Cylinder Size & Qty</div>
+        <div class="detail-value" id="resItem">—</div>
+      </div>
+      <div>
+        <div class="detail-label">Delivery Address</div>
+        <div class="detail-value" id="resAddress">—</div>
+      </div>
+      <div>
+        <div class="detail-label">Total Amount</div>
+        <div class="detail-value" style="color:var(--wine-500);" id="resAmount">GH₵ 0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="track-card" id="trackErrorCard" style="display:none;">
+    <div class="track-error" id="trackErrorMessage">
+      Enter an Order ID above to track your LPG delivery.
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialId = urlParams.get('id');
+  if (initialId) {
+    document.getElementById('trackInput').value = initialId;
+    fetchTracking(initialId);
+  }
+
+  document.getElementById('trackForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = document.getElementById('trackInput').value.trim();
+    if (q) fetchTracking(q);
+  });
+});
+
+async function fetchTracking(query) {
+  const resCard = document.getElementById('trackResultCard');
+  const errCard = document.getElementById('trackErrorCard');
+  const errMsg = document.getElementById('trackErrorMessage');
+
+  try {
+    const res = await fetch(`/api/public/orders/${encodeURIComponent(query)}`);
+    const json = await res.json();
+
+    if (json.success && json.data) {
+      const order = json.data;
+      errCard.style.display = 'none';
+      resCard.style.display = 'block';
+
+      document.getElementById('resOrderId').textContent = order.id;
+      document.getElementById('resOutlet').textContent = order.outlet + ' Station';
+      document.getElementById('resName').textContent = order.customerName;
+      document.getElementById('resItem').textContent = `${order.qty}x ${order.size} Cylinder`;
+      document.getElementById('resAddress').textContent = order.address || 'Station Pickup';
+      document.getElementById('resAmount').textContent = `GH₵ ${(Number(order.amount) || 0).toFixed(2)}`;
+
+      // Update Stepper
+      const statusMap = { 'received': 1, 'confirmed': 2, 'dispatched': 3, 'delivered': 4, 'done': 4 };
+      const currentStep = statusMap[order.status.toLowerCase()] || 1;
+
+      const progressWidths = { 1: '0%', 2: '33%', 3: '66%', 4: '100%' };
+      document.getElementById('stepperProgress').style.width = progressWidths[currentStep];
+
+      for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        stepEl.classList.remove('active', 'done');
+        if (i < currentStep) stepEl.classList.add('done');
+        if (i === currentStep) stepEl.classList.add('active');
+      }
+    } else {
+      resCard.style.display = 'none';
+      errCard.style.display = 'block';
+      errMsg.textContent = json.error || 'Order not found. Please verify your Order ID or phone number.';
+    }
+  } catch (err) {
+    resCard.style.display = 'none';
+    errCard.style.display = 'block';
+    errMsg.textContent = 'Unable to connect to server. Please try again.';
+  }
+}
+</script>
+
+</body>
+</html>

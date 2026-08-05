@@ -11,6 +11,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase-db.js"></script>
+<script src="js/admin-api.js"></script>
+<script src="js/admin-core.js"></script>
+<script src="js/admin-ui.js"></script>
 <style>
 :root {
   --wine:#8E1B2C; --wine-500:#A8283A; --wine-300:#C96A78; --wine-900:#3E0B14;
@@ -208,12 +211,44 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 .alert-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
 .alert-item .al-title{font-size:13.5px;color:#fff;font-weight:500;margin-bottom:3px;}
 .alert-item .al-sub{font-size:11.5px;color:var(--text-dim);}
-.alert-empty{text-align:center;padding:40px;color:var(--text-faint);}
-.kiosk-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:24px;z-index:2000;}
-.kiosk-card{width:min(900px,100%);max-height:90vh;overflow:auto;background:rgba(16,18,22,0.97);border:1px solid var(--border-strong);border-radius:24px;padding:24px;box-shadow:0 25px 70px rgba(0,0,0,.45);}
-.kiosk-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px;}
-.kiosk-grid .stat-card{padding:16px;}
-  
+/* ── Command Palette (Ctrl+K) ── */
+.cmd-modal { display:none; position:fixed; inset:0; z-index:3000; align-items:center; justify-content:center; padding:20px; }
+.cmd-modal.open { display:flex; }
+.cmd-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(10px); }
+.cmd-box { position:relative; width:100%; max-width:580px; background:rgba(20,24,30,0.96); border:1px solid var(--border-strong); border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,0.8); overflow:hidden; animation:fadeInUp .2s ease; }
+.cmd-header { display:flex; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); gap:12px; }
+.cmd-header input { flex:1; background:transparent; border:none; color:#fff; font-size:16px; font-family:var(--body); outline:none; }
+.cmd-search-icon { font-size:18px; opacity:0.6; }
+.cmd-esc-hint { font-family:var(--mono); font-size:11px; color:var(--text-faint); padding:3px 7px; background:rgba(255,255,255,0.08); border-radius:6px; }
+.cmd-results { max-height:360px; overflow-y:auto; padding:10px; }
+.cmd-item { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; cursor:pointer; transition:background .15s; }
+.cmd-item:hover { background:rgba(255,255,255,0.08); }
+.cmd-item-icon { font-size:16px; }
+.cmd-item-title { font-size:14px; font-weight:600; color:#fff; flex:1; }
+.cmd-item-cat { font-size:11px; font-family:var(--mono); color:var(--text-faint); text-transform:uppercase; letter-spacing:0.05em; }
+.cmd-empty { padding:30px; text-align:center; color:var(--text-faint); font-size:13px; }
+
+/* ── Light Theme Override ── */
+body.light-theme {
+  --bg:#f4f6f8; --panel:rgba(255,255,255,0.85); --panel-solid:#ffffff;
+  --panel-2:rgba(240,243,246,0.9); --panel-3:rgba(225,230,236,0.9);
+  --border:rgba(0,0,0,0.1); --border-strong:rgba(0,0,0,0.2);
+  --text:#1a202c; --text-dim:#4a5568; --text-faint:#718096;
+}
+body.light-theme .sidebar { background:rgba(255,255,255,0.95); }
+body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme .sidebar-top b, body.light-theme .ctx-val { color:#1a202c; }
+body.light-theme .navlist button { color:#4a5568; }
+body.light-theme .navlist button:hover { background:rgba(0,0,0,0.05); color:#1a202c; }
+body.light-theme .field select, body.light-theme .field input, body.light-theme .field textarea, body.light-theme .filter-row input, body.light-theme .filter-row select { background:rgba(0,0,0,0.03); color:#1a202c; border-color:rgba(0,0,0,0.15); }
+body.light-theme th { background:rgba(0,0,0,0.03); color:#4a5568; }
+body.light-theme td { color:#2d3748; border-bottom:1px solid rgba(0,0,0,0.06); }
+
+/* ── Table Pagination ── */
+.table-pag-controls { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-top:1px solid var(--border); font-size:12px; color:var(--text-dim); }
+.table-pag-btns { display:flex; align-items:center; gap:8px; }
+.table-pag-cur { font-family:var(--mono); font-weight:600; color:#fff; }
+body.light-theme .table-pag-cur { color:#1a202c; }
+
 /* ── Responsive ── */
 #menuBtn{display:none;position:fixed;top:12px;left:12px;z-index:1200;border:none;background:var(--panel-solid);color:var(--text);padding:8px 10px;border-radius:10px;font-size:18px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.5);}
 .overlay{display:none;pointer-events:none;}
@@ -364,6 +399,10 @@ input, select, textarea{font-size:16px;}
       <span id="ctxRole" class="ctx-role">—</span><br>
       <span class="db-indicator"><span style="width:6px;height:6px;border-radius:50%;background:var(--safe);"></span> Live Backend</span>
     </div>
+    <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;font-size:11.5px;" onclick="CommandPalette.open()">🔍 Search (Ctrl+K)</button>
+      <button class="btn btn-ghost btn-sm" style="padding:7px 10px;" onclick="ThemeManager.toggle()" title="Toggle Theme">🌓</button>
+    </div>
     <ul class="navlist">
       <li><div class="nav-section-label">Overview</div></li>
       <li><button data-view="dashboard" class="active"><span class="nav-icon">📊</span>Dashboard</button></li>
@@ -374,7 +413,9 @@ input, select, textarea{font-size:16px;}
       <li><button data-view="inventory"><span class="nav-icon">🗃️</span>Inventory</button></li>
       <li><button onclick="showView('stockcount')" id="nav-stockcount"><span class="nav-icon">📋</span>Stock Count</button></li>
       <li><button data-view="fleet"><span class="nav-icon">🚛</span>Fleet &amp; Drivers</button></li>
+      <li><button data-view="fuel-efficiency"><span class="nav-icon">⛽</span>Fuel Efficiency</button></li>
       <li><button data-view="cashier"><span class="nav-icon">🛒</span>Cashier Sales</button></li>
+      <li><button data-view="public-orders"><span class="nav-icon">🛵</span>Public Orders</button></li>
       <li><div class="nav-section-label">Business</div></li>
       <li><button data-view="customers"><span class="nav-icon">🏢</span>Customer Accounts</button></li>
       <li><button data-view="suppliers"><span class="nav-icon">📋</span>Suppliers &amp; Procurement</button></li>
@@ -382,6 +423,7 @@ input, select, textarea{font-size:16px;}
       <li><div class="nav-section-label">People &amp; Safety</div></li>
       <li><button data-view="staff"><span class="nav-icon">👤</span>Staff Directory</button></li>
       <li><button data-view="inspections"><span class="nav-icon">🔍</span>Inspections</button></li>
+      <li><button data-view="hydro-testing"><span class="nav-icon">🧪</span>Hydro-Testing</button></li>
       <li><button data-view="shiftNotes"><span class="nav-icon">📝</span>Shift Notes</button></li>
       <li><button data-view="presence"><span class="nav-icon">📹</span>Presence &amp; Cameras</button></li>
       <li><div class="nav-section-label">Compliance</div></li>
@@ -710,7 +752,16 @@ input, select, textarea{font-size:16px;}
     <!-- ──────────────── INVENTORY ──────────────── -->
     <div id="view-inventory" class="view">
       <div class="view-head">
-        <div><h2>Stock &amp; Inventory</h2><p>Real-time cylinder counts with visual indicators.</p></div>
+        <div><h2>Stock &amp; Inventory</h2><p>Real-time cylinder counts with visual indicators and AI stockout prediction.</p></div>
+      </div>
+      <div class="panel" style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h3 style="margin:0;">⏱️ Predictive Stock Run-Out Forecast (7-Day Sales Velocity Analysis)</h3>
+          <button class="btn btn-ghost btn-sm" onclick="renderStockRunoutPredictor()">🔄 Refresh Forecast</button>
+        </div>
+        <div id="stockPredictorContainer">
+          <div style="color:var(--text-faint);font-size:13px;">Click Refresh Forecast to load stock velocity predictions...</div>
+        </div>
       </div>
       <div class="two-col">
         <div class="panel">
@@ -949,7 +1000,7 @@ input, select, textarea{font-size:16px;}
           <h3 style="margin:0;">Sales History</h3>
           <button class="btn btn-ghost btn-sm" onclick="printReceipt()">🖨 Print Last Receipt</button>
         </div>
-        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Outlet</th><th>Cashier</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Payment</th></tr></thead><tbody id="purchaseTable"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Outlet</th><th>Cashier</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Payment</th><th style="text-align:right;">Print</th></tr></thead><tbody id="purchaseTable"></tbody></table></div>
       </div>
     </div>
 
@@ -1167,6 +1218,107 @@ input, select, textarea{font-size:16px;}
       </div>
     </div>
 
+    <!-- ──────────────── PUBLIC ORDERS ──────────────── -->
+    <div id="view-public-orders" class="view">
+      <div class="view-head">
+        <div><h2>🛵 Public Customer Orders</h2><p>Manage inbound LPG refill orders placed by customers online. Update status and dispatch alerts.</p></div>
+      </div>
+      <div id="publicOrdersStats" class="stat-grid" style="grid-template-columns:repeat(4,1fr);"></div>
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <h3 style="margin:0;">Incoming Orders</h3>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="publicOrderSearch" placeholder="Search Order ID or phone..." style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;outline:none;" oninput="renderPublicOrders()">
+            <select id="publicOrderFilterStatus" onchange="renderPublicOrders()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;">
+              <option value="">All Statuses</option>
+              <option value="received">Received</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="dispatched">Dispatched</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Time</th><th>Customer</th><th>Phone</th><th>Station</th><th>Size</th><th>Qty</th><th>Amount</th><th>Status</th><th style="text-align:right;">Actions</th></tr></thead><tbody id="publicOrderTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── FUEL EFFICIENCY ──────────────── -->
+    <div id="view-fuel-efficiency" class="view">
+      <div class="view-head">
+        <div><h2>⛽ Vehicle Fuel Efficiency Log</h2><p>Track trip distances, fuel consumed, and cost-per-km for each vehicle and driver.</p></div>
+      </div>
+      <div id="fuelEfficiencyStats" class="stat-grid" style="grid-template-columns:repeat(4,1fr);"></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Log Fuel Trip</h3>
+          <form id="fuelTripForm" class="form-grid-2">
+            <div class="field field-m0"><label>Vehicle Plate</label><input type="text" name="plate" placeholder="e.g. GT-4012-24" required></div>
+            <div class="field field-m0"><label>Driver</label><input type="text" name="driver" placeholder="Driver name"></div>
+            <div class="field field-m0"><label>Station</label><select name="outlet" id="fuelTripOutletSelect"></select></div>
+            <div class="field field-m0"><label>Distance Driven (km)</label><input type="number" name="kmDriven" min="0" step="0.1" placeholder="e.g. 45" required></div>
+            <div class="field field-m0"><label>Fuel Filled (Liters)</label><input type="number" name="fuelLiters" min="0" step="0.1" placeholder="e.g. 12.5"></div>
+            <div class="field field-m0"><label>Fuel Cost (GH₵)</label><input type="number" name="fuelCost" min="0" step="0.01" placeholder="e.g. 87.50" required></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Log Trip &amp; Calculate Efficiency</button>
+          </form>
+        </div>
+        <div class="panel" style="background:rgba(63,162,74,0.05);border-color:rgba(63,162,74,0.2);">
+          <h3>📊 Fleet Efficiency Summary</h3>
+          <div id="fuelEfficiencySummary" style="color:var(--text-faint);font-size:13px;">Log trips to see per-vehicle efficiency rankings.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Fuel Trip Log</h3>
+        <div class="table-wrap"><table><thead><tr><th>Time</th><th>Plate</th><th>Driver</th><th>Station</th><th>km Driven</th><th>Fuel (L)</th><th>Cost (GH₵)</th><th>GH₵/km</th></tr></thead><tbody id="fuelTripTable"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ──────────────── HYDRO-TESTING ──────────────── -->
+    <div id="view-hydro-testing" class="view">
+      <div class="view-head">
+        <div><h2>🧪 Hydro-Testing &amp; Safety Equipment Tracker</h2><p>Log bulk tank pressure tests, hose certifications, and equipment sign-offs. GSA/NPA compliance tracking.</p></div>
+      </div>
+      <div id="hydroTestAlertCards" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;"></div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Register Hydro-Test / Safety Sign-Off</h3>
+          <form id="hydroTestForm" class="form-grid-2">
+            <div class="field field-m0"><label>Equipment</label><select name="equipment">
+              <option value="Bulk Tank">Bulk Tank</option>
+              <option value="LPG Hose">LPG Hose</option>
+              <option value="Cylinder Valve">Cylinder Valve</option>
+              <option value="Pressure Relief Valve">Pressure Relief Valve</option>
+              <option value="Fire Extinguisher">Fire Extinguisher</option>
+              <option value="Storage Rack">Storage Rack</option>
+            </select></div>
+            <div class="field field-m0"><label>Serial / Unit No.</label><input type="text" name="serialNo" placeholder="e.g. BT-ACC-001"></div>
+            <div class="field field-m0"><label>Station</label><select name="outlet" id="hydroOutletSelect"></select></div>
+            <div class="field field-m0"><label>Test Result</label><select name="status">
+              <option value="PASS">✅ PASS</option>
+              <option value="FAIL">❌ FAIL</option>
+              <option value="CONDITIONAL">⚠️ CONDITIONAL</option>
+            </select></div>
+            <div class="field field-m0"><label>Next Due Date</label><input type="date" name="nextDue" required></div>
+            <div class="field field-m0"><label>Inspector Name</label><input type="text" name="inspector" placeholder="GSA / NPA Inspector"></div>
+            <button type="submit" class="btn btn-primary" style="grid-column:span 2;">Record Safety Test</button>
+          </form>
+        </div>
+        <div class="panel" style="background:rgba(142,27,44,0.05);border-color:rgba(142,27,44,0.2);">
+          <h3>⚠️ Compliance Overview</h3>
+          <p style="font-size:13px;">Equipment is flagged based on next hydro-test due date:</p>
+          <div style="padding:14px;background:rgba(255,255,255,0.04);border-radius:12px;margin-top:12px;">
+            <div style="color:var(--safe);font-size:13px;margin-bottom:8px;">🟢 &gt;90 days — Compliant</div>
+            <div style="color:var(--warn);font-size:13px;margin-bottom:8px;">🟡 30–90 days — Schedule test</div>
+            <div style="color:var(--danger);font-size:13px;">🔴 &lt;30 days — Urgent: test overdue</div>
+          </div>
+          <div id="hydroComplianceSummary" style="margin-top:16px;font-size:13px;color:var(--text-dim);">Load data to see compliance summary.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Hydro-Test History</h3>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Equipment</th><th>Serial No.</th><th>Station</th><th>Result</th><th>Next Due</th><th>Days Left</th><th>Inspector</th></tr></thead><tbody id="hydroTestTable"></tbody></table></div>
+      </div>
+    </div>
+
   </main>
 </div><!-- end shell -->
 
@@ -1257,7 +1409,10 @@ function getDefaultDB() {
     ],
     dailyReports:[],
     aiSummaries:[],
-    kioskMode:{enabled:false}
+    kioskMode:{enabled:false},
+    publicOrders:[],
+    vehicleTrips:[],
+    hydroTests:[]
   };
 }
 
@@ -1286,6 +1441,12 @@ function loadFromLocal() {
       if (!DB.kioskMode) DB.kioskMode = getDefaultDB().kioskMode;
     }
   } catch(e){}
+}
+
+function ensureNewCollections(){
+  if (!Array.isArray(DB.publicOrders)) DB.publicOrders = [];
+  if (!Array.isArray(DB.vehicleTrips)) DB.vehicleTrips = [];
+  if (!Array.isArray(DB.hydroTests)) DB.hydroTests = [];
 }
 
 function ensureDashboardCollections(){
@@ -1431,6 +1592,9 @@ function showView(id){
     if(id==='payroll') renderPayrollChart(); 
     if(id==='stockcount') renderStockCounts();
     if(id==='customers') renderEnquiries();
+    if(id==='public-orders') renderPublicOrders();
+    if(id==='fuel-efficiency') renderFuelEfficiency();
+    if(id==='hydro-testing') renderHydroTesting();
   },80);
 }
 
@@ -2447,7 +2611,11 @@ function updatePurchaseAmount(){
 function renderPurchases(){
   const sc=scopedOutlet();
   const rows=DB.purchases.filter(p=>!sc||p.outlet===sc).slice().reverse();
-  document.getElementById('purchaseTable').innerHTML=rows.length?rows.map(p=>`<tr><td class="mono">${esc(p.time)}</td><td>${esc(p.outlet)}</td><td>${esc(p.cashier)}</td><td>${esc(p.customer)}</td><td>${esc(p.item)}</td><td class="mono">${p.qty}</td><td class="mono">${gh(p.amount)}</td><td>${esc(p.paymentMethod||'cash')}</td></tr>`).join(''):`<tr><td colspan="8" style="color:var(--text-faint);">No sales logged.</td></tr>`;
+  document.getElementById('purchaseTable').innerHTML=rows.length?rows.map(p=>{
+    const pJson = encodeURIComponent(JSON.stringify(p)).replace(/'/g,'%27');
+    return `<tr><td class="mono" style="font-size:11px;">${esc(p.time)}</td><td>${esc(p.outlet)}</td><td>${esc(p.cashier)}</td><td>${esc(p.customer)}</td><td>${esc(p.item)}</td><td class="mono">${p.qty}</td><td class="mono">${gh(p.amount)}</td><td>${esc(p.paymentMethod||'cash')}</td><td style="text-align:right;white-space:nowrap;"><button class="btn btn-ghost btn-sm" onclick="printReceipt(JSON.parse(decodeURIComponent('${pJson}')))" style="font-size:10px;padding:4px 8px;">🧾</button><button class="btn btn-ghost btn-sm" onclick="printInvoice(JSON.parse(decodeURIComponent('${pJson}')))" style="font-size:10px;padding:4px 8px;margin-left:2px;">📄</button></td></tr>`;
+  }).join(''):`<tr><td colspan="9" style="color:var(--text-faint);">No sales logged.</td></tr>`;
+
 
   const pos=document.getElementById('purchaseOutletSelect');if(pos)pos.innerHTML=opts(OUTLETS,sc||OUTLETS[0]);
   const cashierInput=document.querySelector('#purchaseForm input[name="cashier"]');
@@ -2484,14 +2652,86 @@ async function addPurchase(ev){
   f.reset();const ds=document.getElementById('purchaseOutletSelect');if(ds)ds.value=scopedOutlet()||OUTLETS[0];if(currentUser){const ci=document.querySelector('#purchaseForm input[name="cashier"]');if(ci)ci.value=currentUser.name;}updatePurchaseAmount();
 }
 
-function printReceipt(){
-  const p=window._lastPurchase;if(!p){toast('No recent sale to print.','warn');return;}
+function printReceipt(p){
+  const purchase = p || window._lastPurchase;
+  if(!purchase){toast('No sale selected for receipt.','warn');return;}
   const area=document.getElementById('receipt-print-area');
   area.className='printing';
-  area.innerHTML=`<div style="text-align:center;border-bottom:1px dashed #ccc;padding-bottom:12px;margin-bottom:12px;"><h2 style="margin:0;">TRIPLE A GAS</h2><p style="margin:4px 0;font-size:11px;">${esc(p.outlet)} Station</p></div><table style="width:100%;"><tr><td>Item:</td><td style="text-align:right;font-weight:bold;">${esc(p.item)}</td></tr><tr><td>Qty:</td><td style="text-align:right;">${p.qty}</td></tr><tr><td>Unit Price:</td><td style="text-align:right;">${gh(p.unitPrice)}</td></tr><tr><td><strong>Total:</strong></td><td style="text-align:right;font-weight:bold;">${gh(p.amount)}</td></tr><tr><td>Payment:</td><td style="text-align:right;">${esc(p.paymentMethod)}</td></tr><tr><td>Cashier:</td><td style="text-align:right;">${esc(p.cashier)}</td></tr></table><div style="text-align:center;margin-top:16px;font-size:10px;color:#666;">Thank you! · ${new Date().toLocaleString()}</div>`;
-  area.style.display='block';area.style.position='fixed';area.style.inset='0';area.style.background='#fff';area.style.padding='20px';area.style.zIndex='9999';area.style.color='#000';
+  const vatRate = 0.125; // 12.5% VAT
+  const nhilRate = 0.025; // 2.5% NHIL+GETFund levy
+  const subtotal = Number(purchase.amount||0);
+  const vatAmt = (subtotal * vatRate).toFixed(2);
+  const nhilAmt = (subtotal * nhilRate).toFixed(2);
+  const total = (subtotal + parseFloat(vatAmt) + parseFloat(nhilAmt)).toFixed(2);
+  area.innerHTML = `
+<div style="font-family:monospace;font-size:12px;color:#000;max-width:300px;margin:auto;padding:20px;">
+  <div style="text-align:center;border-bottom:2px dashed #000;padding-bottom:12px;margin-bottom:12px;">
+    <div style="font-size:20px;font-weight:900;letter-spacing:2px;">TRIPLE A GAS</div>
+    <div style="font-size:11px;">${esc(purchase.outlet||'Station')} · Official Receipt</div>
+    <div style="font-size:10px;margin-top:4px;">NPA Licensed LPG Distributor</div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Date:</span><span>${esc(purchase.time||new Date().toLocaleString())}</span></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Receipt No:</span><span style="font-weight:700;">${esc(purchase.id||'—')}</span></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Cashier:</span><span>${esc(purchase.cashier||'—')}</span></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span>Customer:</span><span>${esc(purchase.customer||'Walk-in')}</span></div>
+  <div style="border-top:1px dashed #000;border-bottom:1px dashed #000;padding:8px 0;margin:8px 0;">
+    <div style="display:flex;justify-content:space-between;"><span>${esc(purchase.item||'LPG')}</span><span>x${purchase.qty||1}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px;"><span>Unit Price:</span><span>${gh(purchase.unitPrice)}</span></div>
+    <div style="display:flex;justify-content:space-between;font-weight:700;"><span>Subtotal:</span><span>${gh(subtotal)}</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span>VAT (12.5%):</span><span>GH₵${vatAmt}</span></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span>NHIL+GETFund (2.5%):</span><span>GH₵${nhilAmt}</span></div>
+  <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;border-top:2px solid #000;padding-top:8px;"><span>TOTAL:</span><span>GH₵${total}</span></div>
+  <div style="display:flex;justify-content:space-between;margin-top:8px;"><span>Payment:</span><span style="text-transform:uppercase;font-weight:700;">${esc(purchase.paymentMethod||'CASH')}</span></div>
+  <div style="text-align:center;margin-top:16px;border-top:1px dashed #000;padding-top:12px;font-size:10px;">
+    <div>Thank you for your business!</div>
+    <div style="margin-top:4px;">www.tripleagas.com.gh</div>
+    <div style="margin-top:2px;">Printed: ${new Date().toLocaleString()}</div>
+  </div>
+</div>`;
+  area.style.cssText='display:block;position:fixed;inset:0;background:#fff;padding:20px;z-index:9999;color:#000;overflow:auto;';
   setTimeout(()=>window.print(),200);
-  setTimeout(()=>{area.style.display='none';area.className='';},2000);
+  setTimeout(()=>{area.style.display='none';area.className='';},3000);
+}
+
+function printInvoice(p){
+  const purchase = p || window._lastPurchase;
+  if(!purchase){toast('No sale selected for invoice.','warn');return;}
+  const area = document.getElementById('invoice-print-area');
+  const vatRate=0.125, nhilRate=0.025;
+  const subtotal = Number(purchase.amount||0);
+  const vatAmt = (subtotal*vatRate).toFixed(2);
+  const nhilAmt = (subtotal*nhilRate).toFixed(2);
+  const total = (subtotal+parseFloat(vatAmt)+parseFloat(nhilAmt)).toFixed(2);
+  const invNo = `INV-${purchase.id||Date.now()}`;
+  area.innerHTML = `
+<div style="font-family:Arial,sans-serif;font-size:13px;color:#111;max-width:700px;margin:auto;padding:40px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;">
+    <div><div style="font-size:28px;font-weight:900;letter-spacing:-1px;color:#8E1B2C;">TRIPLE A GAS</div><div style="font-size:11px;color:#666;">NPA Licensed LPG Distributor</div></div>
+    <div style="text-align:right;"><div style="font-size:22px;font-weight:700;color:#8E1B2C;">TAX INVOICE</div><div style="font-size:12px;color:#666;">${invNo}</div><div style="font-size:11px;color:#666;">${esc(purchase.time||new Date().toLocaleString())}</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+    <div style="background:#f8f8f8;padding:14px;border-radius:8px;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px;">Billed From</div><div style="font-weight:700;">Triple A Gas · ${esc(purchase.outlet||'')} Station</div><div style="font-size:12px;color:#666;">Ghana</div></div>
+    <div style="background:#f8f8f8;padding:14px;border-radius:8px;"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px;">Billed To</div><div style="font-weight:700;">${esc(purchase.customer||'Walk-in Customer')}</div><div style="font-size:12px;color:#666;">Cashier: ${esc(purchase.cashier||'—')}</div></div>
+  </div>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+    <thead><tr style="background:#8E1B2C;color:#fff;"><th style="padding:10px 14px;text-align:left;">Description</th><th style="padding:10px;text-align:center;">Qty</th><th style="padding:10px;text-align:right;">Unit Price</th><th style="padding:10px;text-align:right;">Amount</th></tr></thead>
+    <tbody><tr style="border-bottom:1px solid #e8e8e8;"><td style="padding:12px 14px;">${esc(purchase.item||'LPG Cylinder')}</td><td style="text-align:center;">${purchase.qty||1}</td><td style="text-align:right;">${gh(purchase.unitPrice)}</td><td style="text-align:right;font-weight:700;">${gh(subtotal)}</td></tr></tbody>
+  </table>
+  <div style="display:flex;justify-content:flex-end;">
+    <div style="min-width:280px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;"><span>Subtotal:</span><span>${gh(subtotal)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;"><span>VAT (12.5%):</span><span>GH₵${vatAmt}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;"><span>NHIL + GETFund (2.5%):</span><span>GH₵${nhilAmt}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:17px;font-weight:900;"><span>TOTAL DUE:</span><span style="color:#8E1B2C;">GH₵${total}</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;"><span>Payment Method:</span><span style="text-transform:uppercase;font-weight:700;">${esc(purchase.paymentMethod||'CASH')}</span></div>
+    </div>
+  </div>
+  <div style="margin-top:32px;padding-top:16px;border-top:2px solid #8E1B2C;font-size:11px;color:#888;text-align:center;">This is a computer-generated tax invoice. Thank you for choosing Triple A Gas. | www.tripleagas.com.gh</div>
+</div>`;
+  area.style.cssText='display:block;position:fixed;inset:0;background:#fff;padding:40px;z-index:9999;color:#000;overflow:auto;';
+  setTimeout(()=>window.print(),200);
+  setTimeout(()=>{area.style.display='none';area.className='';},3000);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2762,6 +3002,272 @@ function renderAll(){
   if (typeof renderEnquiries === 'function') renderEnquiries();
   if (typeof renderStationStatusControl === 'function') renderStationStatusControl();
   if (typeof renderLeaderboard === 'function') renderLeaderboard();
+  renderPublicOrders();
+  renderFuelEfficiency();
+  renderHydroTesting();
+}
+
+// ══════════════════════════════════════════════════════════
+//  PUBLIC ORDERS — Render & Handlers
+// ══════════════════════════════════════════════════════════
+const ORDER_STATUS_FLOW = ['received','confirmed','dispatched','delivered'];
+const ORDER_STATUS_LABELS = {received:'📥 Received',confirmed:'✅ Confirmed',dispatched:'🚛 Dispatched',delivered:'🏠 Delivered'};
+const ORDER_STATUS_BADGE = {received:'neutral',confirmed:'safe',dispatched:'gold',delivered:'safe'};
+
+function renderPublicOrders() {
+  ensureNewCollections();
+  const orders = (DB.publicOrders || []).slice().reverse();
+  const search = (document.getElementById('publicOrderSearch')?.value || '').toLowerCase();
+  const statusFilter = document.getElementById('publicOrderFilterStatus')?.value || '';
+
+  const filtered = orders.filter(o => {
+    const matchSearch = !search || o.id.toLowerCase().includes(search) || (o.phone||'').includes(search) || (o.customerName||'').toLowerCase().includes(search);
+    const matchStatus = !statusFilter || o.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  // Stats
+  const total = orders.length;
+  const pending = orders.filter(o => o.status !== 'delivered').length;
+  const delivered = orders.filter(o => o.status === 'delivered').length;
+  const revenue = orders.reduce((s,o) => s + (Number(o.amount)||0), 0);
+  const statsEl = document.getElementById('publicOrdersStats');
+  if (statsEl) statsEl.innerHTML = [
+    `<div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${total}</div></div>`,
+    `<div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--warn)">${pending}</div></div>`,
+    `<div class="stat-card"><div class="stat-label">Delivered</div><div class="stat-value" style="color:var(--safe)">${delivered}</div></div>`,
+    `<div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value mono" style="font-size:16px;">${gh(revenue)}</div></div>`
+  ].join('');
+
+  const tb = document.getElementById('publicOrderTable');
+  if (!tb) return;
+  if (!filtered.length) { tb.innerHTML = `<tr><td colspan="10" style="color:var(--text-faint);">No orders found. Orders from the public ordering form will appear here.</td></tr>`; return; }
+  tb.innerHTML = filtered.map(o => {
+    const statusIdx = ORDER_STATUS_FLOW.indexOf(o.status);
+    const nextStatus = ORDER_STATUS_FLOW[statusIdx + 1];
+    return `<tr>
+      <td class="mono" style="font-weight:700;color:var(--gold);">${esc(o.id)}</td>
+      <td class="mono" style="font-size:11px;">${esc(o.time||'—')}</td>
+      <td>${esc(o.customerName||'—')}</td>
+      <td class="mono">${esc(o.phone||'—')}</td>
+      <td>${esc(o.outlet||'—')}</td>
+      <td class="mono">${esc(o.size||'—')}</td>
+      <td class="mono">${o.qty||1}</td>
+      <td class="mono">${gh(o.amount)}</td>
+      <td>${badge(ORDER_STATUS_BADGE[o.status]||'neutral', ORDER_STATUS_LABELS[o.status]||o.status)}</td>
+      <td style="text-align:right;">
+        ${nextStatus ? `<button class="btn btn-ghost btn-sm" onclick="advanceOrderStatus('${esc(o.id)}','${nextStatus}')" style="font-size:11px;">→ ${nextStatus.charAt(0).toUpperCase()+nextStatus.slice(1)}</button>` : badge('safe','✓ Complete')}
+        ${o.phone ? `<button class="btn btn-ghost btn-sm" onclick="sendDispatchAlert('${esc(o.id)}','${esc(o.phone)}')" style="font-size:11px;margin-left:4px;">📱 Alert</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function advanceOrderStatus(orderId, newStatus) {
+  ensureNewCollections();
+  const order = DB.publicOrders.find(o => o.id === orderId);
+  if (!order) return;
+  order.status = newStatus;
+  saveToLocal();
+  // Sync to server
+  fetch('/api/public/orders/'+orderId+'/status', {method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:newStatus})}).catch(()=>{});
+  renderPublicOrders();
+  toast(`Order ${orderId} → ${newStatus}`);
+}
+
+function sendDispatchAlert(orderId, phone) {
+  const order = DB.publicOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const msg = `Dear ${order.customerName||'Customer'}, your LPG order ${orderId} (${order.qty||1}x ${order.size}) is now ${order.status}. Thank you — Triple A Gas.`;
+  fetch('/api/notifications/send', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({recipient: phone, message: msg, channel:'SMS'})
+  }).then(r=>r.json()).then(d=>{ toast(`SMS alert sent to ${phone}`); }).catch(()=>toast('Alert queued (offline mode)','warn'));
+}
+
+// ══════════════════════════════════════════════════════════
+//  FUEL EFFICIENCY — Render & Handlers
+// ══════════════════════════════════════════════════════════
+function renderFuelEfficiency() {
+  ensureNewCollections();
+  const sc = scopedOutlet();
+  const fuelOutlet = document.getElementById('fuelTripOutletSelect');
+  if (fuelOutlet) fuelOutlet.innerHTML = opts(OUTLETS, sc || OUTLETS[0]);
+
+  const trips = (DB.vehicleTrips || []).filter(t => !sc || t.outlet === sc).slice().reverse();
+
+  // Stats
+  const totalKm = trips.reduce((s,t) => s + (Number(t.kmDriven)||0), 0);
+  const totalFuel = trips.reduce((s,t) => s + (Number(t.fuelLiters)||0), 0);
+  const totalCost = trips.reduce((s,t) => s + (Number(t.fuelCost)||0), 0);
+  const avgCostPerKm = totalKm > 0 ? (totalCost / totalKm).toFixed(2) : '—';
+
+  const statsEl = document.getElementById('fuelEfficiencyStats');
+  if (statsEl) statsEl.innerHTML = [
+    `<div class="stat-card"><div class="stat-label">Total km Driven</div><div class="stat-value mono">${totalKm.toFixed(0)}</div></div>`,
+    `<div class="stat-card"><div class="stat-label">Total Fuel (L)</div><div class="stat-value mono">${totalFuel.toFixed(1)}</div></div>`,
+    `<div class="stat-card"><div class="stat-label">Total Fuel Cost</div><div class="stat-value mono">${gh(totalCost)}</div></div>`,
+    `<div class="stat-card"><div class="stat-label">Avg Cost/km</div><div class="stat-value mono" style="color:${totalKm>0&&avgCostPerKm>5?'var(--warn)':'var(--safe)'}">${avgCostPerKm !== '—' ? 'GH₵'+avgCostPerKm : '—'}</div></div>`
+  ].join('');
+
+  // Per-vehicle summary
+  const summaryEl = document.getElementById('fuelEfficiencySummary');
+  if (summaryEl && trips.length) {
+    const byPlate = {};
+    trips.forEach(t => {
+      if (!byPlate[t.plate]) byPlate[t.plate] = {km:0,cost:0,liters:0,trips:0};
+      byPlate[t.plate].km += Number(t.kmDriven)||0;
+      byPlate[t.plate].cost += Number(t.fuelCost)||0;
+      byPlate[t.plate].liters += Number(t.fuelLiters)||0;
+      byPlate[t.plate].trips++;
+    });
+    summaryEl.innerHTML = Object.entries(byPlate).map(([plate, s]) => {
+      const cpp = s.km > 0 ? (s.cost/s.km).toFixed(2) : '—';
+      const risk = s.km > 0 && (s.cost/s.km) > 5 ? 'warn' : 'safe';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div><div class="mono" style="font-weight:700;">${esc(plate)}</div><div style="font-size:11px;color:var(--text-dim);">${s.trips} trip${s.trips!==1?'s':''} · ${s.km.toFixed(0)} km</div></div>
+        <div style="text-align:right;"><div class="mono">${gh(s.cost)}</div>${badge(risk, cpp !== '—' ? 'GH₵'+cpp+'/km' : '—')}</div>
+      </div>`;
+    }).join('');
+  } else if (summaryEl) { summaryEl.innerHTML = '<div style="color:var(--text-faint);">No fuel trips logged yet.</div>'; }
+
+  // Table
+  const tb = document.getElementById('fuelTripTable');
+  if (!tb) return;
+  tb.innerHTML = trips.length ? trips.map(t => `<tr>
+    <td class="mono" style="font-size:11px;">${esc(t.time||'—')}</td>
+    <td class="mono" style="font-weight:700;">${esc(t.plate||'—')}</td>
+    <td>${esc(t.driver||'—')}</td>
+    <td>${esc(t.outlet||'—')}</td>
+    <td class="mono">${Number(t.kmDriven||0).toFixed(1)} km</td>
+    <td class="mono">${Number(t.fuelLiters||0).toFixed(1)} L</td>
+    <td class="mono">${gh(t.fuelCost)}</td>
+    <td class="mono" style="color:${Number(t.costPerKm||0)>5?'var(--warn)':'var(--safe)'}">${t.costPerKm || '—'}</td>
+  </tr>`).join('') : `<tr><td colspan="8" style="color:var(--text-faint);">No fuel trips logged.</td></tr>`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const fuelForm = document.getElementById('fuelTripForm');
+  if (fuelForm) fuelForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const f = ev.target;
+    const payload = {
+      plate: f.plate.value.trim().toUpperCase(),
+      driver: f.driver.value.trim() || (currentUser?.name||'Driver'),
+      outlet: f.outlet.value,
+      kmDriven: parseFloat(f.kmDriven.value)||0,
+      fuelLiters: parseFloat(f.fuelLiters.value)||0,
+      fuelCost: parseFloat(f.fuelCost.value)||0
+    };
+    payload.costPerKm = payload.kmDriven > 0 ? (payload.fuelCost/payload.kmDriven).toFixed(2) : 0;
+    try {
+      const r = await fetch('/api/vehicles/trips',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const j = await r.json();
+      if (j.success) { ensureNewCollections(); DB.vehicleTrips.unshift(j.data); saveToLocal(); }
+    } catch(e) {
+      const rec = {id:uid('vt'),time:now(),...payload};
+      ensureNewCollections(); DB.vehicleTrips.unshift(rec); saveToLocal();
+    }
+    renderFuelEfficiency();
+    toast('Fuel trip logged ⛽');
+    f.reset();
+  });
+
+// ══════════════════════════════════════════════════════════
+//  HYDRO-TESTING — Render & Handlers
+// ══════════════════════════════════════════════════════════
+  const hydroForm = document.getElementById('hydroTestForm');
+  if (hydroForm) hydroForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const f = ev.target;
+    const payload = {
+      equipment: f.equipment.value,
+      serialNo: f.serialNo.value.trim() || `SN-${Math.floor(10000+Math.random()*90000)}`,
+      outlet: f.outlet.value,
+      status: f.status.value,
+      nextDue: f.nextDue.value,
+      inspector: f.inspector.value.trim() || 'GSA Inspector'
+    };
+    try {
+      const r = await fetch('/api/inspections/hydro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const j = await r.json();
+      if (j.success) { ensureNewCollections(); DB.hydroTests.unshift(j.data); saveToLocal(); }
+    } catch(e) {
+      const rec = {id:uid('ht'),date:now().split(' ')[0],...payload};
+      ensureNewCollections(); DB.hydroTests.unshift(rec); saveToLocal();
+    }
+    renderHydroTesting();
+    toast('Safety test recorded 🧪');
+    f.reset();
+  });
+});
+
+function renderHydroTesting() {
+  ensureNewCollections();
+  const sc = scopedOutlet();
+  const hydroOutlet = document.getElementById('hydroOutletSelect');
+  if (hydroOutlet) hydroOutlet.innerHTML = opts(OUTLETS, sc || OUTLETS[0]);
+
+  const tests = (DB.hydroTests || []).filter(t => !sc || t.outlet === sc).slice().reverse();
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  // Alert cards for items due soon
+  const alertsEl = document.getElementById('hydroTestAlertCards');
+  if (alertsEl) {
+    // Group by equipment — find latest test per equipment
+    const latestByEquip = {};
+    tests.forEach(t => {
+      const key = `${t.outlet}|${t.equipment}|${t.serialNo}`;
+      if (!latestByEquip[key] || t.date > latestByEquip[key].date) latestByEquip[key] = t;
+    });
+    const cards = Object.values(latestByEquip).filter(t => { const d = daysUntil(t.nextDue); return d <= 90; });
+    alertsEl.innerHTML = cards.length ? cards.map(t => {
+      const d = daysUntil(t.nextDue);
+      const color = d < 0 ? 'var(--danger)' : d <= 30 ? 'var(--warn)' : 'var(--gold)';
+      const icon = d < 0 ? '🔴' : d <= 30 ? '🟡' : '🟠';
+      return `<div style="background:rgba(255,255,255,0.05);border:1px solid ${color}33;border-left:4px solid ${color};border-radius:12px;padding:14px 18px;min-width:220px;">
+        <div style="font-size:11px;font-family:var(--mono);color:var(--text-dim);margin-bottom:4px;">${esc(t.outlet)} · ${esc(t.equipment)}</div>
+        <div style="font-weight:700;margin-bottom:6px;">${icon} ${esc(t.serialNo||'—')}</div>
+        <div style="font-size:12px;color:${color};">${d < 0 ? `OVERDUE by ${Math.abs(d)} days` : `Due in ${d} days`}</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:4px;">Next: ${esc(t.nextDue||'—')}</div>
+      </div>`;
+    }).join('') : '<div style="color:var(--text-faint);font-size:13px;">✅ All equipment is within compliance window (&gt;90 days).</div>';
+  }
+
+  // Compliance summary
+  const summaryEl = document.getElementById('hydroComplianceSummary');
+  if (summaryEl && tests.length) {
+    const latestMap = {};
+    tests.forEach(t => { const k = `${t.outlet}|${t.equipment}|${t.serialNo}`; if (!latestMap[k]) latestMap[k] = t; });
+    const all = Object.values(latestMap);
+    const ok = all.filter(t => daysUntil(t.nextDue) > 90).length;
+    const warn = all.filter(t => { const d = daysUntil(t.nextDue); return d >= 30 && d <= 90; }).length;
+    const crit = all.filter(t => daysUntil(t.nextDue) < 30).length;
+    summaryEl.innerHTML = `
+      <div style="margin-top:8px;"><span style="color:var(--safe);">🟢 Compliant:</span> <strong>${ok}</strong> items</div>
+      <div><span style="color:var(--warn);">🟡 Due soon:</span> <strong>${warn}</strong> items</div>
+      <div><span style="color:var(--danger);">🔴 Critical/Overdue:</span> <strong>${crit}</strong> items</div>`;
+  }
+
+  // Table
+  const tb = document.getElementById('hydroTestTable');
+  if (!tb) return;
+  tb.innerHTML = tests.length ? tests.map(t => {
+    const d = daysUntil(t.nextDue);
+    const resultBadge = t.status === 'PASS' ? badge('safe','✅ PASS') : t.status === 'FAIL' ? badge('danger','❌ FAIL') : badge('warn','⚠️ CONDITIONAL');
+    const dBadge = d < 0 ? badge('danger',`Overdue ${Math.abs(d)}d`) : d <= 30 ? badge('warn',`${d}d`) : badge('safe',`${d}d`);
+    return `<tr>
+      <td class="mono">${esc(t.date||'—')}</td>
+      <td><strong>${esc(t.equipment||'—')}</strong></td>
+      <td class="mono">${esc(t.serialNo||'—')}</td>
+      <td>${esc(t.outlet||'—')}</td>
+      <td>${resultBadge}</td>
+      <td class="mono">${esc(t.nextDue||'—')}</td>
+      <td>${dBadge}</td>
+      <td>${esc(t.inspector||'—')}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="8" style="color:var(--text-faint);">No hydro-tests recorded.</td></tr>`;
 }
 
 function submitStockCount() {
@@ -2969,16 +3475,24 @@ function renderLeaderboard() {
 // ══════════════════════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════════════════════
-function doLogin(){
+async function doLogin(){
   const name=document.getElementById('loginName').value.trim()||'Staff User';
   const role=document.getElementById('loginRole').value;
   const outlet=document.getElementById('loginOutlet').value;
-  currentUser={name,role,outlet};
+
+  const authRes = await AdminAPI.apiFetch('/api/login', 'POST', { name, role, outlet });
+  if (authRes.ok && authRes.data && authRes.data.token) {
+    AdminAPI.setToken(authRes.data.token);
+    currentUser = authRes.data.user || { name, role, outlet };
+  } else {
+    currentUser = { name, role, outlet };
+  }
+
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('shell').style.display='flex';
-  document.getElementById('ctxName').textContent=name;
-  document.getElementById('ctxOutlet').textContent=role==='Owner / Head Office'||role==='COO'?'All Outlets':outlet;
-  document.getElementById('ctxRole').textContent=role;
+  document.getElementById('ctxName').textContent=currentUser.name;
+  document.getElementById('ctxOutlet').textContent=currentUser.role==='Owner / Head Office'||currentUser.role==='COO'?'All Outlets':currentUser.outlet;
+  document.getElementById('ctxRole').textContent=currentUser.role;
 
   // Update restrict labels
   const restricted=!isFinanceRole();
@@ -2987,13 +3501,18 @@ function doLogin(){
   loadFromLocal();
   fetchDatabase();
   showView('dashboard');
-  initPurchaseQuickActions();
-  toast(`Welcome, ${name}!`);
+  if (typeof initPurchaseQuickActions === 'function') initPurchaseQuickActions();
+  toast(`Welcome, ${currentUser.name}!`);
 }
 
 function logout(){
   currentUser=null;
+  AdminAPI.setToken('');
   document.getElementById('shell').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch(e){}});
+  chartInstances={};
+}
   document.getElementById('loginScreen').style.display='flex';
   Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch(e){}});
   chartInstances={};

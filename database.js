@@ -102,6 +102,10 @@ class DatabaseStore {
         const merged = { ...seeded, ...parsed };
         if (!Array.isArray(merged.purchases)) merged.purchases = [];
         if (!Array.isArray(merged.inventoryMovements)) merged.inventoryMovements = [];
+        if (!Array.isArray(merged.auditLogs)) merged.auditLogs = [];
+        if (!Array.isArray(merged.publicOrders)) merged.publicOrders = [];
+        if (!Array.isArray(merged.hydroTests)) merged.hydroTests = [];
+        if (!Array.isArray(merged.vehicleTrips)) merged.vehicleTrips = [];
         this.save(merged);
         return merged;
       }
@@ -238,14 +242,131 @@ class DatabaseStore {
     return purchase;
   }
  
-  resolveDsRequest(id) {
-    const req = this.data.dsRequests.find(r => r.id === id);
-    if (req) {
-      req.status = "resolved";
+  addAuditLog(entry) {
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const log = {
+      id: `a_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      time: timeStr,
+      action: entry.action || 'ACTION',
+      target: entry.target || 'General',
+      detail: entry.detail || '—',
+      actor: entry.actor || 'System'
+    };
+    if (!this.data.auditLogs) this.data.auditLogs = [];
+    this.data.auditLogs.unshift(log);
+    if (this.data.auditLogs.length > 200) this.data.auditLogs = this.data.auditLogs.slice(0, 200);
+    this.save();
+    return log;
+  }
+
+  addPublicOrder(order) {
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const id = `TAG-${Math.floor(1000 + Math.random() * 9000)}`;
+    const record = {
+      id,
+      time: timeStr,
+      customerName: order.customerName || 'Customer',
+      phone: order.phone || '—',
+      outlet: order.outlet || 'Accra',
+      size: order.size || '14.5kg',
+      qty: parseInt(order.qty) || 1,
+      address: order.address || 'Station Pickup',
+      status: 'received', // received -> confirmed -> dispatched -> delivered
+      amount: parseFloat(order.amount) || 0
+    };
+    if (!this.data.publicOrders) this.data.publicOrders = [];
+    this.data.publicOrders.unshift(record);
+    this.save();
+    return record;
+  }
+
+  getPublicOrder(id) {
+    if (!this.data.publicOrders) return null;
+    return this.data.publicOrders.find(o => o.id.toLowerCase() === id.toLowerCase() || (o.phone && o.phone.includes(id))) || null;
+  }
+
+  updatePublicOrderStatus(id, status) {
+    const order = this.getPublicOrder(id);
+    if (order) {
+      order.status = status;
       this.save();
-      return req;
+      return order;
     }
     return null;
+  }
+
+  predictStockouts() {
+    const predictions = [];
+    const inventory = this.data.inventory || [];
+    const movements = this.data.inventoryMovements || [];
+    
+    // Group sales movements by outlet & size
+    const salesMap = {};
+    movements.forEach(m => {
+      if (m.qty < 0) {
+        const key = `${m.outlet}_${m.size}`;
+        salesMap[key] = (salesMap[key] || 0) + Math.abs(m.qty);
+      }
+    });
+
+    inventory.forEach(item => {
+      const key = `${item.outlet}_${item.size}`;
+      const totalSold = salesMap[key] || Math.floor(Math.random() * 5) + 2; // fallback baseline
+      const avgDailySales = Math.max(1, (totalSold / 7));
+      const daysRemaining = Math.max(0, Math.round(item.qty / avgDailySales));
+
+      predictions.push({
+        outlet: item.outlet,
+        size: item.size,
+        currentQty: item.qty,
+        avgDailySales: avgDailySales.toFixed(1),
+        daysRemaining,
+        risk: daysRemaining <= 2 ? 'CRITICAL' : daysRemaining <= 5 ? 'WARNING' : 'HEALTHY'
+      });
+    });
+
+    return predictions;
+  }
+
+  addVehicleTrip(trip) {
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const record = {
+      id: `vt_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      time: timeStr,
+      plate: trip.plate || 'GT-4012-24',
+      driver: trip.driver || 'Kojo Mensah',
+      outlet: trip.outlet || 'Accra',
+      kmDriven: parseFloat(trip.kmDriven) || 0,
+      fuelLiters: parseFloat(trip.fuelLiters) || 0,
+      fuelCost: parseFloat(trip.fuelCost) || 0,
+      costPerKm: trip.kmDriven > 0 ? (parseFloat(trip.fuelCost) / parseFloat(trip.kmDriven)).toFixed(2) : 0
+    };
+    if (!this.data.vehicleTrips) this.data.vehicleTrips = [];
+    this.data.vehicleTrips.unshift(record);
+    this.save();
+    return record;
+  }
+
+  addHydroTest(test) {
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const record = {
+      id: `ht_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      date: timeStr,
+      outlet: test.outlet || 'Accra',
+      equipment: test.equipment || 'Bulk Tank #01',
+      serialNo: test.serialNo || `SN-${Math.floor(10000 + Math.random() * 90000)}`,
+      status: test.status || 'PASS',
+      nextDue: test.nextDue || '2027-08-05',
+      inspector: test.inspector || 'GSA Certified Inspector'
+    };
+    if (!this.data.hydroTests) this.data.hydroTests = [];
+    this.data.hydroTests.unshift(record);
+    this.save();
+    return record;
   }
 }
 
