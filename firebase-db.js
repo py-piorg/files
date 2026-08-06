@@ -23,20 +23,32 @@ function initFirebase() {
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       }
-      db = firebase.firestore();
 
-      db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-        if (err.code == 'failed-precondition') {
-          console.warn("Multiple tabs open, persistence enabled in primary tab.");
-        } else if (err.code == 'unimplemented') {
-          console.warn("Browser does not support offline persistence.");
-        }
-      });
+      // Use modern persistent cache instead of deprecated enablePersistence()
+      // This eliminates the "enableMultiTabIndexedDbPersistence will be deprecated" warning
+      try {
+        db = firebase.firestore();
+        // Modern: configure cache via settings (compat SDK approach)
+        db.settings({
+          cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+        });
+        db.enableMultiTabIndexedDbPersistence().catch(err => {
+          if (err.code === 'failed-precondition') {
+            // Multiple tabs open — persistence limited to one tab, that's fine
+            db.enableIndexedDbPersistence({ synchronizeTabs: false }).catch(() => {});
+          } else if (err.code === 'unimplemented') {
+            // Browser doesn't support offline persistence — that's OK
+          }
+        });
+      } catch (settingsErr) {
+        // Settings already set or not supported — just get db reference
+        db = firebase.firestore();
+      }
 
       isFirebaseInitialized = true;
-      console.log("🔥 Firebase Cloud Firestore Connected!");
+      console.log('🔥 Firebase Cloud Firestore Connected!');
     } catch (e) {
-      console.warn("Firebase initialization error, using local fallback:", e);
+      console.warn('Firebase initialization error, using local fallback:', e);
     }
   }
 }

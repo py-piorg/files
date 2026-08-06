@@ -41,30 +41,31 @@ const AdminAPI = {
   },
 
   // ── Real-Time SSE Listener ──
+  // On static / Netlify hosting the /api/events endpoint does not exist.
+  // We probe with a HEAD request first and skip EventSource silently if 404.
   initSSE(onUpdateCallback) {
     if (!window.EventSource) return;
-    try {
-      const sse = new EventSource('/api/events');
-      sse.onmessage = (e) => {
+    fetch('/api/events', { method: 'HEAD' })
+      .then(res => {
+        if (!res.ok) return; // 404 on static host — skip silently
         try {
-          const payload = JSON.parse(e.data);
-          if (onUpdateCallback) onUpdateCallback(payload);
-        } catch (err) {}
-      };
-      sse.addEventListener('db_update', (e) => {
-        console.log('[SSE] Database update received');
-        if (typeof fetchDatabase === 'function') fetchDatabase();
-        if (typeof toast === 'function') toast('Live data synced', 'safe');
-      });
-      sse.addEventListener('audit_log', (e) => {
-        console.log('[SSE] Audit log received');
-      });
-      sse.onerror = () => {
-        // SSE reconnects automatically
-      };
-    } catch (e) {
-      console.warn('[SSE] EventSource init failed:', e);
-    }
+          const sse = new EventSource('/api/events');
+          sse.onmessage = (e) => {
+            try {
+              const payload = JSON.parse(e.data);
+              if (onUpdateCallback) onUpdateCallback(payload);
+            } catch (err) {}
+          };
+          sse.addEventListener('db_update', () => {
+            if (typeof fetchDatabase === 'function') fetchDatabase();
+            if (typeof toast === 'function') toast('Live data synced', 'safe');
+          });
+          sse.onerror = () => { /* auto-reconnects */ };
+        } catch (e) {
+          // ignore
+        }
+      })
+      .catch(() => { /* network offline — skip */ });
   },
 
   // ── Offline Queue Manager ──
