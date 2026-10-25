@@ -1,5 +1,5 @@
 /* Triple A Gas Service Worker — PWA & Offline Support */
-const CACHE_NAME = 'triple-a-gas-v1';
+const CACHE_NAME = 'triple-a-gas-v2';
 const ASSETS = [
   '/',
   '/index.html',

@@ -97,6 +97,17 @@ body::before {
 .login-logo span { font-family: var(--font-mono); font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 2px; }
 .login-note { text-align: center; font-size: 11px; color: var(--text-faint); margin-top: 18px; }
 
+/* ── KIOSK MODAL ── (hidden until openKioskMode sets display:flex) */
+.kiosk-modal {
+  display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center;
+  padding: 20px; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+}
+.kiosk-card {
+  width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; background: var(--panel-bg);
+  border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 24px;
+}
+.kiosk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+
 /* ── MAIN SHELL LAYOUT ── */
 .shell { display: flex; height: 100vh; width: 100vw; overflow: hidden; position: relative; z-index: 1; }
 
@@ -1471,7 +1482,7 @@ Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
 const OUTLETS = ['Accra','Antoa','Bonwire','Bogoso','Prestea'];
 const SIZES   = ['3kg','6kg','13kg','14.5kg'];
 const EXPENSE_CATEGORIES = ['Fuel','Wages','Maintenance','Supplies','Rent','Utilities','Other'];
-let currentUser = null;
+currentUser = null; // declared in js/admin-core.js
 let dismissedAlerts = new Set(JSON.parse(localStorage.getItem('tAG_dismissedAlerts')||'[]'));
 let THRESHOLDS = JSON.parse(localStorage.getItem('tAG_thresholds')||'{"3kg":10,"6kg":8,"13kg":5,"14.5kg":5}');
 let PRICE_HISTORY = JSON.parse(localStorage.getItem('tAG_priceHistory')||'[]');
@@ -1479,7 +1490,7 @@ let COMPETITOR_NOTES = localStorage.getItem('tAG_competitorNotes')||'';
 let dashboardFocus = localStorage.getItem('tAG_dashboardFocus') || 'all';
 let reportRange = 'month';
 let financeRange = 'month';
-let chartInstances = {};
+chartInstances = {}; // declared in js/admin-core.js
 
 function getDefaultDB() {
   return {
@@ -1530,7 +1541,7 @@ function getDefaultDB() {
   };
 }
 
-let DB = getDefaultDB();
+DB = getDefaultDB(); // declared in js/admin-core.js
 
 // ── Persistence ──────────────────────────────────────────
 function saveToLocal() {
