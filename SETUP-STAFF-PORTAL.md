@@ -14,6 +14,21 @@ Unpaid orders expire after 12 hours. Prices changed later don't affect orders al
 3. **Lock down the database:** Firestore Database → Rules → paste the contents of `firestore.rules` → **Publish**. Until you do this, anyone on the internet can read and change the database.
 4. As owner, open **Pricing** and publish today's prices, then **Stations** for each station's MoMo number and hours, then **Staff** to add everyone.
 
+## Automatic pricing (NPA floor + your margin)
+The NPA sets a minimum LPG price (the "price floor") for each pricing window, starting on the 1st and 16th of the month. A GitHub job (`.github/workflows/npa-price.yml`) reads the new floor from the Ghanaian business press (Citi Newsroom and MyJoyOnline) three times a day. Once a window starts, it sets your price to **floor + your margin**.
+
+One-time setup:
+1. In the portal, open **Pricing → Connect price robot** (owner only). Copy the secret it shows. It is shown only once.
+2. On GitHub, go to **Settings → Secrets and variables → Actions → New repository secret**. Name it `TAG_PRICEBOT` and paste the secret as the value.
+3. Go to **Actions → NPA LPG price → Run workflow** to test it. Pricing should then show "Connected".
+4. Back in **Pricing**, tick **Update prices automatically**, set your margins, and save.
+
+How it behaves:
+- Publishing a price by hand pauses automatic pricing until the next window. **Resume automatic now** undoes the pause.
+- If the news sources disagree, or the floor jumps more than 40% from the last one, the job keeps your current price. The reason is shown under Pricing.
+- The robot's login can only set price = floor + your margin. The database rules block everything else it might try.
+- GitHub pauses scheduled jobs in repositories with no activity for 60 days. If Pricing says "Not seen" for days, open Actions and re-enable the workflow.
+
 ## Roles
 | Role | Can do |
 |---|---|
@@ -24,6 +39,7 @@ Unpaid orders expire after 12 hours. Prices changed later don't affect orders al
 | Pump Attendant | Own station: scan and fill, tank readings, safety checks |
 | Driver | Own station: record deliveries |
 | Secretary | Own station: view orders, website enquiries |
+| Automatic price bot | Only sets price = NPA floor + margin (cannot sign in to the portal) |
 
 The security rules in `firestore.rules` enforce these permissions on the server. Hiding a menu item is not what stops someone.
 

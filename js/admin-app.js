@@ -12,49 +12,58 @@
 
   const ROLES = {
     owner: 'Owner / Head Office', coo: 'COO', manager: 'Station Manager', cashier: 'Cashier',
-    attendant: 'Pump Attendant', driver: 'Driver', secretary: 'Secretary'
+    attendant: 'Pump Attendant', driver: 'Driver', secretary: 'Secretary', pricebot: 'Automatic price bot'
   };
-  const ALL = Object.keys(ROLES);
+  const STAFF_ROLES = ['owner', 'coo', 'manager', 'cashier', 'attendant', 'driver', 'secretary'];
+  const ALL = STAFF_ROLES;
   const HQ = ['owner', 'coo'];
   const NAV = [
     ['Operations', [
-      ['dashboard', '📊', 'Dashboard', ['owner', 'coo', 'manager']],
-      ['cashier', '💵', 'Cashier', ['owner', 'coo', 'manager', 'cashier']],
-      ['pump', '⛽', 'Pump / Scan', ['owner', 'coo', 'manager', 'attendant']],
-      ['orders', '🧾', 'Orders', ['owner', 'coo', 'manager', 'cashier', 'secretary']],
-      ['cashup', '🔒', 'Cash-up', ['owner', 'coo', 'manager', 'cashier']],
-      ['notes', '📝', 'Shift notes', ALL]
+      ['dashboard', 'dashboard', 'Dashboard', ['owner', 'coo', 'manager']],
+      ['cashier', 'cashier', 'Cashier', ['owner', 'coo', 'manager', 'cashier']],
+      ['pump', 'pump', 'Pump / Scan', ['owner', 'coo', 'manager', 'attendant']],
+      ['orders', 'orders', 'Orders', ['owner', 'coo', 'manager', 'cashier', 'secretary']],
+      ['cashup', 'cashup', 'Cash-up', ['owner', 'coo', 'manager', 'cashier']],
+      ['notes', 'notes', 'Shift notes', ALL]
     ]],
     ['Station', [
-      ['stock', '🛢️', 'Stock & tank', ['owner', 'coo', 'manager', 'attendant']],
-      ['deliveries', '🚚', 'Deliveries', ['owner', 'coo', 'manager', 'driver']],
-      ['safety', '🦺', 'Safety checks', ['owner', 'coo', 'manager', 'attendant']],
-      ['expenses', '💸', 'Expenses', ['owner', 'coo', 'manager']]
+      ['stock', 'stock', 'Stock & tank', ['owner', 'coo', 'manager', 'attendant']],
+      ['deliveries', 'deliveries', 'Deliveries', ['owner', 'coo', 'manager', 'driver']],
+      ['safety', 'safety', 'Safety checks', ['owner', 'coo', 'manager', 'attendant']],
+      ['expenses', 'expenses', 'Expenses', ['owner', 'coo', 'manager']]
     ]],
     ['Management', [
-      ['reports', '📈', 'Reports', ['owner', 'coo', 'manager']],
-      ['stations', '📍', 'Stations', ['owner', 'coo', 'manager']],
-      ['pricing', '🏷️', 'Pricing', HQ],
-      ['staff', '👥', 'Staff', ['owner', 'coo', 'manager']],
-      ['payroll', '💼', 'Payroll', HQ],
-      ['enquiries', '✉️', 'Enquiries', ['owner', 'coo', 'manager', 'secretary']],
-      ['audit', '🛡️', 'Audit log', HQ]
+      ['reports', 'reports', 'Reports', ['owner', 'coo', 'manager']],
+      ['stations', 'stations', 'Stations', ['owner', 'coo', 'manager']],
+      ['pricing', 'pricing', 'Pricing', HQ],
+      ['staff', 'staff', 'Staff', ['owner', 'coo', 'manager']],
+      ['payroll', 'payroll', 'Payroll', HQ],
+      ['enquiries', 'enquiries', 'Enquiries', ['owner', 'coo', 'manager', 'secretary']],
+      ['audit', 'audit', 'Audit log', HQ]
     ]]
   ];
   const HOME = { owner: 'dashboard', coo: 'dashboard', manager: 'dashboard', cashier: 'cashier', attendant: 'pump', driver: 'deliveries', secretary: 'orders' };
   // Views that work on one station at a time.
   const SINGLE_STATION = ['cashier', 'pump', 'stock', 'cashup'];
+  // Phone bottom bar: the first views of this list the role can see.
+  const TABS = { owner: ['dashboard', 'cashier', 'pump', 'orders'], coo: ['dashboard', 'cashier', 'pump', 'orders'],
+    manager: ['dashboard', 'cashier', 'pump', 'orders'], cashier: ['cashier', 'orders', 'cashup', 'notes'],
+    attendant: ['pump', 'stock', 'safety', 'notes'], driver: ['deliveries', 'notes'], secretary: ['orders', 'enquiries', 'notes'] };
 
   const A = window.ADMIN = {
     T, db, auth, FV, ROLES, HQ, ALL,
     user: null, me: null, outlet: 'all', pricing: T.DEFAULT_PRICING, stations: {},
-    views: {}, unsubs: [], current: null
+    views: {}, unsubs: [], current: null, STAFF_ROLES
   };
+  const ICON = window.ICON;
+  A.icon = ICON;
 
   // ── small helpers ───────────────────────────────────────────────────────
   const $ = (s, r = document) => r.querySelector(s);
   const esc = T.esc;
   A.$ = $;
+  // For writes that may land after the user has moved to another page.
+  A.safe = s => document.querySelector(s) || document.createElement('div');
   A.esc = esc;
   A.isHQ = () => !!A.me && HQ.includes(A.me.role);
   A.can = roles => !!A.me && roles.includes(A.me.role);
@@ -68,7 +77,7 @@
 
   A.toast = function (msg, tone = 'safe') {
     const t = $('#toast');
-    t.textContent = msg;
+    t.innerHTML = ICON(tone === 'safe' ? 'checkCircle' : 'alert', 18) + `<span>${esc(msg)}</span>`;
     t.className = 'toast show ' + (tone === 'safe' ? '' : tone);
     clearTimeout(A._tt);
     A._tt = setTimeout(() => t.classList.remove('show'), 3200);
@@ -77,9 +86,11 @@
   A.modal = function (html, opts = {}) {
     const m = document.createElement('div');
     m.className = 'modal';
-    m.innerHTML = `<div class="modal-card ${opts.wide ? 'wide' : ''}" role="dialog" aria-modal="true"><button class="modal-x" aria-label="Close">×</button>${html}</div>`;
+    m.innerHTML = `<div class="modal-card ${opts.wide ? 'wide' : ''}" role="dialog" aria-modal="true"><button class="modal-x" aria-label="Close">${ICON('x', 18)}</button>${html}</div>`;
     document.body.appendChild(m);
-    const close = () => { m.remove(); if (opts.onClose) opts.onClose(); };
+    const onKey = e => { if (e.key === 'Escape' && document.body.lastElementChild === m) close(); };
+    const close = () => { document.removeEventListener('keydown', onKey); m.remove(); if (opts.onClose) opts.onClose(); };
+    document.addEventListener('keydown', onKey);
     m.querySelector('.modal-x').onclick = close;
     m.addEventListener('mousedown', e => { if (e.target === m) close(); });
     return { el: m, close };
@@ -239,7 +250,7 @@
       <h2>First-time setup</h2><p class="sub">Create the owner account. This can only be done once; after that the owner adds every other staff member.</p>
       <form id="setupForm">
         <div class="field"><label>Your full name</label><input name="name" required maxlength="60"></div>
-        <div class="field"><label>Username</label><input name="username" required pattern="[a-z0-9._-]{3,30}" autocapitalize="none" placeholder="e.g. kofi.owner"></div>
+        <div class="field"><label>Username</label><input name="username" required pattern="[a-z0-9._\\-]{3,30}" autocapitalize="none" placeholder="e.g. kofi.owner"></div>
         <div class="field"><label>Password (8+ characters)</label><input name="password" type="password" minlength="8" required autocomplete="new-password"></div>
         <button class="btn btn-primary btn-block" id="setupGo">Create owner account</button>
         <div class="err" id="setupErr"></div>
@@ -317,6 +328,10 @@
       await auth.signOut();
       return showAuth('Your account is not active. Ask the owner to enable it.');
     }
+    if (snap.data().role === 'pricebot') {
+      await auth.signOut();
+      return showAuth('That is the automatic price account. It cannot sign in to the portal.');
+    }
     A.user = user;
     A.me = snap.data();
     A.outlet = A.isHQ() ? (sessionStorage.getItem('tag_outlet') || 'all') : A.me.outlet;
@@ -326,7 +341,9 @@
     $('#authScreen').classList.add('hidden');
     $('#app').classList.remove('hidden');
     $('#meName').textContent = A.me.name;
-    $('#meRole').textContent = `${ROLES[A.me.role]} · ${A.isHQ() ? 'All stations' : T.outletName(A.me.outlet)}`;
+    $('#meRole').textContent = ROLES[A.me.role];
+    $('#meAvatar').textContent = A.me.name.split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    $('#sideScope').textContent = A.isHQ() ? 'All stations' : `${T.outletName(A.me.outlet)} station`;
     buildNav();
     const sel = $('#outletSelect');
     if (A.isHQ()) {
@@ -344,10 +361,18 @@
       const visible = items.filter(([, , , roles]) => A.can(roles));
       if (!visible.length) return '';
       return `<div class="nav-group">${group}</div>` + visible.map(([id, ico, label]) =>
-        `<button data-view="${id}"><span class="ico">${ico}</span>${label}<span class="count hidden" data-count="${id}"></span></button>`).join('');
+        `<button data-view="${id}">${ICON(ico, 19)}<span>${label}</span><span class="count hidden" data-count="${id}"></span></button>`).join('');
     }).join('');
+    const tabs = (TABS[A.me.role] || []).filter(v => A.canSee(v));
+    const all = NAV.flatMap(([, items]) => items).filter(([, , , roles]) => A.can(roles));
+    const short = { dashboard: 'Home', cashier: 'Cashier', pump: 'Pump', orders: 'Orders', cashup: 'Cash-up', notes: 'Notes', stock: 'Stock', safety: 'Safety', deliveries: 'Deliveries', enquiries: 'Enquiries' };
+    $('#tabbar').innerHTML = tabs.map(id => { const it = all.find(x => x[0] === id);
+      return `<button data-view="${id}">${ICON(it[1], 22)}<span>${short[id] || it[2]}</span><span class="count hidden" data-count="${id}"></span></button>`; }).join('')
+      + (all.length > tabs.length ? `<button id="tabMore">${ICON('more', 22)}<span>More</span></button>` : '');
+    const more = $('#tabMore');
+    if (more) more.onclick = () => { $('#side').classList.add('open'); $('#overlay').classList.add('open'); };
   }
-  A.setCount = (view, n) => { const c = document.querySelector(`[data-count="${view}"]`); if (c) { c.textContent = n; c.classList.toggle('hidden', !n); } };
+  A.setCount = (view, n) => document.querySelectorAll(`[data-count="${view}"]`).forEach(c => { c.textContent = n; c.classList.toggle('hidden', !n); });
 
   function titleOf(view) {
     if (view === 'account') return 'My account';
@@ -362,12 +387,13 @@
     if (A.stopCamera) A.stopCamera();
     A.current = view;
     history.replaceState(null, '', '#' + view);
-    document.querySelectorAll('#nav button, .side-foot [data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    document.querySelectorAll('#nav button, #tabbar button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    window.scrollTo(0, 0);
     $('#viewTitle').textContent = titleOf(view);
     $('#side').classList.remove('open'); $('#overlay').classList.remove('open');
     const el = $('#view');
     if (SINGLE_STATION.includes(view) && !A.singleOutlet()) {
-      el.innerHTML = `<div class="panel"><h3>Choose a station</h3><p style="color:var(--muted);margin-bottom:12px;">${esc(titleOf(view))} works on one station at a time.</p>
+      el.innerHTML = `<div class="panel" style="max-width:640px;"><h3>${ICON('stations', 20)} Choose a station</h3><p style="color:var(--muted);margin-bottom:14px;">${esc(titleOf(view))} works on one station at a time.</p>
         <div class="chips">${T.OUTLETS.map(o => `<button class="chip" data-pick="${o.id}">${esc(o.name)}</button>`).join('')}</div></div>`;
       el.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => {
         A.outlet = b.dataset.pick; sessionStorage.setItem('tag_outlet', A.outlet);
@@ -376,10 +402,10 @@
       return;
     }
     const v = A.views[view];
-    el.innerHTML = '<div class="empty">Loading…</div>';
+    el.innerHTML = A.skeleton();
     Promise.resolve(v ? v(el) : (el.innerHTML = '<div class="empty">Coming soon</div>')).catch(e => {
       console.error(e);
-      el.innerHTML = `<div class="note danger">This page could not load${e && e.code === 'permission-denied' ? ': your role does not have access.' : '. Check your connection and try again.'}</div>`;
+      el.innerHTML = `<div class="note danger">${ICON('alert', 18)}<span>This page could not load${e && e.code === 'permission-denied' ? ': your role does not have access.' : '. Check your connection and try again.'}</span></div>`;
     });
   }
   A.show = show;
@@ -409,7 +435,20 @@
   };
 
   // ── boot ────────────────────────────────────────────────────────────────
+  const isDark = () => document.documentElement.dataset.theme === 'dark' ||
+    (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  A.skeleton = () => `<div class="kpis">${'<div class="kpi"><div class="skel" style="height:12px;width:60%;"></div><div class="skel" style="height:26px;width:80%;margin-top:10px;"></div></div>'.repeat(4)}</div>
+    <div class="panel"><div class="skel" style="height:14px;width:30%;margin-bottom:16px;"></div><div class="skel" style="height:160px;"></div></div>`;
   function wireShell() {
+    $('#menuBtn').innerHTML = ICON('menu', 20);
+    $('#logoutBtn').innerHTML = ICON('logout', 18);
+    $('#themeBtn').innerHTML = ICON(isDark() ? 'sun' : 'moon', 18);
+    $('#themeBtn').onclick = () => {
+      document.documentElement.dataset.theme = isDark() ? 'light' : 'dark';
+      try { localStorage.setItem('tag_theme', document.documentElement.dataset.theme); } catch (e) {}
+      $('#themeBtn').innerHTML = ICON(isDark() ? 'sun' : 'moon', 18);
+    };
+    window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', window.scrollY > 4), { passive: true });
     $('#menuBtn').onclick = () => { $('#side').classList.add('open'); $('#overlay').classList.add('open'); };
     $('#overlay').onclick = () => { $('#side').classList.remove('open'); $('#overlay').classList.remove('open'); };
     document.addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b && A.me) show(b.dataset.view); });

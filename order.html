@@ -2,61 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Your Order | Triple A Gas</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="images/offical_logo.png" type="image/png">
-<meta name="theme-color" content="#3E0B14">
+<meta name="theme-color" content="#f6f4f3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--wine-900:#3E0B14;--wine-700:#6E1524;--wine-500:#A8283A;--wine-100:#F7E7EA;--gold:#C79A3D;--gold-pale:#F8EFDB;--safe:#2E7D32;--safe-pale:#E4F1E5;--ink:#221417;--steel-500:#7A6669;--steel-300:#D9C9CC;--steel-100:#F3EBEC;--paper:#fff;}
-*{box-sizing:border-box;}
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--steel-100);color:var(--ink);min-height:100vh;}
-header{background:var(--wine-900);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;}
-header img{height:30px;}
-header a{color:#fff;text-decoration:none;font-family:'Archivo Expanded',sans-serif;font-weight:800;font-size:14px;letter-spacing:.02em;}
-main{max-width:480px;margin:0 auto;padding:20px 16px 48px;}
-.card{background:var(--paper);border-radius:18px;padding:22px 20px;box-shadow:0 10px 30px rgba(62,11,20,.08);margin-bottom:14px;}
-.pill{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;border-radius:100px;}
-.pill.warn{background:var(--gold-pale);color:#7A5A12;}
-.pill.gold{background:#FDF0C8;color:#6B4E00;}
-.pill.safe{background:var(--safe-pale);color:var(--safe);}
-.pill.neutral{background:var(--steel-100);color:var(--steel-500);}
-.pill.danger{background:#FDE4E4;color:#B3261E;}
-h1{font-family:'Archivo Expanded',sans-serif;font-size:20px;margin:12px 0 6px;color:var(--wine-900);}
-.lead{color:var(--steel-500);font-size:14.5px;line-height:1.5;margin:0;}
-.code{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:64px;letter-spacing:.18em;text-align:center;color:var(--wine-900);background:var(--wine-100);border-radius:16px;padding:14px 0 10px;margin:18px 0 6px;}
-.code-label{text-align:center;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--steel-500);}
-.qr{background:#fff;border:2px solid var(--ink);border-radius:16px;padding:12px;margin:18px auto 8px;max-width:300px;}
+:root{--brand:#a8283a;--brand-2:#8e1b2c;--brand-soft:#fbf1f3;--ink:#1b1215;--muted:#6c5f62;--faint:#a09396;--line:#efe7e8;--bg:#f6f4f3;--card:#fff;
+  --safe:#15803d;--safe-soft:#e8f6ed;--warn:#b45309;--warn-soft:#fdf3e2;--danger:#c62828;--danger-soft:#fdecec;--gold:#a8741a;--gold-soft:#fbf3e1;--mono:'JetBrains Mono',ui-monospace,monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;}
+a{color:var(--brand);text-decoration:none;}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(246,244,243,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+header img{width:34px;height:34px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+header .name{font-weight:800;font-size:14px;letter-spacing:.02em;color:var(--ink);}
+header .sp{flex:1;}
+header .link{font-size:13.5px;font-weight:600;color:var(--muted);padding:8px 12px;border-radius:10px;}
+header .link:hover{background:#ece6e6;color:var(--ink);}
+main{max-width:480px;margin:0 auto;padding:8px 16px 48px;}
+.card{background:var(--card);border-radius:22px;padding:22px 20px;box-shadow:0 1px 2px rgba(30,10,15,.04),0 8px 30px rgba(30,10,15,.06);margin-bottom:14px;animation:rise .35s cubic-bezier(.2,.8,.2,1);}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;}
+.pill::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;}
+.pill.warn{background:var(--warn-soft);color:var(--warn);}
+.pill.gold{background:var(--gold-soft);color:var(--gold);}
+.pill.safe{background:var(--safe-soft);color:var(--safe);}
+.pill.neutral{background:#f1eded;color:var(--muted);}
+.pill.danger{background:var(--danger-soft);color:var(--danger);}
+.live{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px;margin-left:8px;}
+.live::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.6s infinite;}
+h1{font-size:24px;font-weight:800;letter-spacing:-.025em;margin:14px 0 6px;line-height:1.2;}
+.lead{color:var(--muted);font-size:15px;line-height:1.5;}
+.lead b{color:var(--ink);}
+.track{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:20px 0 4px;}
+.track div{font-size:11.5px;font-weight:600;color:var(--faint);display:flex;flex-direction:column;gap:7px;}
+.track div::before{content:'';height:4px;border-radius:4px;background:#efe8e9;}
+.track div.done{color:var(--safe);} .track div.done::before{background:var(--safe);}
+.track div.now{color:var(--brand);} .track div.now::before{background:linear-gradient(90deg,var(--brand) 50%,#efe8e9 50%);background-size:200% 100%;animation:fill 1.6s ease-in-out infinite;}
+.digits{display:flex;justify-content:center;gap:10px;margin:22px 0 8px;}
+.digits span{width:64px;height:78px;border-radius:16px;background:var(--brand-soft);color:var(--brand-2);display:grid;place-items:center;font-family:var(--mono);font-size:40px;font-weight:700;box-shadow:inset 0 0 0 1.5px rgba(168,40,58,.15);}
+.digits.small span{width:44px;height:54px;font-size:26px;border-radius:12px;}
+.cap{text-align:center;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.qr{background:#fff;border-radius:20px;padding:14px;margin:20px auto 8px;max-width:300px;box-shadow:0 0 0 1px var(--line),0 12px 30px rgba(30,10,15,.08);}
 .qr svg{display:block;width:100%;height:auto;}
-.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0 0;}
-.steps li{counter-increment:s;position:relative;padding:0 0 12px 38px;font-size:14.5px;line-height:1.45;}
-.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:26px;height:26px;border-radius:50%;background:var(--wine-500);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
-.steps li.done::before{content:'✓';background:var(--safe);}
-.rows{margin:0;}
-.rows div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--steel-100);font-size:14.5px;}
+.momo{display:flex;gap:12px;align-items:flex-start;background:var(--gold-soft);border-radius:16px;padding:14px;font-size:14px;margin-top:18px;line-height:1.5;}
+.momo svg{flex-shrink:0;color:var(--gold);margin-top:2px;}
+.momo .num{font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:.04em;}
+.rows div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;}
 .rows div:last-child{border-bottom:none;}
-.rows dt{color:var(--steel-500);}
-.rows dd{margin:0;font-weight:600;text-align:right;}
-.amount{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:700;color:var(--wine-500);}
-.momo{background:var(--gold-pale);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px;line-height:1.5;}
-.btn{display:block;width:100%;text-align:center;border:none;border-radius:12px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;min-height:48px;font-family:inherit;}
-.btn-primary{background:var(--wine-500);color:#fff;}
-.btn-ghost{background:transparent;color:var(--wine-700);border:1.5px solid var(--steel-300);margin-top:10px;}
-.muted{color:var(--steel-500);font-size:13px;text-align:center;margin-top:10px;}
-.list a{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--steel-100);text-decoration:none;color:var(--ink);font-size:14.5px;}
+.rows dt{color:var(--muted);}
+.rows dd{font-weight:600;text-align:right;}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:14px;border-top:1px dashed #e2d7d9;}
+.total span{color:var(--muted);font-size:14px;}
+.total b{font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;text-align:center;border:none;border-radius:14px;padding:14px;font-weight:700;font-size:15px;cursor:pointer;min-height:52px;font-family:inherit;margin-top:10px;transition:background .15s;}
+.btn-primary{background:var(--brand);color:#fff;} .btn-primary:hover{background:var(--brand-2);}
+.btn-ghost{background:transparent;color:var(--muted);} .btn-ghost:hover{background:#ece6e6;color:var(--ink);}
+.btn-soft{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line);}
+.muted{color:var(--muted);font-size:13px;text-align:center;margin-top:12px;line-height:1.5;}
+.hero-ok{width:64px;height:64px;border-radius:50%;background:var(--safe-soft);color:var(--safe);display:grid;place-items:center;margin:4px auto 0;animation:pop .45s cubic-bezier(.2,1.4,.4,1);}
+.center{text-align:center;}
+.list a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);color:var(--ink);}
 .list a:last-child{border-bottom:none;}
-.list b{font-family:'IBM Plex Mono',monospace;font-size:18px;color:var(--wine-900);}
-.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--steel-500);}
-.live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--safe);animation:p 1.6s infinite;}
-@keyframes p{50%{opacity:.3}}
+.list small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;}
+.list .code{font-family:var(--mono);font-weight:700;font-size:18px;letter-spacing:.1em;background:var(--brand-soft);color:var(--brand-2);padding:4px 10px;border-radius:10px;}
+.skel{background:linear-gradient(90deg,#f1ecec,#e8e1e2,#f1ecec);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px;}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pulse{50%{opacity:.35}}
+@keyframes fill{0%{background-position:100% 0}100%{background-position:0 0}}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes shimmer{to{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;}}
+@media (max-width:360px){.digits span{width:54px;height:68px;font-size:34px;}}
 @media print{header,.btn,.no-print{display:none!important;}body{background:#fff;}.card{box-shadow:none;}}
 </style>
 </head>
 <body>
-<header><img src="images/offical_logo.png" alt=""><a href="index.html">TRIPLE A GAS</a></header>
-<main id="app"><div class="card"><p class="lead">Loading your order…</p></div></main>
+<header><a href="index.html" style="display:flex;align-items:center;gap:10px;"><img src="images/offical_logo.png" alt=""><span class="name">TRIPLE A GAS</span></a><span class="sp"></span><a class="link" href="order.html">My orders</a></header>
+<main id="app"><div class="card"><div class="skel" style="height:22px;width:40%;"></div><div class="skel" style="height:30px;width:70%;margin:16px 0;"></div><div class="skel" style="height:78px;"></div></div></main>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -68,21 +93,25 @@ h1{font-family:'Archivo Expanded',sans-serif;font-size:20px;margin:12px 0 6px;co
   const app = document.getElementById('app');
   const id = new URLSearchParams(location.search).get('id');
   let station = null;
+  const svg = (p, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 
   function fmtTime(ts) {
     const d = T.toDate(ts);
     return d ? d.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
   }
+  const digits = (code, small) => `<div class="digits ${small ? 'small' : ''}" aria-label="Code ${T.esc(code)}">${String(code).split('').map(c => `<span>${T.esc(c)}</span>`).join('')}</div>`;
+  const track = step => `<div class="track" aria-hidden="true">${['Ordered', 'Paid', 'Filled'].map((l, i) => `<div class="${i < step ? 'done' : i === step ? 'now' : ''}">${l}</div>`).join('')}</div>`;
 
-  function details(o) {
+  function details(o, extra = '') {
     return `<dl class="rows">
       <div><dt>Order</dt><dd>${T.esc(T.describe(o))}</dd></div>
       <div><dt>Station</dt><dd>${T.esc(T.outletName(o.outlet))}</dd></div>
       ${o.type !== 'exchange' ? `<div><dt>Price</dt><dd>${T.money(o.unitPrice)}/kg</dd></div>` : ''}
-      <div><dt>Name</dt><dd>${T.esc(o.customerName || '—')}</dd></div>
+      ${o.customerName ? `<div><dt>Name</dt><dd>${T.esc(o.customerName)}</dd></div>` : ''}
       <div><dt>Placed</dt><dd>${fmtTime(o.createdAt)}</dd></div>
-      <div><dt>Total</dt><dd class="amount">${T.money(o.amount)}</dd></div>
-    </dl>`;
+      ${extra}
+    </dl>
+    <div class="total"><span>Total</span><b>${T.money(o.amount)}</b></div>`;
   }
 
   function render(o) {
@@ -91,56 +120,47 @@ h1{font-family:'Archivo Expanded',sans-serif;font-size:20px;margin:12px 0 6px;co
     let html = '';
     if (st === 'pending') {
       const momo = o.payPref === 'momo' && station && station.momoNumber
-        ? `<div class="momo"><b>Paying with Mobile Money?</b><br>Send <b>${T.money(o.amount)}</b> to <b>${T.esc(station.momoNumber)}</b>${station.momoName ? ` (${T.esc(station.momoName)})` : ''} and use <b>${T.esc(o.code)}</b> as the reference. Show the cashier your confirmation SMS.</div>` : '';
+        ? `<div class="momo">${svg('<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>')}<div>Paying with <b>Mobile Money</b>? Send <b>${T.money(o.amount)}</b> to<br><span class="num">${T.esc(station.momoNumber)}</span>${station.momoName ? ` · ${T.esc(station.momoName)}` : ''}<br>Use <b>${T.esc(o.code)}</b> as the reference and show the cashier your SMS.</div></div>` : '';
       html = `<div class="card">
-          <span class="pill ${info.tone}">${info.label}</span> <span class="live">Live</span>
-          <h1>Go to the cashier</h1>
-          <p class="lead">At the <b>${T.esc(T.outletName(o.outlet))}</b> station, tell the cashier your code and pay.</p>
-          <div class="code" aria-label="Order code">${T.esc(o.code)}</div>
-          <div class="code-label">Your order code</div>
+          <span class="pill ${info.tone}">${info.label}</span><span class="live">Updates live</span>
+          ${track(1)}
+          <h1>Show this code at the cashier</h1>
+          <p class="lead">Go to <b>${T.esc(T.outletName(o.outlet))}</b> station and pay <b>${T.money(o.amount)}</b>. Your QR code appears here as soon as you've paid.</p>
+          ${digits(o.code)}
+          <div class="cap">Your order code</div>
           ${momo}
-          <ol class="steps">
-            <li class="done">Order placed</li>
-            <li>Pay <b>${T.money(o.amount)}</b> at the cashier (cash or MoMo)</li>
-            <li>Your QR code appears here automatically</li>
-            <li>Show the QR code at the pump to get filled</li>
-          </ol>
         </div>
         <div class="card">${details(o)}</div>
         <button class="btn btn-ghost no-print" id="cancelBtn">Cancel this order</button>
         <p class="muted">Unpaid orders expire after 12 hours.</p>`;
     } else if (st === 'paid') {
-      html = `<div class="card" style="text-align:center;">
-          <span class="pill ${info.tone}">${info.label}</span>
+      html = `<div class="card center">
+          <span class="pill ${info.tone}">Paid · ready to fill</span>
+          ${track(2)}
           <h1>Show this at the pump</h1>
-          <p class="lead">The pump attendant will scan this QR code and fill your order.</p>
+          <p class="lead">The attendant scans it and fills your order.</p>
           <div class="qr" id="qr"></div>
-          <div class="code" style="font-size:40px;margin-top:8px;">${T.esc(o.code)}</div>
-          <div class="code-label">Backup code if scanning fails</div>
+          ${digits(o.code, true)}
+          <div class="cap">Backup code</div>
           <p class="muted">Tip: turn your screen brightness up.</p>
         </div>
-        <div class="card">${details(o)}
-          <dl class="rows"><div><dt>Paid</dt><dd>${fmtTime(o.paidAt)} · ${T.esc((o.payMethod || '').toUpperCase())}</dd></div></dl>
-        </div>`;
+        <div class="card">${details(o, `<div><dt>Paid</dt><dd>${fmtTime(o.paidAt)} · ${T.esc((o.payMethod || '').toUpperCase())}</dd></div>`)}</div>`;
     } else if (st === 'fulfilled') {
-      html = `<div class="card" style="text-align:center;">
-          <span class="pill ${info.tone}">${info.label}</span>
-          <h1>Thank you!</h1>
-          <p class="lead">Your gas has been filled. Here is your receipt.</p>
+      html = `<div class="card center">
+          <div class="hero-ok">${svg('<path d="M20 6 9 17l-5-5"/>', 32)}</div>
+          <h1>All filled. Thank you!</h1>
+          <p class="lead">Here's your receipt.</p>
         </div>
-        <div class="card">${details(o)}
-          <dl class="rows">
+        <div class="card">${details(o, `
             <div><dt>Paid</dt><dd>${fmtTime(o.paidAt)} · ${T.esc((o.payMethod || '').toUpperCase())}</dd></div>
             <div><dt>Filled</dt><dd>${fmtTime(o.fulfilledAt)}</dd></div>
             ${o.dispensedKg ? `<div><dt>Dispensed</dt><dd>${T.esc(o.dispensedKg)} kg</dd></div>` : ''}
-            <div><dt>Receipt no.</dt><dd style="font-family:'IBM Plex Mono',monospace;">${T.esc(id.slice(0, 8).toUpperCase())}</dd></div>
-          </dl>
-        </div>
-        <button class="btn btn-ghost no-print" onclick="window.print()">Print / save receipt</button>
-        <a class="btn btn-primary no-print" style="margin-top:10px;" href="index.html#order">Order again</a>`;
+            <div><dt>Receipt</dt><dd style="font-family:var(--mono);">${T.esc(id.slice(0, 8).toUpperCase())}</dd></div>`)}</div>
+        <button class="btn btn-soft no-print" onclick="window.print()">Save or print receipt</button>
+        <a class="btn btn-primary no-print" href="index.html#order">Order again</a>`;
     } else {
-      const why = st === 'expired' ? 'This order was not paid within 12 hours.'
-        : st === 'refunded' ? 'This order was refunded by the station.' : 'This order was cancelled.';
+      const why = st === 'expired' ? 'This order wasn’t paid within 12 hours.'
+        : st === 'refunded' ? 'The station refunded this order.' : 'This order was cancelled.';
       html = `<div class="card"><span class="pill ${info.tone}">${info.label}</span><h1>${info.label}</h1><p class="lead">${why}</p></div>
         <div class="card">${details(o)}</div>
         <a class="btn btn-primary" href="index.html#order">Place a new order</a>`;
@@ -163,9 +183,9 @@ h1{font-family:'Archivo Expanded',sans-serif;font-size:20px;margin:12px 0 6px;co
 
   function renderList() {
     const mine = T.myOrders();
-    app.innerHTML = `<div class="card"><h1>My orders</h1>
-      ${mine.length ? `<div class="list">${mine.map(m => `<a href="order.html?id=${encodeURIComponent(m.id)}"><span>${T.esc(T.outletName(m.outlet))} · ${T.money(m.amount)}<br><small style="color:var(--steel-500)">${new Date(m.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></span><b>${T.esc(m.code)}</b></a>`).join('')}</div>`
-        : '<p class="lead">No orders on this device yet.</p>'}
+    app.innerHTML = `<div class="card"><h1 style="margin-top:0;">My orders</h1>
+      ${mine.length ? `<div class="list">${mine.map(m => `<a href="order.html?id=${encodeURIComponent(m.id)}"><span><b>${T.esc(T.outletName(m.outlet))}</b> · ${T.money(m.amount)}<small>${new Date(m.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></span><span class="code">${T.esc(m.code)}</span></a>`).join('')}</div>`
+        : '<p class="lead">No orders on this phone yet.</p>'}
       </div><a class="btn btn-primary" href="index.html#order">Order LPG</a>`;
   }
 
@@ -173,21 +193,23 @@ h1{font-family:'Archivo Expanded',sans-serif;font-size:20px;margin:12px 0 6px;co
   const { db } = T.init();
   let last = null;
   db.collection('orders').doc(id).onSnapshot(async snap => {
-    if (!snap.exists) { app.innerHTML = '<div class="card"><h1>Order not found</h1><p class="lead">Check the link, or place a new order.</p></div><a class="btn btn-primary" href="index.html#order">Order LPG</a>'; return; }
+    if (!snap.exists) { app.innerHTML = '<div class="card"><h1 style="margin-top:0;">Order not found</h1><p class="lead">Check the link, or place a new order.</p></div><a class="btn btn-primary" href="index.html#order">Order LPG</a>'; return; }
     const o = snap.data();
     if (!station) {
       try { const s = await db.collection('stations').doc(o.outlet).get(); station = s.exists ? s.data() : {}; } catch (e) { station = {}; }
     }
-    if (last && last.status !== o.status && navigator.vibrate) navigator.vibrate(200);
+    const changed = last && last.status !== o.status;
+    if (changed && navigator.vibrate) navigator.vibrate([120, 60, 120]);
     last = o;
     T.rememberOrder({ id, code: o.code, outlet: o.outlet, amount: o.amount });
     render(o);
+    if (changed) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, err => {
     console.error(err);
-    app.innerHTML = '<div class="card"><h1>Connection problem</h1><p class="lead">We could not load your order. Check your internet and refresh.</p></div>';
+    app.innerHTML = '<div class="card"><h1 style="margin-top:0;">Connection problem</h1><p class="lead">We couldn’t load your order. Check your internet and refresh.</p></div>';
   });
-  // Re-render once a minute so "expired" shows up without a refresh.
-  setInterval(() => { if (last && last.status === 'pending') render(last); }, 60000);
+  // Show "expired" once an unpaid order passes 12 hours, without a refresh.
+  setInterval(() => { if (last && last.status === 'pending' && T.effectiveStatus(last) === 'expired') render(last); }, 60000);
 })();
 </script>
 </body>

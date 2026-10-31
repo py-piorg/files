@@ -12,6 +12,7 @@ rules_version = '2';
 //    attendant  own station: scan QR / code and mark orders filled, tank dips
 //    driver     own station: bulk deliveries
 //    secretary  own station: orders view, enquiries
+//    pricebot   the automatic NPA price job only (GitHub Actions)
 // ============================================================================
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -20,7 +21,8 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function staffPath() { return /databases/$(database)/documents/staff/$(request.auth.uid); }
     function me() { return get(staffPath()).data; }
-    function isStaff() { return signedIn() && exists(staffPath()) && me().active == true; }
+    function isStaff() { return signedIn() && exists(staffPath()) && me().active == true && me().role != 'pricebot'; }
+    function isBot() { return signedIn() && exists(staffPath()) && me().active == true && me().role == 'pricebot'; }
     function hasRole(roles) { return isStaff() && me().role in roles; }
     function isHQ() { return hasRole(['owner', 'coo']); }
     function atOutlet(o) { return isStaff() && (me().role in ['owner', 'coo'] || me().outlet == o); }
@@ -39,7 +41,7 @@ service cloud.firestore {
       return d.keys().hasOnly(['name', 'username', 'role', 'outlet', 'phone', 'active', 'createdAt', 'createdBy', 'updatedAt'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 60
         && d.username is string && d.username.matches('^[a-z0-9._-]{3,30}$')
-        && d.role in ['owner', 'coo', 'manager', 'cashier', 'attendant', 'driver', 'secretary']
+        && d.role in ['owner', 'coo', 'manager', 'cashier', 'attendant', 'driver', 'secretary', 'pricebot']
         && d.outlet in outlets()
         && d.active is bool;
     }
@@ -65,15 +67,18 @@ service cloud.firestore {
 
     // ── settings ───────────────────────────────────────────────────────────
     match /settings/{doc} {
-      allow read: if doc in ['pricing', 'stationStatus', 'bootstrap'] || isStaff();
+      allow read: if doc in ['pricing', 'stationStatus', 'bootstrap'] || isStaff() || (doc == 'npa' && isBot());
       allow create: if doc == 'bootstrap' && signedIn()
                     && request.resource.data.ownerUid == request.auth.uid
                     && existsAfter(staffPath())
                     && getAfter(staffPath()).data.role == 'owner';
       allow update: if (doc == 'pricing' && isHQ() && validPricing())
-                    || (doc == 'stationStatus' && hasRole(['owner', 'coo', 'manager']));
+                    || (doc == 'pricing' && isBot() && botPricing())
+                    || (doc == 'stationStatus' && hasRole(['owner', 'coo', 'manager']))
+                    || (doc == 'npa' && (isBot() || isHQ()));
       allow create: if (doc == 'pricing' && isHQ() && validPricing())
-                    || (doc == 'stationStatus' && hasRole(['owner', 'coo', 'manager']));
+                    || (doc == 'stationStatus' && hasRole(['owner', 'coo', 'manager']))
+                    || (doc == 'npa' && (isBot() || isHQ()));
       allow delete: if false;
     }
     function validPricing() {
@@ -82,10 +87,25 @@ service cloud.firestore {
         && d.autogasPerKg is number && d.autogasPerKg > 0 && d.autogasPerKg < 200
         && d.exchange is map && d.deposit is map;
     }
+    // The price bot may only set price = NPA floor + the owner's margins, only
+    // while automatic pricing is on and no manual price is holding.
+    function botPricing() {
+      let n = request.resource.data;
+      let o = resource.data;
+      return o.auto == true
+        && (!('manualUntil' in o) || o.manualUntil == null || o.manualUntil < request.time)
+        && changed().hasOnly(['perKg', 'autogasPerKg', 'exchange', 'npaFloor', 'npaWindow', 'updatedAt', 'updatedBy',
+                              'bulk_per_kg', 'autogas', '3kg', '6kg', '12.5kg', '14.5kg'])
+        && n.npaFloor is number && n.npaFloor > 3 && n.npaFloor < 100
+        && (!('npaFloor' in o) || (n.npaFloor > o.npaFloor * 0.6 && n.npaFloor < o.npaFloor * 1.6))
+        && near(n.perKg, n.npaFloor + o.markupKg, 0.011)
+        && near(n.autogasPerKg, n.npaFloor + o.autogasMarkupKg, 0.011)
+        && n.updatedAt == request.time;
+    }
 
     match /priceHistory/{id} {
       allow read: if isStaff();
-      allow create: if isHQ() && request.resource.data.by == request.auth.uid;
+      allow create: if (isHQ() || isBot()) && request.resource.data.by == request.auth.uid;
     }
 
     // ── stations (public info) & stock (staff only) ────────────────────────

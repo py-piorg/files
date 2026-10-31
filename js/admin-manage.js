@@ -16,7 +16,7 @@
     return `<div class="chart">${points.map(p => `<div class="c" title="${esc(p.label)}: ${esc(fmt ? fmt(p.v) : p.v)}"><i style="height:${Math.max(1, (p.v / max) * 100)}%"></i><span>${esc(p.short || p.label)}</span></div>`).join('')}</div>`;
   }
   function breakdown(rows, total) {
-    return rows.length ? rows.map(([label, v, sub]) => `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>${esc(label)}</span><b class="mono">${esc(sub)}</b></div><div class="bar"><i style="width:${pct(v, total)}%;background:var(--gold)"></i></div></div>`).join('') : '<div class="empty">No data</div>';
+    return rows.length ? rows.map(([label, v, sub]) => `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>${esc(label)}</span><b class="num">${esc(sub)}</b></div><div class="bar"><i style="width:${pct(v, total)}%;background:var(--gold)"></i></div></div>`).join('') : '<div class="empty">No data</div>';
   }
   async function getStock(outlets) {
     const snaps = await Promise.all(outlets.map(o => db.collection('stock').doc(o).get().catch(() => null)));
@@ -38,6 +38,8 @@
     const today = T.dayStr();
     const pastDays = A.daysBack(7).slice(0, 6);
     el.innerHTML = `
+      ${A.isHQ() && !A.pricing.auto ? `<div class="note info" style="margin-bottom:16px;">${A.icon('zap', 18)}<div><b>Automatic pricing is off.</b> Turn it on to follow the NPA price floor every pricing window without updating prices by hand.
+        <div style="margin-top:8px;"><button class="btn btn-sm" data-view="pricing">Set up automatic pricing</button></div></div></div>` : ''}
       <div class="kpis" id="dK"></div>
       <div id="dAlerts"></div>
       <div class="cols-3">
@@ -61,7 +63,7 @@
       const waiting = todayRows.filter(o => o.status === 'paid');
       const filled = todayRows.filter(o => o.status === 'fulfilled' && o.paidAt && o.fulfilledAt);
       const serve = filled.length ? Math.round(sum(filled, o => (T.toDate(o.fulfilledAt) - T.toDate(o.paidAt)) / 60000) / filled.length) : null;
-      $('#dK').innerHTML = `
+      A.safe('#dK').innerHTML = `
         <div class="kpi gold"><div class="v">${T.money(revenue)}</div><div class="l">Sales today</div></div>
         <div class="kpi"><div class="v">${kg.toLocaleString()} kg</div><div class="l">LPG sold today</div></div>
         <div class="kpi safe"><div class="v">${todayRows.filter(o => o.status === 'fulfilled').length}</div><div class="l">Orders filled</div></div>
@@ -81,26 +83,26 @@
       });
       const slow = waiting.filter(o => Date.now() - (T.toDate(o.paidAt) || Date.now()) > 30 * 60000);
       if (slow.length) alerts.push(`${slow.length} paid order${slow.length > 1 ? 's' : ''} waiting more than 30 min at the pump`);
-      $('#dAlerts').innerHTML = alerts.length ? `<div class="note danger" style="margin-bottom:14px;">⚠ ${alerts.join('<br>⚠ ')}</div>` : '';
+      A.safe('#dAlerts').innerHTML = alerts.length ? `<div class="note danger" style="margin-bottom:16px;">${A.icon('alert', 18)}<div>${alerts.join('<br>')}</div></div>` : '';
 
       const week = [...pastDays.map(d => ({ d, rows: past.filter(o => o.day === d) })), { d: today, rows: todayRows }];
       const pts = week.map(w => ({ label: A.fmtDay(w.d), short: new Date(w.d + 'T00:00:00Z').toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' }), v: sum(w.rows.filter(isSale), o => o.amount) }));
-      $('#dChart').innerHTML = bars(pts, T.money);
-      $('#dWeek').textContent = T.money(sum(pts, p => p.v)) + ' total';
+      A.safe('#dChart').innerHTML = bars(pts, T.money);
+      A.safe('#dWeek').textContent = T.money(sum(pts, p => p.v)) + ' total';
 
       if (all) {
-        $('#dStations').innerHTML = `<table><thead><tr><th>Station</th><th>Status</th><th class="num">Sales</th><th class="num">Orders</th><th class="num">Unpaid</th><th>Tank</th></tr></thead><tbody>
+        A.safe('#dStations').innerHTML = `<table><thead><tr><th>Station</th><th>Status</th><th class="num">Sales</th><th class="num">Orders</th><th class="num">Unpaid</th><th>Tank</th></tr></thead><tbody>
           ${outlets.map(o => { const r = todayRows.filter(x => x.outlet === o); const st = A.stations[o] || {};
             return `<tr class="click" data-pick="${o}"><td><b>${esc(T.outletName(o))}</b></td><td><span class="badge ${st.open === false ? 'danger' : st.status === 'limited' ? 'warn' : 'safe'}">${st.open === false ? 'Closed' : st.status === 'limited' ? 'Limited' : 'Open'}</span></td>
             <td class="num">${T.money(sum(r.filter(isSale), x => x.amount))}</td><td class="num">${r.length}</td><td class="num">${r.filter(x => T.effectiveStatus(x) === 'pending').length}</td><td>${tankBar(stock[o])}</td></tr>`; }).join('')}</tbody></table>`;
       } else {
         const q = [...pending, ...waiting].sort((a, b) => (T.toDate(a.createdAt) || 0) - (T.toDate(b.createdAt) || 0));
-        $('#dStations').innerHTML = `<div style="margin-bottom:10px;">Tank: ${tankBar(stock[outlets[0]])}</div>` + (q.length ? `<table><tbody>${q.map(o => `<tr class="click" data-oid="${o.id}"><td><span class="code-chip" style="font-size:13px;">${esc(o.code)}</span></td><td>${esc(T.describe(o))}</td><td class="num">${T.money(o.amount)}</td><td>${A.statusBadge(o)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">Queue is empty</div>');
+        A.safe('#dStations').innerHTML = `<div style="margin-bottom:10px;">Tank: ${tankBar(stock[outlets[0]])}</div>` + (q.length ? `<table><tbody>${q.map(o => `<tr class="click" data-oid="${o.id}"><td><span class="code-chip" style="font-size:13px;">${esc(o.code)}</span></td><td>${esc(T.describe(o))}</td><td class="num">${T.money(o.amount)}</td><td>${A.statusBadge(o)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">Queue is empty</div>');
       }
       const types = [['Cylinder refill', 'refill'], ['Exchange', 'exchange'], ['Autogas', 'autogas']].map(([l, t]) => { const r = sales.filter(o => o.type === t); return [l, sum(r, o => o.amount), `${T.money(sum(r, o => o.amount))} · ${r.length}`]; });
-      $('#dMix').innerHTML = breakdown(types, revenue);
+      A.safe('#dMix').innerHTML = breakdown(types, revenue);
       const pays = [['Cash', 'cash'], ['Mobile Money', 'momo'], ['Card', 'card']].map(([l, m]) => { const r = sales.filter(o => o.payMethod === m); return [l, sum(r, o => o.amount), T.money(sum(r, o => o.amount))]; });
-      $('#dPay').innerHTML = breakdown(pays, revenue);
+      A.safe('#dPay').innerHTML = breakdown(pays, revenue);
     }
     el.addEventListener('click', e => {
       const p = e.target.closest('[data-pick]');
@@ -228,9 +230,9 @@
     };
     try {
       const list = await A.fetchOps('deliveries', outlets, A.daysBack(30));
-      $('#dvList').innerHTML = list.length ? list.map(d => `<div class="list-row"><div class="grow"><b>${d.kind === 'bulk' ? `${Number(d.kg).toLocaleString()} kg bulk LPG` : 'Cylinders: ' + T.SIZES.filter(z => d.cylIn && d.cylIn[z]).map(z => `${d.cylIn[z]}×${z}`).join(', ')}</b>
+      A.safe('#dvList').innerHTML = list.length ? list.map(d => `<div class="list-row"><div class="grow"><b>${d.kind === 'bulk' ? `${Number(d.kg).toLocaleString()} kg bulk LPG` : 'Cylinders: ' + T.SIZES.filter(z => d.cylIn && d.cylIn[z]).map(z => `${d.cylIn[z]}×${z}`).join(', ')}</b>
         <small>${esc(T.outletName(d.outlet))} · ${esc(d.supplier || '—')}${d.waybill ? ' · #' + esc(d.waybill) : ''} · ${esc(d.byName)} · ${A.fmtDateTime(d.at)}</small></div>${d.cost ? `<b class="mono">${T.money(d.cost)}</b>` : ''}</div>`).join('') : '<div class="empty">No deliveries recorded</div>';
-    } catch (e) { $('#dvList').innerHTML = '<div class="empty">Could not load</div>'; }
+    } catch (e) { A.safe('#dvList').innerHTML = '<div class="empty">Could not load</div>'; }
   };
 
   // ── SAFETY ──────────────────────────────────────────────────────────────
@@ -266,9 +268,9 @@
     };
     try {
       const list = await A.fetchOps('inspections', outlets, A.daysBack(30));
-      $('#sfList').innerHTML = list.length ? list.map(c => `<div class="list-row"><div class="grow"><b>${esc(T.outletName(c.outlet))}</b> ${c.passed ? '<span class="badge safe">All clear</span>' : `<span class="badge danger">${c.failed.length} issue${c.failed.length > 1 ? 's' : ''}</span>`}
+      A.safe('#sfList').innerHTML = list.length ? list.map(c => `<div class="list-row"><div class="grow"><b>${esc(T.outletName(c.outlet))}</b> ${c.passed ? '<span class="badge safe">All clear</span>' : `<span class="badge danger">${c.failed.length} issue${c.failed.length > 1 ? 's' : ''}</span>`}
         <small>${esc(c.byName)} · ${A.fmtDateTime(c.at)}${c.failed && c.failed.length ? ' · ' + esc(c.failed.join('; ')) : ''}${c.notes ? ' · ' + esc(c.notes) : ''}</small></div></div>`).join('') : '<div class="empty">No checks recorded</div>';
-    } catch (e) { $('#sfList').innerHTML = '<div class="empty">Could not load</div>'; }
+    } catch (e) { A.safe('#sfList').innerHTML = '<div class="empty">Could not load</div>'; }
   };
 
   // ── EXPENSES ────────────────────────────────────────────────────────────
@@ -297,10 +299,10 @@
     try {
       const list = await A.fetchOps('expenses', outlets, A.daysBetween(monthStart, T.dayStr()));
       const total = sum(list, x => x.amount);
-      $('#exTotal').textContent = T.money(total);
-      $('#exCats').innerHTML = breakdown(EXP_CATS.map(c => { const v = sum(list.filter(x => x.category === c), x => x.amount); return [c, v, T.money(v)]; }).filter(r => r[1] > 0), total);
-      $('#exList').innerHTML = list.length ? list.map(x => `<div class="list-row"><div class="grow"><b>${esc(x.description)}</b><small>${esc(x.category)} · ${esc(T.outletName(x.outlet))} · ${esc(x.byName)} · ${A.fmtDay(x.day)}</small></div><b class="mono">${T.money(x.amount)}</b></div>`).join('') : '<div class="empty">No expenses this month</div>';
-    } catch (e) { $('#exList').innerHTML = '<div class="empty">Could not load</div>'; }
+      A.safe('#exTotal').textContent = T.money(total);
+      A.safe('#exCats').innerHTML = breakdown(EXP_CATS.map(c => { const v = sum(list.filter(x => x.category === c), x => x.amount); return [c, v, T.money(v)]; }).filter(r => r[1] > 0), total);
+      A.safe('#exList').innerHTML = list.length ? list.map(x => `<div class="list-row"><div class="grow"><b>${esc(x.description)}</b><small>${esc(x.category)} · ${esc(T.outletName(x.outlet))} · ${esc(x.byName)} · ${A.fmtDay(x.day)}</small></div><b class="mono">${T.money(x.amount)}</b></div>`).join('') : '<div class="empty">No expenses this month</div>';
+    } catch (e) { A.safe('#exList').innerHTML = '<div class="empty">Could not load</div>'; }
   };
 
   // ── REPORTS ─────────────────────────────────────────────────────────────
@@ -310,13 +312,13 @@
     el.innerHTML = `<div class="toolbar">
         <div class="tabs" style="margin:0;" id="rQuick"><button data-n="1">Today</button><button data-n="7" class="on">7 days</button><button data-n="30">30 days</button><button data-n="m">This month</button></div>
         <input type="date" id="rFrom" value="${st.from}" max="${st.to}"> → <input type="date" id="rTo" value="${st.to}" max="${st.to}">
-        <button class="btn btn-sm btn-primary" id="rGo">Run</button><button class="btn btn-sm" id="rCsv">⬇ CSV</button>
+        <button class="btn btn-sm btn-primary" id="rGo">Run</button><button class="btn btn-sm" id="rCsv">${A.icon('download', 16)} CSV</button>
       </div><div id="rOut"><div class="empty">Loading…</div></div>`;
     let daily = [];
     async function run() {
       const days = A.daysBetween(st.from, st.to);
       if (!days.length) { A.toast('Pick a valid date range', 'warn'); return; }
-      $('#rOut').innerHTML = `<div class="empty">Loading ${days.length} day${days.length > 1 ? 's' : ''}…</div>`;
+      A.safe('#rOut').innerHTML = `<div class="empty">Loading ${days.length} day${days.length > 1 ? 's' : ''}…</div>`;
       try {
         const [orders, expenses] = await Promise.all([A.fetchOrders(outlets, days), A.fetchOps('expenses', outlets, days).catch(() => [])]);
         const sales = orders.filter(isSale);
@@ -335,7 +337,7 @@
         sales.forEach(o => { if (o.paidByName) { const p = people[o.paidByName] = people[o.paidByName] || { pay: 0, amt: 0, fills: 0 }; p.pay++; p.amt += o.amount; } });
         orders.filter(o => o.status === 'fulfilled').forEach(o => { if (o.fulfilledByName) { const p = people[o.fulfilledByName] = people[o.fulfilledByName] || { pay: 0, amt: 0, fills: 0 }; p.fills++; } });
 
-        $('#rOut').innerHTML = `
+        A.safe('#rOut').innerHTML = `
           <div class="kpis">
             <div class="kpi gold"><div class="v">${T.money(revenue)}</div><div class="l">Sales (${sales.length} paid orders)</div></div>
             <div class="kpi"><div class="v">${kg.toLocaleString()} kg</div><div class="l">LPG sold${cylinders ? ` + ${cylinders} cylinders` : ''}</div></div>
@@ -358,7 +360,7 @@
             <div class="panel"><h3>Staff activity</h3>${Object.keys(people).length ? `<div class="table-wrap"><table><thead><tr><th>Staff</th><th class="num">Payments</th><th class="num">Collected</th><th class="num">Fills</th></tr></thead><tbody>
               ${Object.entries(people).sort((a, b) => b[1].amt - a[1].amt).map(([n, p]) => `<tr><td>${esc(n)}</td><td class="num">${p.pay}</td><td class="num">${T.money(p.amt)}</td><td class="num">${p.fills}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No activity</div>'}</div>
           </div>`;
-      } catch (e) { A.err(e); $('#rOut').innerHTML = '<div class="empty">Could not load report</div>'; }
+      } catch (e) { A.err(e); A.safe('#rOut').innerHTML = '<div class="empty">Could not load report</div>'; }
     }
     $('#rQuick').onclick = e => {
       const b = e.target.closest('[data-n]'); if (!b) return;
@@ -380,7 +382,7 @@
     el.innerHTML = `<p style="color:var(--muted);margin-bottom:12px;">What customers see on the website and in the order form. A closed station cannot receive online orders.</p>
       <div class="cols">${snaps.map((s, i) => { const d = s.exists ? s.data() : {}; const o = outlets[i]; const status = d.open === false ? 'closed' : (d.status || 'open');
         return `<form class="panel" data-st="${o}"><h3>${esc(T.outletName(o))}</h3>
-          <div class="field"><label>Status</label><select name="status"><option value="open" ${status === 'open' ? 'selected' : ''}>🟢 Open</option><option value="limited" ${status === 'limited' ? 'selected' : ''}>🟡 Limited stock</option><option value="closed" ${status === 'closed' ? 'selected' : ''}>🔴 Closed</option></select></div>
+          <div class="field"><label>Status</label><select name="status"><option value="open" ${status === 'open' ? 'selected' : ''}>Open</option><option value="limited" ${status === 'limited' ? 'selected' : ''}>Limited stock</option><option value="closed" ${status === 'closed' ? 'selected' : ''}>Closed</option></select></div>
           <div class="grid2"><div class="field"><label>Opening hours</label><input name="hours" value="${esc(d.hours || '')}" maxlength="60"></div>
           <div class="field"><label>Note for customers</label><input name="note" value="${esc(d.note || '')}" maxlength="120"></div></div>
           <div class="grid2"><div class="field"><label>MoMo merchant number</label><input name="momoNumber" value="${esc(d.momoNumber || '')}" maxlength="20" inputmode="tel"></div>
@@ -400,25 +402,165 @@
   };
 
   // ── PRICING ─────────────────────────────────────────────────────────────
+  const REPO = 'https://github.com/py-piorg/files';
+  // Pricing windows start on the 1st and 16th of each month (UTC = Ghana time).
+  function nextWindowStart(d = new Date()) {
+    const y = d.getUTCFullYear(), m = d.getUTCMonth();
+    return d.getUTCDate() < 16 ? new Date(Date.UTC(y, m, 16)) : new Date(Date.UTC(y, m + 1, 1));
+  }
+  const ago = ts => {
+    const d = T.toDate(ts); if (!d) return 'never';
+    const min = Math.round((Date.now() - d) / 60000);
+    return min < 2 ? 'just now' : min < 60 ? `${min} min ago` : min < 1440 ? `${Math.round(min / 60)} h ago` : `${Math.round(min / 1440)} days ago`;
+  };
+
   A.views.pricing = async function (el) {
-    const p = await T.loadPricing();
+    const [p, npaSnap, botSnap] = await Promise.all([
+      T.loadPricing(),
+      db.collection('settings').doc('npa').get().catch(() => null),
+      db.collection('staff').where('role', '==', 'pricebot').get().catch(() => null)
+    ]);
     A.pricing = p;
-    el.innerHTML = `<div class="cols"><div class="panel"><h3>Prices <small>${p.updatedAt ? 'last changed ' + A.fmtDateTime(p.updatedAt) : 'not published yet'}</small></h3>
-      <form id="prForm">
-        <div class="grid3"><div class="field"><label>LPG per kg (GH₵)</label><input name="perKg" type="number" step="0.01" value="${p.perKg}" required></div>
-        <div class="field"><label>Autogas per kg (GH₵)</label><input name="autogasPerKg" type="number" step="0.01" value="${p.autogasPerKg}" required></div>
-        <div class="field"><label>Minimum order (GH₵)</label><input name="minAmount" type="number" step="1" value="${p.minAmount || 10}"></div></div>
-        <div class="table-wrap"><table><thead><tr><th>Size</th><th>Refill price</th><th>Exchange (gas) price</th><th>New cylinder deposit</th></tr></thead><tbody>
-          ${T.SIZES.map(z => `<tr><td><b>${z}</b></td><td class="mono" data-refill="${z}">${T.money(parseFloat(z) * p.perKg)}</td>
-            <td><input name="ex_${z}" type="number" step="0.01" value="${p.exchange[z]}" style="max-width:130px;min-height:38px;"></td>
-            <td><input name="dep_${z}" type="number" step="0.01" value="${p.deposit[z]}" style="max-width:130px;min-height:38px;"></td></tr>`).join('')}
-        </tbody></table></div>
-        <label style="display:flex;gap:8px;align-items:center;margin:10px 0;"><input type="checkbox" id="prSync" checked> Set exchange prices to kg price × size</label>
-        <div class="field"><label>Reason / NPA window</label><input name="note" maxlength="120" placeholder="e.g. NPA 16 Oct pricing window"></div>
-        <button class="btn btn-primary">Publish prices</button>
-        <p style="color:var(--muted);font-size:12.5px;margin-top:8px;">New prices apply to new orders immediately. Orders already placed keep the price shown to the customer.</p>
-      </form></div>
-      <div class="panel"><h3>Price history</h3><div id="prHist"><div class="empty">Loading…</div></div></div></div>`;
+    const npa = npaSnap && npaSnap.exists ? npaSnap.data() : null;
+    const bots = botSnap ? botSnap.docs.map(d => ({ uid: d.id, ...d.data() })).filter(b => b.active) : [];
+    const manualUntil = T.toDate(p.manualUntil);
+    const holding = p.auto && manualUntil && manualUntil > new Date();
+    // The floor in use is the one last applied; the robot's latest find may still be pending or rejected.
+    const floorNow = typeof p.npaFloor === 'number' ? p.npaFloor : (npa && npa.floor) || null;
+    const floorWindow = typeof p.npaFloor === 'number' ? p.npaWindow : npa && npa.window;
+    const usable = npa && npa.floor && npa.window && new Date(npa.window + 'T00:00:00Z') <= new Date()
+      && (typeof p.npaFloor !== 'number' || (npa.floor > p.npaFloor * 0.6 && npa.floor < p.npaFloor * 1.6));
+    const markup = typeof p.markupKg === 'number' ? p.markupKg : T.round2(p.perKg - (floorNow || p.perKg - 3));
+    const agMarkup = typeof p.autogasMarkupKg === 'number' ? p.autogasMarkupKg : T.round2(p.autogasPerKg - (floorNow || p.autogasPerKg - 3));
+    const fresh = npa && npa.lastCheck && Date.now() - T.toDate(npa.lastCheck) < 36 * 3600e3;
+    const windowLabel = w => (w ? new Date(w + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '—');
+
+    el.innerHTML = `
+      <div class="kpis">
+        <div class="kpi gold"><div class="l">LPG price now</div><div class="v">${T.money(p.perKg)}<small style="font-size:13px;color:var(--muted);font-weight:500;"> /kg</small></div></div>
+        <div class="kpi"><div class="l">Autogas now</div><div class="v">${T.money(p.autogasPerKg)}<small style="font-size:13px;color:var(--muted);font-weight:500;"> /kg</small></div></div>
+        <div class="kpi"><div class="l">NPA floor in use${floorWindow ? ' · from ' + windowLabel(floorWindow) : ''}</div><div class="v">${floorNow ? T.money(floorNow) : '—'}</div></div>
+        <div class="kpi ${p.auto ? (holding ? 'warn' : 'safe') : ''}"><div class="l">Price mode</div><div class="v" style="font-size:19px;">${p.auto ? (holding ? 'Manual hold' : 'Automatic') : 'Manual'}</div></div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="panel"><h3>${A.icon('zap', 20)} Automatic pricing<span class="sp"></span><span class="badge ${p.auto ? 'safe' : 'neutral'}">${p.auto ? 'On' : 'Off'}</span></h3>
+            <p style="color:var(--muted);margin-bottom:14px;">Every NPA pricing window (1st and 16th), the price is set to the <b>NPA LPG price floor + your margin</b>. The floor is read from the Ghanaian business press three times a day.</p>
+            ${holding ? `<div class="note" style="margin-bottom:14px;">${A.icon('clock', 18)}<div>You published a manual price, so automatic pricing is paused until <b>${manualUntil.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}</b> (the next pricing window). <button class="btn btn-sm" id="resumeAuto" style="margin-top:8px;">Resume automatic now</button></div></div>` : ''}
+            <form id="autoForm">
+              <label class="check-row" style="margin-bottom:14px;"><input type="checkbox" name="auto" ${p.auto ? 'checked' : ''}> Update prices automatically from the NPA floor</label>
+              <div class="grid2">
+                <div class="field"><label>LPG margin above floor (GH₵/kg)</label><input name="markupKg" type="number" step="0.01" value="${markup}" required></div>
+                <div class="field"><label>Autogas margin above floor (GH₵/kg)</label><input name="autogasMarkupKg" type="number" step="0.01" value="${agMarkup}" required></div>
+              </div>
+              <div id="autoPreview" class="hint" style="margin:-4px 0 14px;"></div>
+              <button class="btn btn-primary">Save automatic pricing</button>
+            </form>
+            <div class="divider">Price robot</div>
+            ${bots.length
+              ? `<div class="list-row"><div class="grow"><b>${fresh ? 'Connected' : 'Waiting for first run'}</b><small>${npa && npa.lastCheck ? `Last checked ${ago(npa.lastCheck)}${npa.lastResult ? ' · ' + esc(npa.lastResult) : ''}` : 'No check received yet. Add the GitHub secret, then run it once.'}</small></div>
+                 <span class="badge ${fresh ? 'safe' : 'warn'}">${fresh ? 'Running' : 'Not seen'}</span></div>
+                 ${npa && npa.url ? `<p class="hint">Source: <a href="${esc(npa.url)}" target="_blank" rel="noopener">${esc(npa.title || npa.source)}</a></p>` : ''}
+                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+                   <a class="btn btn-sm" href="${REPO}/actions/workflows/npa-price.yml" target="_blank" rel="noopener">${A.icon('link', 15)} Run now on GitHub</a>
+                   ${A.me.role === 'owner' ? '<button class="btn btn-sm btn-ghost" id="botNew">Replace robot login</button>' : ''}</div>`
+              : `<p style="color:var(--muted);margin-bottom:12px;">The robot is a small job on GitHub that checks the NPA floor and updates your prices. It needs its own login, which only it can use.</p>
+                 ${A.me.role === 'owner' ? `<button class="btn" id="botNew">${A.icon('bot', 18)} Connect price robot</button>` : '<p class="hint">Ask the owner to connect it.</p>'}`}
+          </div>
+        </div>
+
+        <div>
+          <div class="panel"><h3>${A.icon('pricing', 20)} Set prices manually <small>${p.updatedAt ? 'last changed ' + A.fmtDateTime(p.updatedAt) + (p.updatedBy ? ' · ' + esc(p.updatedBy) : '') : ''}</small></h3>
+            <form id="prForm">
+              <div class="grid3"><div class="field"><label>LPG per kg</label><input name="perKg" type="number" step="0.01" value="${p.perKg}" required></div>
+              <div class="field"><label>Autogas per kg</label><input name="autogasPerKg" type="number" step="0.01" value="${p.autogasPerKg}" required></div>
+              <div class="field"><label>Minimum order</label><input name="minAmount" type="number" step="1" value="${p.minAmount || 10}"></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Size</th><th>Refill</th><th>Exchange (gas)</th><th>New cylinder</th></tr></thead><tbody>
+                ${T.SIZES.map(z => `<tr><td><b>${z}</b></td><td class="num" data-refill="${z}">${T.money(parseFloat(z) * p.perKg)}</td>
+                  <td><input name="ex_${z}" type="number" step="0.01" value="${p.exchange[z]}" style="min-width:96px;min-height:38px;"></td>
+                  <td><input name="dep_${z}" type="number" step="0.01" value="${p.deposit[z]}" style="min-width:96px;min-height:38px;"></td></tr>`).join('')}
+              </tbody></table></div>
+              <label class="check-row" style="margin:14px 0;"><input type="checkbox" id="prSync" checked> Exchange price = kg price × cylinder size</label>
+              <div class="field"><label>Reason</label><input name="note" maxlength="120" placeholder="e.g. NPA 16 Oct pricing window"></div>
+              <button class="btn btn-primary">Publish prices</button>
+              <p class="hint">New prices apply to new orders straight away; orders already placed keep their price.${p.auto ? ' Publishing here pauses automatic pricing until the next window.' : ''}</p>
+            </form>
+          </div>
+          <div class="panel"><h3>${A.icon('audit', 20)} Price history</h3><div id="prHist">${'<div class="skel" style="height:40px;margin-bottom:8px;"></div>'.repeat(3)}</div></div>
+        </div>
+      </div>`;
+
+    // Automatic pricing
+    const af = $('#autoForm');
+    const preview = () => {
+      const d = A.formData(af);
+      A.safe('#autoPreview').innerHTML = floorNow
+        ? `With the floor of ${T.money(floorNow)}: LPG <b>${T.money(floorNow + (+d.markupKg || 0))}</b>/kg · autogas <b>${T.money(floorNow + (+d.autogasMarkupKg || 0))}</b>/kg`
+        : 'The price will be calculated once the robot has found the first NPA floor.';
+    };
+    af.oninput = preview; preview();
+    af.onsubmit = async e => {
+      e.preventDefault();
+      const d = A.formData(af);
+      const upd = { auto: !!d.auto, markupKg: T.round2(+d.markupKg || 0), autogasMarkupKg: T.round2(+d.autogasMarkupKg || 0), manualUntil: null };
+      // Apply straight away when the floor for the current window is known.
+      const live = upd.auto && usable;
+      if (live) {
+        const perKg = T.round2(npa.floor + upd.markupKg);
+        Object.assign(upd, { perKg, autogasPerKg: T.round2(npa.floor + upd.autogasMarkupKg), npaFloor: npa.floor, npaWindow: npa.window,
+          exchange: Object.fromEntries(T.SIZES.map(z => [z, T.round2(parseFloat(z) * perKg)])) });
+        Object.assign(upd, T.legacyPricingFields({ ...p, ...upd }));
+        if (!(await A.confirm(`Turn on automatic pricing and set LPG to ${T.money(perKg)}/kg now?`, 'Turn on'))) return;
+      }
+      try {
+        await db.collection('settings').doc('pricing').set({ ...upd, updatedAt: FV.serverTimestamp(), updatedBy: A.me.name }, { merge: true });
+        if (live) await db.collection('priceHistory').add({ old: { perKg: p.perKg, autogasPerKg: p.autogasPerKg, exchange: p.exchange }, new: { perKg: upd.perKg, autogasPerKg: upd.autogasPerKg, exchange: upd.exchange }, note: `Automatic pricing on: floor ${T.money(npa.floor)} + margin`, by: A.user.uid, byName: A.me.name, at: FV.serverTimestamp() });
+        A.audit('automatic pricing', 'pricing', `${upd.auto ? 'on' : 'off'} · margin ${T.money(upd.markupKg)}/kg`);
+        A.toast(upd.auto ? 'Automatic pricing is on' : 'Automatic pricing is off'); A.refresh();
+      } catch (err) { A.err(err); }
+    };
+    const resume = $('#resumeAuto');
+    if (resume) resume.onclick = async () => {
+      try { await db.collection('settings').doc('pricing').set({ manualUntil: null }, { merge: true }); A.toast('Automatic pricing resumed'); A.refresh(); } catch (err) { A.err(err); }
+    };
+
+    // Robot login (owner only)
+    const botBtn = $('#botNew');
+    if (botBtn) botBtn.onclick = async () => {
+      if (bots.length && !(await A.confirm('Create a new robot login? The old one stops working; you will need to update the GitHub secret.', 'Replace'))) return;
+      botBtn.disabled = true;
+      try {
+        const username = 'pricebot-' + T.randomString(5, 'abcdefghijkmnpqrstuvwxyz23456789');
+        const password = T.randomString(28);
+        const sec = T.secondaryAuth();
+        const cred = await sec.createUserWithEmailAndPassword(`${username}@staff.tripleagas.com`, password);
+        await sec.signOut();
+        await db.collection('staff').doc(cred.user.uid).set({ name: 'Automatic price bot', username, role: 'pricebot', outlet: 'accra', phone: '', active: true, createdAt: FV.serverTimestamp(), createdBy: A.user.uid });
+        for (const b of bots) {
+          const { uid, ...rest } = b;
+          await db.collection('staff').doc(uid).set({ ...rest, active: false, updatedAt: FV.serverTimestamp() });
+        }
+        A.audit('price robot connected', username, '');
+        const secret = `${username}:${password}`;
+        const { el: m } = A.modal(`<h2>${A.icon('bot', 22)} Connect the price robot</h2>
+          <p style="color:var(--muted);margin-bottom:14px;">Copy this secret now. It is shown only once.</p>
+          <div style="display:flex;gap:8px;margin-bottom:18px;"><input id="botSecret" class="mono" readonly value="${esc(secret)}" style="font-size:13px;"><button class="btn" id="botCopy">Copy</button></div>
+          <ol style="padding-left:20px;line-height:1.9;">
+            <li>Open <a href="${REPO}/settings/secrets/actions/new" target="_blank" rel="noopener">GitHub → New repository secret</a></li>
+            <li>Name: <code class="code-chip" style="font-size:13px;">TAG_PRICEBOT</code></li>
+            <li>Secret: paste the value above, then <b>Add secret</b></li>
+            <li>Open <a href="${REPO}/actions/workflows/npa-price.yml" target="_blank" rel="noopener">the NPA LPG price workflow</a> → <b>Run workflow</b> to test it</li>
+          </ol>`, { onClose: () => A.refresh() });
+        m.querySelector('#botCopy').onclick = async () => {
+          const i = m.querySelector('#botSecret'); i.select();
+          try { await navigator.clipboard.writeText(secret); } catch (e) { document.execCommand('copy'); }
+          A.toast('Secret copied');
+        };
+      } catch (err) { botBtn.disabled = false; A.err(err, 'Could not create the robot login'); }
+    };
+
+    // Manual prices
     const f = $('#prForm');
     const sync = () => {
       const per = parseFloat(f.perKg.value) || 0;
@@ -434,9 +576,11 @@
       const np = { perKg: T.round2(+d.perKg), autogasPerKg: T.round2(+d.autogasPerKg), minAmount: +d.minAmount || 0, exchange: {}, deposit: {} };
       T.SIZES.forEach(z => { np.exchange[z] = T.round2(+d['ex_' + z]); np.deposit[z] = T.round2(+d['dep_' + z]); });
       if (!(np.perKg > 0 && np.autogasPerKg > 0)) { A.toast('Prices must be above zero', 'warn'); return; }
-      if (!(await A.confirm(`Publish LPG at ${T.money(np.perKg)}/kg and autogas at ${T.money(np.autogasPerKg)}/kg?`, 'Publish'))) return;
+      const hold = p.auto ? nextWindowStart() : null;
+      if (!(await A.confirm(`Publish LPG at ${T.money(np.perKg)}/kg and autogas at ${T.money(np.autogasPerKg)}/kg?${hold ? ` Automatic pricing pauses until ${hold.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}.` : ''}`, 'Publish'))) return;
       try {
-        await db.collection('settings').doc('pricing').set({ ...np, ...T.legacyPricingFields(np), updatedAt: FV.serverTimestamp(), updatedBy: A.me.name }, { merge: true });
+        await db.collection('settings').doc('pricing').set({ ...np, ...T.legacyPricingFields(np), manualUntil: hold ? firebase.firestore.Timestamp.fromDate(hold) : null,
+          updatedAt: FV.serverTimestamp(), updatedBy: A.me.name }, { merge: true });
         await db.collection('priceHistory').add({ old: { perKg: p.perKg, autogasPerKg: p.autogasPerKg, exchange: p.exchange }, new: np, note: d.note.trim(), by: A.user.uid, byName: A.me.name, at: FV.serverTimestamp() });
         A.audit('prices published', 'pricing', `${T.money(np.perKg)}/kg · autogas ${T.money(np.autogasPerKg)}/kg`);
         A.toast('Prices published'); A.refresh();
@@ -444,9 +588,11 @@
     };
     try {
       const h = await db.collection('priceHistory').orderBy('at', 'desc').limit(20).get();
-      $('#prHist').innerHTML = h.empty ? '<div class="empty">No changes yet</div>' : h.docs.map(x => { const r = x.data();
-        return `<div class="list-row"><div class="grow"><b>${T.money(r.old.perKg)} → ${T.money(r.new.perKg)}/kg</b><small>Autogas ${T.money(r.new.autogasPerKg)}/kg · ${esc(r.byName)} · ${A.fmtDateTime(r.at)}${r.note ? ' · ' + esc(r.note) : ''}</small></div></div>`; }).join('');
-    } catch (e) { $('#prHist').innerHTML = '<div class="empty">Could not load</div>'; }
+      A.safe('#prHist').innerHTML = h.empty ? '<div class="empty">No changes yet</div>' : h.docs.map(x => { const r = x.data();
+        const up = r.new.perKg >= r.old.perKg;
+        return `<div class="list-row"><div class="grow"><b>${T.money(r.old.perKg)} → ${T.money(r.new.perKg)}</b> <span class="badge ${up ? 'warn' : 'safe'}">${up ? '+' : '−'}${T.money(Math.abs(r.new.perKg - r.old.perKg))}</span>
+          <small>${esc(r.byName)} · ${A.fmtDateTime(r.at)}${r.note ? ' · ' + esc(r.note) : ''}</small></div></div>`; }).join('');
+    } catch (e) { A.safe('#prHist').innerHTML = '<div class="empty">Could not load</div>'; }
   };
 
   // ── STAFF ───────────────────────────────────────────────────────────────
@@ -467,7 +613,7 @@
     if (A.isHQ() && A.outlet !== 'all') list = list.filter(s => s.outlet === A.outlet || HQish(s));
     list.sort((a, b) => Number(b.active) - Number(a.active) || a.outlet.localeCompare(b.outlet) || a.name.localeCompare(b.name));
     function HQish(s) { return ['owner', 'coo'].includes(s.role); }
-    el.innerHTML = `<div class="panel"><h3>Staff <small>${list.filter(s => s.active).length} active</small>${owner ? '<button class="btn btn-sm btn-primary" id="addStaff">+ Add staff</button>' : ''}</h3>
+    el.innerHTML = `<div class="panel"><h3>Staff <small>${list.filter(s => s.active).length} active</small>${owner ? `<span class="sp"></span><button class="btn btn-sm btn-primary" id="addStaff">${A.icon('plus', 16)} Add staff</button>` : ''}</h3>
       <div class="table-wrap"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Station</th><th>Phone</th><th>Status</th></tr></thead><tbody>
       ${list.map(s => `<tr class="${owner ? 'click' : ''}" data-uid="${s.uid}"><td><b>${esc(s.name)}</b></td><td class="mono">${esc(s.username)}</td><td>${esc(A.ROLES[s.role])}</td>
         <td>${HQish(s) ? 'All stations' : esc(T.outletName(s.outlet))}</td><td class="mono">${esc(s.phone || '')}</td><td><span class="badge ${s.active ? 'safe' : 'neutral'}">${s.active ? 'Active' : 'Disabled'}</span></td></tr>`).join('')}
@@ -481,10 +627,10 @@
       const isNew = !s; const self = s && s.uid === A.user.uid;
       const { el: m, close } = A.modal(`<h2>${isNew ? 'Add staff member' : 'Edit ' + esc(s.name)}</h2><form id="sf">
         <div class="field"><label>Full name</label><input name="name" required maxlength="60" value="${esc(s ? s.name : '')}"></div>
-        <div class="grid2"><div class="field"><label>Username</label><input name="username" required pattern="[a-z0-9._-]{3,30}" autocapitalize="none" value="${esc(s ? s.username : '')}" ${isNew ? '' : 'readonly'}></div>
+        <div class="grid2"><div class="field"><label>Username</label><input name="username" required pattern="[a-z0-9._\\-]{3,30}" autocapitalize="none" value="${esc(s ? s.username : '')}" ${isNew ? '' : 'readonly'}></div>
         <div class="field"><label>Phone</label><input name="phone" type="tel" maxlength="20" value="${esc(s ? s.phone || '' : '')}"></div></div>
         ${isNew ? '<div class="field"><label>Temporary password (8+ chars)</label><input name="password" minlength="8" required autocomplete="new-password"></div>' : ''}
-        <div class="grid2"><div class="field"><label>Role</label><select name="role" ${self ? 'disabled' : ''}>${Object.entries(A.ROLES).map(([k, v]) => `<option value="${k}" ${s && s.role === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+        <div class="grid2"><div class="field"><label>Role</label><select name="role" ${self ? 'disabled' : ''}>${A.STAFF_ROLES.map(k => `<option value="${k}" ${s && s.role === k ? 'selected' : ''}>${A.ROLES[k]}</option>`).join('')}</select></div>
         <div class="field"><label>Station</label><select name="outlet">${A.outletOptions(s ? s.outlet : (A.singleOutlet() || 'accra'))}</select></div></div>
         ${isNew ? '' : `<label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;"><input type="checkbox" name="active" ${s.active ? 'checked' : ''} ${self ? 'disabled' : ''}> Account active (untick to block sign-in)</label>`}
         <button class="btn btn-primary btn-block">${isNew ? 'Create account' : 'Save changes'}</button>
@@ -527,11 +673,11 @@
     const staff = staffSnap.docs.map(d => ({ uid: d.id, ...d.data() })).filter(s => s.active);
     const rows = paySnap.docs.map(d => ({ id: d.id, ...d.data() }));
     const tot = sum(rows, r => r.net);
-    el.innerHTML = `<div class="toolbar"><input type="month" id="pMonth" value="${month}"><span class="grow"></span><button class="btn btn-sm" id="pCsv">⬇ CSV</button></div>
+    el.innerHTML = `<div class="toolbar"><input type="month" id="pMonth" value="${month}"><span class="grow"></span><button class="btn btn-sm" id="pCsv">${A.icon('download', 16)} CSV</button></div>
       <div class="kpis"><div class="kpi gold"><div class="v">${T.money(tot)}</div><div class="l">Net pay ${month}</div></div>
         <div class="kpi"><div class="v">${rows.filter(r => r.paid).length}/${rows.length}</div><div class="l">Paid</div></div>
         <div class="kpi"><div class="v">${T.money(sum(rows, r => r.ssnit))}</div><div class="l">SSNIT employee (5.5%)</div></div></div>
-      <div class="panel"><h3>Payroll ${month} <button class="btn btn-sm btn-primary" id="pAdd">+ Add / edit pay</button></h3>
+      <div class="panel"><h3>Payroll ${month} <span class="sp"></span><button class="btn btn-sm btn-primary" id="pAdd">${A.icon('plus', 16)} Add / edit pay</button></h3>
       <div class="table-wrap"><table><thead><tr><th>Staff</th><th>Station</th><th class="num">Basic</th><th class="num">Allowances</th><th class="num">SSNIT</th><th class="num">PAYE</th><th class="num">Other</th><th class="num">Net</th><th>Paid</th></tr></thead><tbody>
         ${rows.length ? rows.map(r => `<tr class="click" data-pid="${r.id}"><td>${esc(r.name)}</td><td>${esc(T.outletName(r.outlet))}</td><td class="num">${T.money(r.basic)}</td><td class="num">${T.money(r.allowances)}</td><td class="num">${T.money(r.ssnit)}</td><td class="num">${T.money(r.paye)}</td><td class="num">${T.money(r.other)}</td><td class="num"><b>${T.money(r.net)}</b></td>
           <td><span class="badge ${r.paid ? 'safe' : 'warn'}">${r.paid ? 'Paid' : 'Due'}</span></td></tr>`).join('') : '<tr><td colspan="9" class="empty">No pay records this month</td></tr>'}
@@ -576,7 +722,7 @@
       ${list.length ? list.map(x => `<div class="list-row"><div class="grow"><b>${esc(x.name || x.contact || 'Unknown')}${x.company ? ' · ' + esc(x.company) : ''}</b> ${x.reviewed ? '' : '<span class="badge warn">New</span>'}
         <small>${esc(x.topic || '')}${x.location ? ' · ' + esc(x.location) : ''}${x.usage ? ' · usage: ' + esc(x.usage) : ''} · ${A.fmtDateTime(x.createdAt)}</small>
         ${x.notes ? `<div style="margin-top:4px;">${esc(x.notes)}</div>` : ''}</div>
-        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">${x.phone ? `<a class="btn btn-sm" href="tel:${esc(x.phone)}">📞 ${esc(x.phone)}</a>` : ''}${x.reviewed ? '' : `<button class="btn btn-sm" data-rev="${x.id}">Mark done</button>`}</div></div>`).join('') : '<div class="empty">No enquiries</div>'}</div>`;
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">${x.phone ? `<a class="btn btn-sm" href="tel:${esc(x.phone)}">${A.icon('phone', 15)} ${esc(x.phone)}</a>` : ''}${x.reviewed ? '' : `<button class="btn btn-sm" data-rev="${x.id}">Mark done</button>`}</div></div>`).join('') : '<div class="empty">No enquiries</div>'}</div>`;
     el.onclick = async e => {
       const b = e.target.closest('[data-rev]'); if (!b) return;
       try { await db.collection('enquiries').doc(b.dataset.rev).update({ reviewed: true, reviewedAt: FV.serverTimestamp(), reviewedBy: A.me.name }); A.refresh(); } catch (err) { A.err(err); }
@@ -590,7 +736,7 @@
     el.innerHTML = `<div class="panel"><div class="toolbar"><input class="grow" id="auQ" type="search" placeholder="Filter by person, action or detail"></div>
       <div class="table-wrap"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead><tbody id="auB"></tbody></table></div></div>`;
     const render = q => { const r = list.filter(x => !q || [x.byName, x.action, x.target, x.detail, x.role].join(' ').toLowerCase().includes(q));
-      $('#auB').innerHTML = r.length ? r.map(x => `<tr><td class="mono" style="white-space:nowrap;">${A.fmtDateTime(x.at)}</td><td>${esc(x.byName)}<br><small style="color:var(--muted)">${esc(A.ROLES[x.role] || '')}</small></td><td><b>${esc(x.action)}</b></td><td>${esc(x.target)}</td><td>${esc(x.detail)}</td></tr>`).join('') : '<tr><td colspan="5" class="empty">Nothing found</td></tr>'; };
+      A.safe('#auB').innerHTML = r.length ? r.map(x => `<tr><td class="mono" style="white-space:nowrap;">${A.fmtDateTime(x.at)}</td><td>${esc(x.byName)}<br><small style="color:var(--muted)">${esc(A.ROLES[x.role] || '')}</small></td><td><b>${esc(x.action)}</b></td><td>${esc(x.target)}</td><td>${esc(x.detail)}</td></tr>`).join('') : '<tr><td colspan="5" class="empty">Nothing found</td></tr>'; };
     $('#auQ').oninput = e => render(e.target.value.trim().toLowerCase());
     render('');
   };

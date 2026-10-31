@@ -1,0 +1,28 @@
+# Updates the LPG price from the NPA price floor (see scripts/npa-price.mjs).
+# Needs the repository secret TAG_PRICEBOT ("username:password" from the
+# staff portal → Pricing → Automatic pricing).
+name: NPA LPG price
+
+on:
+  schedule:
+    # 06:15, 12:15 and 18:15 Ghana time, every day
+    - cron: '15 6,12,18 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: npa-price
+  cancel-in-progress: false
+
+jobs:
+  update-price:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check NPA floor and update price
+        run: node scripts/npa-price.mjs
+        env:
+          TAG_PRICEBOT: ${{ secrets.TAG_PRICEBOT }}

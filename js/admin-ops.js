@@ -58,7 +58,7 @@
     return input;
   }
   function keypad(el, input, onCode) {
-    el.innerHTML = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button type="button" data-k="${k}">${k}</button>`).join('');
+    el.innerHTML = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button type="button" data-k="${k}" aria-label="${k === '⌫' ? 'Delete' : k === 'C' ? 'Clear' : k}">${k === '⌫' ? A.icon('backspace', 22) : k}</button>`).join('');
     el.addEventListener('click', e => {
       const k = e.target.closest('[data-k]'); if (!k) return;
       const v = k.dataset.k;
@@ -96,8 +96,8 @@
       <div class="cols-3">
         <div>
           <div class="panel">
-            <h3>Customer code <small>${esc(T.outletName(outlet))} station</small>
-              <button class="btn btn-sm btn-gold" id="walkinBtn">+ Walk-in sale</button></h3>
+            <h3>Customer code <small>${esc(T.outletName(outlet))} station</small><span class="sp"></span>
+              <button class="btn btn-sm btn-gold" id="walkinBtn">${A.icon('plus', 16)} Walk-in sale</button></h3>
             <form class="codebox" id="codeForm"><input id="codeIn" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="····" aria-label="4-digit order code"></form>
             <div class="keypad" id="keypad"></div>
           </div>
@@ -125,7 +125,7 @@
       try {
         const o = await orderByCode(outlet, code);
         if (!o) {
-          slot.innerHTML = `<div class="order-card bad"><div class="verdict bad">No order ${esc(code)} at ${esc(T.outletName(outlet))}</div>
+          slot.innerHTML = `<div class="order-card bad"><div class="verdict bad">${A.icon('stop', 24)} No order ${esc(code)} at ${esc(T.outletName(outlet))}</div>
             <p style="color:var(--muted)">Check the code, or that the customer chose this station. You can also make a walk-in sale.</p></div>`;
           return;
         }
@@ -141,29 +141,29 @@
         const priceNote = Math.abs(now.amount - o.amount) > 0.05
           ? `<div class="note" style="margin-top:10px;">Prices changed since this order was placed (today: ${T.money(now.amount)}). Charge the order price.</div>` : '';
         html = `<div class="order-card wait">
-          <div class="verdict wait">Collect ${T.money(o.amount)}</div>
+          <div class="verdict wait">${A.icon('cashier', 24)} Collect ${T.money(o.amount)}</div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><span class="code-chip" style="font-size:22px;">${esc(o.code)}</span>${A.statusBadge(o)}</div>
           <div class="big-what">${esc(T.describe(o))}</div>
           ${orderKv(o)}${priceNote}
           <div class="paymethods" id="pm">
-            <button type="button" data-m="cash">💵 Cash</button><button type="button" data-m="momo">📱 MoMo</button><button type="button" data-m="card">💳 Card</button>
+            <button type="button" data-m="cash">${A.icon('cash', 22)}Cash</button><button type="button" data-m="momo">${A.icon('momo', 22)}MoMo</button><button type="button" data-m="card">${A.icon('card', 22)}Card</button>
           </div>
           <div id="pmCash" class="grid2"><div class="field"><label>Cash received</label><input id="cashIn" type="number" step="0.01" inputmode="decimal" placeholder="${o.amount}"></div>
             <div class="field"><label>Change due</label><input id="changeOut" readonly class="mono"></div></div>
           <div id="pmMomo" class="field hidden"><label>MoMo transaction ID</label><input id="momoRef" autocomplete="off" placeholder="From the payment SMS"></div>
-          <button class="btn btn-safe btn-xl btn-block" id="payGo">✓ Payment received — issue QR</button>
+          <button class="btn btn-safe btn-xl btn-block" id="payGo">${A.icon('check', 22)} Payment received — issue QR</button>
           <button class="btn btn-danger btn-block" style="margin-top:8px;" id="cancelGo">Cancel order</button>
         </div>`;
       } else if (st === 'paid') {
-        html = `<div class="order-card ok"><div class="verdict ok">Paid — send customer to the pump</div>
+        html = `<div class="order-card ok"><div class="verdict ok">${A.icon('checkCircle', 24)} Paid — send customer to the pump</div>
           <div class="qrbox" id="qrBox"></div>
           <div style="text-align:center"><span class="code-chip" style="font-size:24px;">${esc(o.code)}</span></div>
           <div class="big-what" style="font-size:22px;text-align:center;">${esc(T.describe(o))}</div>
           ${orderKv(o)}
-          <button class="btn btn-primary btn-block" style="margin-top:12px;" id="printGo">🖨 Print slip</button></div>`;
+          <button class="btn btn-primary btn-block" style="margin-top:12px;" id="printGo">${A.icon('printer', 18)} Print slip</button></div>`;
       } else {
         const msg = st === 'fulfilled' ? `Already filled ${A.fmtDateTime(o.fulfilledAt)}` : st === 'expired' ? 'Expired — not paid within 12 hours. Make a new order.' : (T.STATUS[st] || {}).label;
-        html = `<div class="order-card bad"><div class="verdict bad">${esc(msg)}</div>
+        html = `<div class="order-card bad"><div class="verdict bad">${A.icon('stop', 24)} ${esc(msg)}</div>
           <div class="big-what" style="font-size:22px;">${esc(T.describe(o))} · ${T.money(o.amount)}</div>${orderKv(o)}
           ${st === 'expired' ? '<button class="btn btn-danger btn-block" style="margin-top:10px;" id="cancelGo">Close this order</button>' : ''}</div>`;
       }
@@ -230,17 +230,17 @@
     function renderLive() {
       const pending = live.filter(o => T.effectiveStatus(o) === 'pending').sort((a, b) => (T.toDate(a.createdAt) || 0) - (T.toDate(b.createdAt) || 0));
       const paid = live.filter(o => o.status === 'paid');
-      $('#pendN').textContent = pending.length; $('#paidN').textContent = paid.length;
+      A.safe('#pendN').textContent = pending.length; A.safe('#paidN').textContent = paid.length;
       A.setCount('cashier', pending.length);
-      $('#pendingList').innerHTML = pending.length ? pending.map(o => orderRow(o)).join('') : '<div class="empty">No orders waiting</div>';
-      $('#paidList').innerHTML = paid.length ? paid.map(o => orderRow(o, `<span class="badge gold">${esc((o.payMethod || '').toUpperCase())}</span>`)).join('') : '<div class="empty">None</div>';
+      A.safe('#pendingList').innerHTML = pending.length ? pending.map(o => orderRow(o)).join('') : '<div class="empty">No orders waiting</div>';
+      A.safe('#paidList').innerHTML = paid.length ? paid.map(o => orderRow(o, `<span class="badge gold">${esc((o.payMethod || '').toUpperCase())}</span>`)).join('') : '<div class="empty">None</div>';
       const today = T.dayStr();
       const mine = live.filter(o => o.paidBy === A.user.uid && ['paid', 'fulfilled'].includes(o.status) && T.dayStr(T.toDate(o.paidAt) || new Date()) === today);
       const sum = f => mine.filter(f).reduce((s, o) => s + o.amount, 0);
-      $('#kTotal').textContent = T.money(sum(() => true));
-      $('#kCount').textContent = mine.length;
-      $('#kCash').textContent = T.money(sum(o => o.payMethod === 'cash'));
-      $('#kMomo').textContent = T.money(sum(o => o.payMethod !== 'cash'));
+      A.safe('#kTotal').textContent = T.money(sum(() => true));
+      A.safe('#kCount').textContent = mine.length;
+      A.safe('#kCash').textContent = T.money(sum(o => o.payMethod === 'cash'));
+      A.safe('#kMomo').textContent = T.money(sum(o => o.payMethod !== 'cash'));
     }
     el.addEventListener('click', e => {
       const r = e.target.closest('[data-oid]'); if (!r) return;
@@ -269,10 +269,10 @@
         <label style="display:flex;gap:8px;align-items:center;margin-top:18px;"><input type="checkbox" id="wNew"> New cylinder (no empty)</label></div></div>
       <div class="grid2"><div class="field"><label>Customer name (optional)</label><input id="wName" maxlength="60"></div>
         <div class="field"><label>Phone (optional)</label><input id="wPhone" type="tel" inputmode="tel"></div></div>
-      <div class="paymethods" id="wPay"><button type="button" data-p="cash">💵 Cash</button><button type="button" data-p="momo">📱 MoMo</button><button type="button" data-p="card">💳 Card</button></div>
+      <div class="paymethods" id="wPay"><button type="button" data-p="cash">${A.icon('cash', 22)}Cash</button><button type="button" data-p="momo">${A.icon('momo', 22)}MoMo</button><button type="button" data-p="card">${A.icon('card', 22)}Card</button></div>
       <div id="wMomoBox" class="field hidden"><label>MoMo transaction ID</label><input id="wMomo" autocomplete="off"></div>
       <div class="panel" style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 12px;"><span id="wSum" style="color:var(--muted)"></span><b class="big-amt" id="wTotal"></b></div>
-      <button class="btn btn-safe btn-xl btn-block" id="wGo">✓ Paid — issue QR</button>`, { wide: true });
+      <button class="btn btn-safe btn-xl btn-block" id="wGo">${A.icon('check', 22)} Paid — issue QR</button>`, { wide: true });
     const q = s => el.querySelector(s);
     function render() {
       q('#wType').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === st.type));
@@ -382,9 +382,9 @@
         <div>
           <div class="panel">
             <h3>Check customer <small>${esc(T.outletName(outlet))} station</small></h3>
-            <button class="btn btn-primary btn-xl btn-block" id="scanBtn">📷 Scan QR code</button>
+            <button class="btn btn-primary btn-xl btn-block" id="scanBtn">${A.icon('scan', 24)} Scan QR code</button>
             <div id="scanBox"></div>
-            <p style="text-align:center;color:var(--muted);margin:14px 0 6px;">or type the 4-digit code</p>
+            <div class="divider">or type the 4-digit code</div>
             <form class="codebox" id="pCodeForm"><input inputmode="numeric" autocomplete="off" maxlength="4" placeholder="····" aria-label="4-digit order code"></form>
           </div>
           <div id="pumpSlot"></div>
@@ -411,7 +411,7 @@
     });
 
     function verdictOnly(tone, msg, more = '') {
-      slot.innerHTML = `<div class="order-card ${tone}"><div class="verdict ${tone}">${esc(msg)}</div>${more}</div>`;
+      slot.innerHTML = `<div class="order-card ${tone}"><div class="verdict ${tone}">${A.icon(tone === 'ok' ? 'checkCircle' : 'stop', 24)}${esc(msg)}</div>${more}</div>`;
       slot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
@@ -429,13 +429,13 @@
         ? `<div class="big-what">Hand over ${o.qty} × full ${esc(o.size)}</div><p style="font-size:16px;">${o.withCylinder ? 'New cylinder sold — no empty to collect.' : `Collect ${o.qty} empty ${esc(o.size)} cylinder${o.qty > 1 ? 's' : ''}.`}</p>`
         : `<div class="big-what">Fill ${o.kg} kg${o.mode === 'size' && o.size ? ` <small style="font-size:16px;color:var(--muted)">(${esc(o.size)} cylinder)</small>` : ''}</div>
            <p style="color:var(--muted)">${o.type === 'autogas' ? 'Vehicle autogas' : 'Cylinder refill'} · weigh on the certified scale.</p>`;
-      slot.innerHTML = `<div class="order-card ok"><div class="verdict ok">✓ PAID — FILL NOW</div>
+      slot.innerHTML = `<div class="order-card ok"><div class="verdict ok">${A.icon('checkCircle', 24)} PAID — FILL NOW</div>
         <div style="display:flex;justify-content:space-between;align-items:center;"><span class="code-chip" style="font-size:22px;">${esc(o.code)}</span><b class="big-amt" style="font-size:20px;">${T.money(o.amount)}</b></div>
         ${instr}${orderKv(o)}
         ${o.type !== 'exchange' ? `<div class="grid2" style="margin-top:12px;"><div class="field"><label>Actual kg dispensed</label><input id="dKg" type="number" step="0.01" inputmode="decimal" value="${o.kg}"></div>
           <div class="field"><label>Note (optional)</label><input id="dNote" maxlength="120"></div></div>`
           : `<div class="field" style="margin-top:12px;"><label>Note (optional)</label><input id="dNote" maxlength="120"></div>`}
-        <button class="btn btn-safe btn-xl btn-block" id="fillGo">✓ Filled — complete order</button></div>`;
+        <button class="btn btn-safe btn-xl btn-block" id="fillGo">${A.icon('check', 22)} Filled — complete order</button></div>`;
       slot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       $('#fillGo').onclick = async () => {
         const kgIn = $('#dKg') ? parseFloat($('#dKg').value) : null;
@@ -446,7 +446,7 @@
         try {
           await fulfil(o, kgIn, $('#dNote').value.trim());
           A.toast(`Order ${o.code} complete`);
-          verdictOnly('ok', `✓ Order ${o.code} filled`, `<p style="color:var(--muted)">${esc(T.describe(o))}</p>`);
+          verdictOnly('ok', `Order ${o.code} filled`, `<p style="color:var(--muted)">${esc(T.describe(o))}</p>`);
           codeIn.value = '';
         } catch (e) {
           $('#fillGo').disabled = false;
@@ -492,11 +492,11 @@
       const done = live.filter(o => o.status === 'fulfilled' && T.dayStr(T.toDate(o.fulfilledAt) || new Date()) === today)
         .sort((a, b) => (T.toDate(b.fulfilledAt) || 0) - (T.toDate(a.fulfilledAt) || 0));
       A.setCount('pump', waiting.length);
-      $('#waitN').textContent = waiting.length;
-      $('#waitList').innerHTML = waiting.length ? waiting.map(o => orderRow(o, `<small style="color:var(--muted)">paid ${A.fmtTime(o.paidAt)}</small>`)).join('') : '<div class="empty">Nobody waiting</div>';
-      $('#doneList').innerHTML = done.length ? done.slice(0, 12).map(o => orderRow(o, `<small style="color:var(--muted)">${A.fmtTime(o.fulfilledAt)}</small>`)).join('') : '<div class="empty">None yet today</div>';
-      $('#kFilled').textContent = done.length;
-      $('#kKg').textContent = T.round2(done.filter(o => o.type !== 'exchange').reduce((s, o) => s + (o.dispensedKg || o.kg || 0), 0));
+      A.safe('#waitN').textContent = waiting.length;
+      A.safe('#waitList').innerHTML = waiting.length ? waiting.map(o => orderRow(o, `<small style="color:var(--muted)">paid ${A.fmtTime(o.paidAt)}</small>`)).join('') : '<div class="empty">Nobody waiting</div>';
+      A.safe('#doneList').innerHTML = done.length ? done.slice(0, 12).map(o => orderRow(o, `<small style="color:var(--muted)">${A.fmtTime(o.fulfilledAt)}</small>`)).join('') : '<div class="empty">None yet today</div>';
+      A.safe('#kFilled').textContent = done.length;
+      A.safe('#kKg').textContent = T.round2(done.filter(o => o.type !== 'exchange').reduce((s, o) => s + (o.dispensedKg || o.kg || 0), 0));
     });
   };
 
@@ -509,7 +509,7 @@
       ${o.status === 'paid' && o.qrToken ? '<div class="qrbox" id="mq"></div>' : ''}
       ${orderKv(o, `<dt>Order ID</dt><dd class="mono" style="font-size:11px;">${esc(o.id)}</dd>`)}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-        ${o.status === 'paid' ? '<button class="btn btn-primary" data-a="print">🖨 Print slip</button>' : ''}
+        ${o.status === 'paid' ? `<button class="btn btn-primary" data-a="print">${A.icon('printer', 18)} Print slip</button>` : ''}
         ${st === 'pending' || st === 'expired' ? '<button class="btn btn-danger" data-a="cancel">Cancel order</button>' : ''}
         ${o.status === 'paid' && canManage ? '<button class="btn btn-danger" data-a="refund">Refund</button>' : ''}
         <a class="btn" href="order.html?id=${encodeURIComponent(o.id)}" target="_blank" rel="noopener">Customer page ↗</a>
@@ -533,7 +533,7 @@
         <select id="oStatus"><option value="all">All statuses</option>${Object.entries(T.STATUS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('')}</select>
         <select id="oType"><option value="all">All types</option><option value="refill">Refill</option><option value="exchange">Exchange</option><option value="autogas">Autogas</option></select>
         <input class="grow" id="oQ" placeholder="Search code, name or phone" type="search">
-        <button class="btn btn-sm" id="oCsv">⬇ CSV</button>
+        <button class="btn btn-sm" id="oCsv">${A.icon('download', 16)} CSV</button>
       </div>
       <div class="kpis" id="oKpis"></div>
       <div class="table-wrap"><table><thead><tr><th>Time</th><th>Code</th><th>Station</th><th>Customer</th><th>Order</th><th class="num">Amount</th><th>Pay</th><th>Status</th></tr></thead><tbody id="oBody"></tbody></table></div></div>`;
@@ -545,19 +545,19 @@
     function render() {
       const list = filtered();
       const sold = rows.filter(o => ['paid', 'fulfilled'].includes(o.status));
-      $('#oKpis').innerHTML = `
+      A.safe('#oKpis').innerHTML = `
         <div class="kpi gold"><div class="v">${T.money(sold.reduce((s, o) => s + o.amount, 0))}</div><div class="l">Paid sales</div></div>
         <div class="kpi"><div class="v">${rows.length}</div><div class="l">Orders</div></div>
         <div class="kpi warn"><div class="v">${rows.filter(o => T.effectiveStatus(o) === 'pending').length}</div><div class="l">Awaiting payment</div></div>
         <div class="kpi safe"><div class="v">${rows.filter(o => o.status === 'fulfilled').length}</div><div class="l">Filled</div></div>`;
-      $('#oBody').innerHTML = list.length ? list.map(o => `<tr class="click" data-oid="${o.id}">
+      A.safe('#oBody').innerHTML = list.length ? list.map(o => `<tr class="click" data-oid="${o.id}">
         <td class="mono">${A.fmtTime(o.createdAt)}</td><td><span class="code-chip" style="font-size:13px;">${esc(o.code)}</span></td>
         <td>${esc(T.outletName(o.outlet))}</td><td>${esc(o.customerName || 'Walk-in')}<br><small class="mono" style="color:var(--muted)">${o.phone !== '0000000000' ? esc(o.phone) : ''}</small></td>
         <td>${esc(T.describe(o))}</td><td class="num">${T.money(o.amount)}</td><td>${esc((o.payMethod || o.payPref || '').toUpperCase())}</td><td>${A.statusBadge(o)}</td></tr>`).join('')
         : '<tr><td colspan="8" class="empty">No orders</td></tr>';
     }
     async function load() {
-      $('#oBody').innerHTML = '<tr><td colspan="8" class="empty">Loading…</td></tr>';
+      A.safe('#oBody').innerHTML = '<tr><td colspan="8" class="empty">Loading…</td></tr>';
       A.unsubs.forEach(u => u()); A.unsubs = [];
       const outlets = A.outletsInScope();
       const all = outlets.length === T.OUTLETS.length && A.isHQ();
@@ -617,7 +617,7 @@
     const variance = () => {
       const d = A.formData(f);
       const v = T.round2((+d.cash || 0) + (+d.momo || 0) + (+d.card || 0) - exp.cash - exp.momo - exp.card);
-      $('#cuVar').innerHTML = d.cash === '' ? '' : `<span class="badge ${Math.abs(v) < 0.01 ? 'safe' : v < 0 ? 'danger' : 'warn'}">${v < 0 ? 'Short' : v > 0 ? 'Over' : 'Balanced'} ${T.money(Math.abs(v))}</span>`;
+      A.safe('#cuVar').innerHTML = d.cash === '' ? '' : `<span class="badge ${Math.abs(v) < 0.01 ? 'safe' : v < 0 ? 'danger' : 'warn'}">${v < 0 ? 'Short' : v > 0 ? 'Over' : 'Balanced'} ${T.money(Math.abs(v))}</span>`;
       return v;
     };
     f.oninput = variance;
@@ -636,9 +636,9 @@
     };
     try {
       const list = await A.fetchOps('cashups', [outlet], A.daysBack(14));
-      $('#cuList').innerHTML = list.length ? list.map(c => `<div class="list-row"><div class="grow"><b>${esc(c.cashier)}</b><small>${A.fmtDay(c.day)} · ${c.payments} payments · expected ${T.money(c.expectedCash + c.expectedMomo + c.expectedCard)}${c.notes ? ' · ' + esc(c.notes) : ''}</small></div>
+      A.safe('#cuList').innerHTML = list.length ? list.map(c => `<div class="list-row"><div class="grow"><b>${esc(c.cashier)}</b><small>${A.fmtDay(c.day)} · ${c.payments} payments · expected ${T.money(c.expectedCash + c.expectedMomo + c.expectedCard)}${c.notes ? ' · ' + esc(c.notes) : ''}</small></div>
         <span class="badge ${Math.abs(c.variance) < 0.01 ? 'safe' : c.variance < 0 ? 'danger' : 'warn'}">${c.variance < 0 ? '−' : c.variance > 0 ? '+' : ''}${T.money(Math.abs(c.variance))}</span></div>`).join('') : '<div class="empty">No cash-ups yet</div>';
-    } catch (e) { $('#cuList').innerHTML = '<div class="empty">Could not load</div>'; }
+    } catch (e) { A.safe('#cuList').innerHTML = '<div class="empty">Could not load</div>'; }
   };
 
   // ── SHIFT NOTES ─────────────────────────────────────────────────────────
@@ -657,8 +657,8 @@
     };
     try {
       const list = await A.fetchOps('shiftNotes', outlets, A.daysBack(7));
-      $('#nList').innerHTML = list.length ? list.map(n => `<div class="list-row"><div class="grow">${n.priority === 'high' ? '<span class="badge danger">Important</span> ' : ''}${esc(n.note)}
+      A.safe('#nList').innerHTML = list.length ? list.map(n => `<div class="list-row"><div class="grow">${n.priority === 'high' ? '<span class="badge danger">Important</span> ' : ''}${esc(n.note)}
         <small>${esc(n.byName)} · ${esc(T.outletName(n.outlet))} · ${A.fmtDateTime(n.at)}</small></div></div>`).join('') : '<div class="empty">No notes</div>';
-    } catch (e) { $('#nList').innerHTML = '<div class="empty">Could not load</div>'; }
+    } catch (e) { A.safe('#nList').innerHTML = '<div class="empty">Could not load</div>'; }
   };
 })();
