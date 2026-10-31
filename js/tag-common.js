@@ -14,12 +14,15 @@
     appId: "1:533855152730:web:8f92468605c6e25a458663"
   };
 
+  // `site` is the station id used by js/company-info.js on the public pages.
   const OUTLETS = [
-    { id: 'accra',   name: 'Accra',   label: 'Accra (Head Office)' },
-    { id: 'antoa',   name: 'Antoa',   label: 'Antoa' },
-    { id: 'bonwire', name: 'Bonwire', label: 'Bonwire' },
-    { id: 'bogoso',  name: 'Bogoso',  label: 'Bogoso' },
-    { id: 'prestea', name: 'Prestea', label: 'Prestea' }
+    { id: 'accra',   name: 'Agbogba', label: 'Agbogba (Accra head office)', site: 1 },
+    { id: 'klagon',  name: 'Klagon',  label: 'Klagon',  site: 2 },
+    { id: 'apam',    name: 'Apam',    label: 'Apam',    site: 3 },
+    { id: 'antoa',   name: 'Antoa',   label: 'Antoa',   site: 4 },
+    { id: 'bonwire', name: 'Bonwire', label: 'Bonwire', site: 5 },
+    { id: 'bogoso',  name: 'Bogoso',  label: 'Bogoso',  site: 6 },
+    { id: 'prestea', name: 'Prestea', label: 'Prestea', site: 7 }
   ];
   const SIZES = ['3kg', '6kg', '12.5kg', '14.5kg'];
 

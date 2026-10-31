@@ -1,22 +1,26 @@
 /* Triple A Gas Service Worker — offline fallback only.
    Network first for our own files so price, order and portal updates show
    immediately; the cache is only used when there is no connection. */
-const CACHE_NAME = 'triple-a-gas-v3';
+const CACHE_NAME = 'triple-a-gas-v4';
 const ASSETS = [
   '/',
   '/index.html',
   '/order.html',
   '/products.html',
-  '/contact.html',
-  '/about.html',
-  '/find-us.html',
+  '/stations.html',
   '/safety.html',
-  '/site-polish.css',
-  '/apple-design.css',
-  '/modern-pages.css',
-  '/public-luxury.css',
+  '/faq.html',
+  '/about.html',
+  '/contact.html',
+  '/css/tokens.css',
+  '/css/public.css',
+  '/js/site-config.js',
+  '/js/company-info.js',
+  '/js/i18n.js',
+  '/js/main.js',
   '/js/tag-common.js',
   '/js/order-form.js',
+  '/js/site-live.js',
   '/images/offical_logo.png'
 ];
 

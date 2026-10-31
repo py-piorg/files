@@ -26,7 +26,7 @@ service cloud.firestore {
     function hasRole(roles) { return isStaff() && me().role in roles; }
     function isHQ() { return hasRole(['owner', 'coo']); }
     function atOutlet(o) { return isStaff() && (me().role in ['owner', 'coo'] || me().outlet == o); }
-    function outlets() { return ['accra', 'antoa', 'bonwire', 'bogoso', 'prestea']; }
+    function outlets() { return ['accra', 'klagon', 'apam', 'antoa', 'bonwire', 'bogoso', 'prestea']; }
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function near(a, b, tol) { return math.abs(a - b) <= tol; }
     function pad(n) { return n < 10 ? '0' + string(n) : string(n); }

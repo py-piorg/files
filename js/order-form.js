@@ -21,7 +21,7 @@
   };
 
   const css = `
-  .tom{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;background:rgba(24,8,12,.55);padding:20px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .tom{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;background:rgba(24,8,12,.55);padding:20px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
   .tom.open{display:flex;animation:tomFade .2s ease;}
   .tom *{box-sizing:border-box;}
   .tom-card{background:#fff;color:#1b1215;width:100%;max-width:540px;max-height:min(92vh,880px);border-radius:24px;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(30,6,12,.35);font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden;animation:tomRise .28s cubic-bezier(.2,.8,.2,1);}
@@ -281,6 +281,7 @@
     build();
     if (prefill && prefill.outlet) state.outlet = prefill.outlet;
     if (prefill && prefill.type) state.type = prefill.type;
+    if (prefill && prefill.size && T.SIZES.includes(prefill.size)) { state.size = prefill.size; if (state.type !== 'exchange') state.mode = 'size'; }
     render();
     document.getElementById('tagOrderModal').classList.add('open');
     document.body.style.overflow = 'hidden';
