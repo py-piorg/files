@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Order | Triple A Gas</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="images/offical_logo.png" type="image/png">
+<meta name="theme-color" content="#3E0B14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wine-900:#3E0B14;--wine-700:#6E1524;--wine-500:#A8283A;--wine-100:#F7E7EA;--gold:#C79A3D;--gold-pale:#F8EFDB;--safe:#2E7D32;--safe-pale:#E4F1E5;--ink:#221417;--steel-500:#7A6669;--steel-300:#D9C9CC;--steel-100:#F3EBEC;--paper:#fff;}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--steel-100);color:var(--ink);min-height:100vh;}
+header{background:var(--wine-900);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;}
+header img{height:30px;}
+header a{color:#fff;text-decoration:none;font-family:'Archivo Expanded',sans-serif;font-weight:800;font-size:14px;letter-spacing:.02em;}
+main{max-width:480px;margin:0 auto;padding:20px 16px 48px;}
+.card{background:var(--paper);border-radius:18px;padding:22px 20px;box-shadow:0 10px 30px rgba(62,11,20,.08);margin-bottom:14px;}
+.pill{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;border-radius:100px;}
+.pill.warn{background:var(--gold-pale);color:#7A5A12;}
+.pill.gold{background:#FDF0C8;color:#6B4E00;}
+.pill.safe{background:var(--safe-pale);color:var(--safe);}
+.pill.neutral{background:var(--steel-100);color:var(--steel-500);}
+.pill.danger{background:#FDE4E4;color:#B3261E;}
+h1{font-family:'Archivo Expanded',sans-serif;font-size:20px;margin:12px 0 6px;color:var(--wine-900);}
+.lead{color:var(--steel-500);font-size:14.5px;line-height:1.5;margin:0;}
+.code{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:64px;letter-spacing:.18em;text-align:center;color:var(--wine-900);background:var(--wine-100);border-radius:16px;padding:14px 0 10px;margin:18px 0 6px;}
+.code-label{text-align:center;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--steel-500);}
+.qr{background:#fff;border:2px solid var(--ink);border-radius:16px;padding:12px;margin:18px auto 8px;max-width:300px;}
+.qr svg{display:block;width:100%;height:auto;}
+.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0 0;}
+.steps li{counter-increment:s;position:relative;padding:0 0 12px 38px;font-size:14.5px;line-height:1.45;}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:26px;height:26px;border-radius:50%;background:var(--wine-500);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.steps li.done::before{content:'✓';background:var(--safe);}
+.rows{margin:0;}
+.rows div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--steel-100);font-size:14.5px;}
+.rows div:last-child{border-bottom:none;}
+.rows dt{color:var(--steel-500);}
+.rows dd{margin:0;font-weight:600;text-align:right;}
+.amount{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:700;color:var(--wine-500);}
+.momo{background:var(--gold-pale);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px;line-height:1.5;}
+.btn{display:block;width:100%;text-align:center;border:none;border-radius:12px;padding:14px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;min-height:48px;font-family:inherit;}
+.btn-primary{background:var(--wine-500);color:#fff;}
+.btn-ghost{background:transparent;color:var(--wine-700);border:1.5px solid var(--steel-300);margin-top:10px;}
+.muted{color:var(--steel-500);font-size:13px;text-align:center;margin-top:10px;}
+.list a{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--steel-100);text-decoration:none;color:var(--ink);font-size:14.5px;}
+.list a:last-child{border-bottom:none;}
+.list b{font-family:'IBM Plex Mono',monospace;font-size:18px;color:var(--wine-900);}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--steel-500);}
+.live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--safe);animation:p 1.6s infinite;}
+@keyframes p{50%{opacity:.3}}
+@media print{header,.btn,.no-print{display:none!important;}body{background:#fff;}.card{box-shadow:none;}}
+</style>
+</head>
+<body>
+<header><img src="images/offical_logo.png" alt=""><a href="index.html">TRIPLE A GAS</a></header>
+<main id="app"><div class="card"><p class="lead">Loading your order…</p></div></main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="js/tag-common.js"></script>
+<script>
+(function () {
+  const T = window.TAG;
+  const app = document.getElementById('app');
+  const id = new URLSearchParams(location.search).get('id');
+  let station = null;
+
+  function fmtTime(ts) {
+    const d = T.toDate(ts);
+    return d ? d.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+  }
+
+  function details(o) {
+    return `<dl class="rows">
+      <div><dt>Order</dt><dd>${T.esc(T.describe(o))}</dd></div>
+      <div><dt>Station</dt><dd>${T.esc(T.outletName(o.outlet))}</dd></div>
+      ${o.type !== 'exchange' ? `<div><dt>Price</dt><dd>${T.money(o.unitPrice)}/kg</dd></div>` : ''}
+      <div><dt>Name</dt><dd>${T.esc(o.customerName || '—')}</dd></div>
+      <div><dt>Placed</dt><dd>${fmtTime(o.createdAt)}</dd></div>
+      <div><dt>Total</dt><dd class="amount">${T.money(o.amount)}</dd></div>
+    </dl>`;
+  }
+
+  function render(o) {
+    const st = T.effectiveStatus(o);
+    const info = T.STATUS[st] || T.STATUS.pending;
+    let html = '';
+    if (st === 'pending') {
+      const momo = o.payPref === 'momo' && station && station.momoNumber
+        ? `<div class="momo"><b>Paying with Mobile Money?</b><br>Send <b>${T.money(o.amount)}</b> to <b>${T.esc(station.momoNumber)}</b>${station.momoName ? ` (${T.esc(station.momoName)})` : ''} and use <b>${T.esc(o.code)}</b> as the reference. Show the cashier your confirmation SMS.</div>` : '';
+      html = `<div class="card">
+          <span class="pill ${info.tone}">${info.label}</span> <span class="live">Live</span>
+          <h1>Go to the cashier</h1>
+          <p class="lead">At the <b>${T.esc(T.outletName(o.outlet))}</b> station, tell the cashier your code and pay.</p>
+          <div class="code" aria-label="Order code">${T.esc(o.code)}</div>
+          <div class="code-label">Your order code</div>
+          ${momo}
+          <ol class="steps">
+            <li class="done">Order placed</li>
+            <li>Pay <b>${T.money(o.amount)}</b> at the cashier (cash or MoMo)</li>
+            <li>Your QR code appears here automatically</li>
+            <li>Show the QR code at the pump to get filled</li>
+          </ol>
+        </div>
+        <div class="card">${details(o)}</div>
+        <button class="btn btn-ghost no-print" id="cancelBtn">Cancel this order</button>
+        <p class="muted">Unpaid orders expire after 12 hours.</p>`;
+    } else if (st === 'paid') {
+      html = `<div class="card" style="text-align:center;">
+          <span class="pill ${info.tone}">${info.label}</span>
+          <h1>Show this at the pump</h1>
+          <p class="lead">The pump attendant will scan this QR code and fill your order.</p>
+          <div class="qr" id="qr"></div>
+          <div class="code" style="font-size:40px;margin-top:8px;">${T.esc(o.code)}</div>
+          <div class="code-label">Backup code if scanning fails</div>
+          <p class="muted">Tip: turn your screen brightness up.</p>
+        </div>
+        <div class="card">${details(o)}
+          <dl class="rows"><div><dt>Paid</dt><dd>${fmtTime(o.paidAt)} · ${T.esc((o.payMethod || '').toUpperCase())}</dd></div></dl>
+        </div>`;
+    } else if (st === 'fulfilled') {
+      html = `<div class="card" style="text-align:center;">
+          <span class="pill ${info.tone}">${info.label}</span>
+          <h1>Thank you!</h1>
+          <p class="lead">Your gas has been filled. Here is your receipt.</p>
+        </div>
+        <div class="card">${details(o)}
+          <dl class="rows">
+            <div><dt>Paid</dt><dd>${fmtTime(o.paidAt)} · ${T.esc((o.payMethod || '').toUpperCase())}</dd></div>
+            <div><dt>Filled</dt><dd>${fmtTime(o.fulfilledAt)}</dd></div>
+            ${o.dispensedKg ? `<div><dt>Dispensed</dt><dd>${T.esc(o.dispensedKg)} kg</dd></div>` : ''}
+            <div><dt>Receipt no.</dt><dd style="font-family:'IBM Plex Mono',monospace;">${T.esc(id.slice(0, 8).toUpperCase())}</dd></div>
+          </dl>
+        </div>
+        <button class="btn btn-ghost no-print" onclick="window.print()">Print / save receipt</button>
+        <a class="btn btn-primary no-print" style="margin-top:10px;" href="index.html#order">Order again</a>`;
+    } else {
+      const why = st === 'expired' ? 'This order was not paid within 12 hours.'
+        : st === 'refunded' ? 'This order was refunded by the station.' : 'This order was cancelled.';
+      html = `<div class="card"><span class="pill ${info.tone}">${info.label}</span><h1>${info.label}</h1><p class="lead">${why}</p></div>
+        <div class="card">${details(o)}</div>
+        <a class="btn btn-primary" href="index.html#order">Place a new order</a>`;
+    }
+    app.innerHTML = html;
+    if (st === 'paid' && o.qrToken) T.renderQR(document.getElementById('qr'), T.qrPayload(id, o.qrToken), 8);
+    const c = document.getElementById('cancelBtn');
+    if (c) c.addEventListener('click', () => cancel(o));
+  }
+
+  async function cancel(o) {
+    if (!confirm(`Cancel order ${o.code}?`)) return;
+    try {
+      await T.init().db.collection('orders').doc(id).update({
+        status: 'cancelled', cancelReason: 'Cancelled by customer',
+        cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) { alert('Could not cancel. If you already paid, please speak to the cashier.'); }
+  }
+
+  function renderList() {
+    const mine = T.myOrders();
+    app.innerHTML = `<div class="card"><h1>My orders</h1>
+      ${mine.length ? `<div class="list">${mine.map(m => `<a href="order.html?id=${encodeURIComponent(m.id)}"><span>${T.esc(T.outletName(m.outlet))} · ${T.money(m.amount)}<br><small style="color:var(--steel-500)">${new Date(m.at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></span><b>${T.esc(m.code)}</b></a>`).join('')}</div>`
+        : '<p class="lead">No orders on this device yet.</p>'}
+      </div><a class="btn btn-primary" href="index.html#order">Order LPG</a>`;
+  }
+
+  if (!id) { renderList(); return; }
+  const { db } = T.init();
+  let last = null;
+  db.collection('orders').doc(id).onSnapshot(async snap => {
+    if (!snap.exists) { app.innerHTML = '<div class="card"><h1>Order not found</h1><p class="lead">Check the link, or place a new order.</p></div><a class="btn btn-primary" href="index.html#order">Order LPG</a>'; return; }
+    const o = snap.data();
+    if (!station) {
+      try { const s = await db.collection('stations').doc(o.outlet).get(); station = s.exists ? s.data() : {}; } catch (e) { station = {}; }
+    }
+    if (last && last.status !== o.status && navigator.vibrate) navigator.vibrate(200);
+    last = o;
+    T.rememberOrder({ id, code: o.code, outlet: o.outlet, amount: o.amount });
+    render(o);
+  }, err => {
+    console.error(err);
+    app.innerHTML = '<div class="card"><h1>Connection problem</h1><p class="lead">We could not load your order. Check your internet and refresh.</p></div>';
+  });
+  // Re-render once a minute so "expired" shows up without a refresh.
+  setInterval(() => { if (last && last.status === 'pending') render(last); }, 60000);
+})();
+</script>
+</body>
+</html>

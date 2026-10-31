@@ -1,0 +1,240 @@
+rules_version = '2';
+
+// ============================================================================
+//  TRIPLE A GAS — Firestore security rules
+//  Paste into Firebase Console → Firestore Database → Rules → Publish.
+//
+//  Roles (staff/{uid}.role):
+//    owner      everything, all stations, manages staff accounts
+//    coo        all stations: operations, pricing, finance (no staff accounts)
+//    manager    own station: cashier, pump, stock, expenses, reports, cancels
+//    cashier    own station: confirm payments, walk-in orders, cash-up
+//    attendant  own station: scan QR / code and mark orders filled, tank dips
+//    driver     own station: bulk deliveries
+//    secretary  own station: orders view, enquiries
+// ============================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── helpers ────────────────────────────────────────────────────────────
+    function signedIn() { return request.auth != null; }
+    function staffPath() { return /databases/$(database)/documents/staff/$(request.auth.uid); }
+    function me() { return get(staffPath()).data; }
+    function isStaff() { return signedIn() && exists(staffPath()) && me().active == true; }
+    function hasRole(roles) { return isStaff() && me().role in roles; }
+    function isHQ() { return hasRole(['owner', 'coo']); }
+    function atOutlet(o) { return isStaff() && (me().role in ['owner', 'coo'] || me().outlet == o); }
+    function outlets() { return ['accra', 'antoa', 'bonwire', 'bogoso', 'prestea']; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function near(a, b, tol) { return math.abs(a - b) <= tol; }
+    function pad(n) { return n < 10 ? '0' + string(n) : string(n); }
+    function today() {
+      return string(request.time.year()) + '-' + pad(request.time.month()) + '-' + pad(request.time.day());
+    }
+    function pricing() { return get(/databases/$(database)/documents/settings/pricing).data; }
+
+    // ── staff accounts ─────────────────────────────────────────────────────
+    function validStaff() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['name', 'username', 'role', 'outlet', 'phone', 'active', 'createdAt', 'createdBy', 'updatedAt'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 60
+        && d.username is string && d.username.matches('^[a-z0-9._-]{3,30}$')
+        && d.role in ['owner', 'coo', 'manager', 'cashier', 'attendant', 'driver', 'secretary']
+        && d.outlet in outlets()
+        && d.active is bool;
+    }
+    // The very first sign-up becomes the owner, once, in the same batch that
+    // creates settings/bootstrap. After that only the owner can add staff.
+    function bootstrapOwner(uid) {
+      return signedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'owner' && request.resource.data.active == true
+        && !exists(/databases/$(database)/documents/settings/bootstrap)
+        && existsAfter(/databases/$(database)/documents/settings/bootstrap);
+    }
+
+    match /staff/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isHQ()
+                    || (hasRole(['manager']) && resource.data.outlet == me().outlet));
+      allow list: if isHQ() || (hasRole(['manager']) && resource.data.outlet == me().outlet);
+      allow create: if validStaff() && (hasRole(['owner']) || bootstrapOwner(uid));
+      // Owner edits anyone, but can never deactivate or demote themselves.
+      allow update: if hasRole(['owner']) && validStaff()
+                    && (uid != request.auth.uid || (request.resource.data.role == 'owner' && request.resource.data.active == true));
+      allow delete: if false;
+    }
+
+    // ── settings ───────────────────────────────────────────────────────────
+    match /settings/{doc} {
+      allow read: if doc in ['pricing', 'stationStatus', 'bootstrap'] || isStaff();
+      allow create: if doc == 'bootstrap' && signedIn()
+                    && request.resource.data.ownerUid == request.auth.uid
+                    && existsAfter(staffPath())
+                    && getAfter(staffPath()).data.role == 'owner';
+      allow update: if (doc == 'pricing' && isHQ() && validPricing())
+                    || (doc == 'stationStatus' && hasRole(['owner', 'coo', 'manager']));
+      allow create: if (doc == 'pricing' && isHQ() && validPricing())
+                    || (doc == 'stationStatus' && hasRole(['owner', 'coo', 'manager']));
+      allow delete: if false;
+    }
+    function validPricing() {
+      let d = request.resource.data;
+      return d.perKg is number && d.perKg > 0 && d.perKg < 200
+        && d.autogasPerKg is number && d.autogasPerKg > 0 && d.autogasPerKg < 200
+        && d.exchange is map && d.deposit is map;
+    }
+
+    match /priceHistory/{id} {
+      allow read: if isStaff();
+      allow create: if isHQ() && request.resource.data.by == request.auth.uid;
+    }
+
+    // ── stations (public info) & stock (staff only) ────────────────────────
+    match /stations/{id} {
+      allow read: if true;
+      allow create, delete: if hasRole(['owner']) && id in outlets();
+      allow update: if isHQ()
+        || (hasRole(['manager']) && me().outlet == id
+            && changed().hasOnly(['open', 'status', 'note', 'hours', 'momoNumber', 'momoName', 'updatedAt']));
+    }
+
+    match /stock/{id} {
+      allow read: if atOutlet(id);
+      allow create: if isHQ() && id in outlets();
+      // Everyone on the station can move stock levels (fills, deliveries, dips);
+      // only managers/HQ can change thresholds and capacity.
+      allow update: if (atOutlet(id) && changed().hasOnly(['stockKg', 'cylFull', 'cylEmpty', 'updatedAt', 'updatedBy']))
+                    || hasRole(['owner', 'coo']) || (hasRole(['manager']) && me().outlet == id);
+    }
+
+    // ── order codes: 4-digit code → order id, unique per station ───────────
+    function validCode(cid) {
+      let d = request.resource.data;
+      let o = /databases/$(database)/documents/orders/$(d.orderId);
+      return d.keys().hasOnly(['orderId', 'expiresAt'])
+        && d.expiresAt is timestamp && d.expiresAt <= request.time + duration.value(13, 'h')
+        && existsAfter(o)
+        && getAfter(o).data.outlet + '_' + getAfter(o).data.code == cid
+        && getAfter(o).data.status == 'pending';
+    }
+    match /orderCodes/{cid} {
+      allow get: if isStaff();
+      allow list: if false;
+      allow create: if validCode(cid);
+      // A code whose order went stale can be claimed again by a new order.
+      allow update: if (resource.data.expiresAt < request.time && validCode(cid))
+                    || (isStaff() && changed().hasOnly(['expiresAt']));
+      allow delete: if isStaff();
+    }
+
+    // ── orders ─────────────────────────────────────────────────────────────
+    function validNewOrder(id) {
+      let d = request.resource.data;
+      let p = pricing();
+      let codeDoc = /databases/$(database)/documents/orderCodes/$(d.outlet + '_' + d.code);
+      return d.keys().hasOnly(['code', 'outlet', 'type', 'mode', 'kg', 'size', 'qty', 'withCylinder', 'amount',
+                               'unitPrice', 'customerName', 'phone', 'payPref', 'status', 'createdAt', 'day',
+                               'source', 'createdBy', 'createdByName', 'notes'])
+        && d.status == 'pending'
+        && d.createdAt == request.time
+        && d.day == today()
+        && d.code is string && d.code.matches('^[0-9]{4}$')
+        && d.outlet in outlets()
+        && d.phone is string && d.phone.size() >= 9 && d.phone.size() <= 20
+        && d.customerName is string && d.customerName.size() <= 60
+        && d.payPref in ['cash', 'momo']
+        && d.amount is number && d.amount >= 1 && d.amount <= 100000
+        && (
+          (d.type == 'refill' && d.kg is number && d.kg >= 0.5 && d.kg <= 1000
+             && d.unitPrice == p.perKg && near(d.amount, d.kg * p.perKg, 0.1))
+          || (d.type == 'autogas' && d.kg is number && d.kg >= 0.5 && d.kg <= 300
+             && d.unitPrice == p.autogasPerKg && near(d.amount, d.kg * p.autogasPerKg, 0.1))
+          || (d.type == 'exchange' && d.size in p.exchange && d.qty is int && d.qty >= 1 && d.qty <= 5
+             && near(d.amount, d.qty * (p.exchange[d.size] + (d.withCylinder == true ? p.deposit[d.size] : 0)), 0.01))
+        )
+        && existsAfter(codeDoc) && getAfter(codeDoc).data.orderId == id;
+    }
+
+    match /orders/{id} {
+      // Order ids are random and only shared with the customer who placed it.
+      allow get: if true;
+      allow list: if isHQ() || (isStaff() && resource.data.outlet == me().outlet);
+
+      allow create: if validNewOrder(id) && (
+          (request.resource.data.source == 'online' && !('createdBy' in request.resource.data))
+          || (request.resource.data.source == 'walkin' && atOutlet(request.resource.data.outlet)
+              && request.resource.data.createdBy == request.auth.uid));
+
+      allow update: if
+          // customer (or staff) cancels an unpaid order
+          (resource.data.status == 'pending' && request.resource.data.status == 'cancelled'
+            && changed().hasOnly(['status', 'cancelledAt', 'cancelledBy', 'cancelReason'])
+            && request.resource.data.cancelledAt == request.time)
+          // cashier confirms payment and issues the QR token
+          || (hasRole(['owner', 'coo', 'manager', 'cashier']) && atOutlet(resource.data.outlet)
+            && resource.data.status == 'pending' && request.resource.data.status == 'paid'
+            && resource.data.createdAt > request.time - duration.value(12, 'h')
+            && changed().hasOnly(['status', 'paidAt', 'paidBy', 'paidByName', 'payMethod', 'momoRef', 'qrToken', 'amountReceived'])
+            && request.resource.data.paidBy == request.auth.uid
+            && request.resource.data.paidAt == request.time
+            && request.resource.data.payMethod in ['cash', 'momo', 'card']
+            && request.resource.data.qrToken is string && request.resource.data.qrToken.size() >= 12)
+          // pump attendant fills the order
+          || (hasRole(['owner', 'coo', 'manager', 'attendant']) && atOutlet(resource.data.outlet)
+            && resource.data.status == 'paid' && request.resource.data.status == 'fulfilled'
+            && changed().hasOnly(['status', 'fulfilledAt', 'fulfilledBy', 'fulfilledByName', 'dispensedKg', 'fillNote'])
+            && request.resource.data.fulfilledBy == request.auth.uid
+            && request.resource.data.fulfilledAt == request.time)
+          // manager / HQ cancels or refunds a paid order
+          || (hasRole(['owner', 'coo', 'manager']) && atOutlet(resource.data.outlet)
+            && resource.data.status == 'paid' && request.resource.data.status == 'refunded'
+            && changed().hasOnly(['status', 'cancelledAt', 'cancelledBy', 'cancelReason'])
+            && request.resource.data.cancelledBy == request.auth.uid);
+      allow delete: if false;
+    }
+
+    // ── station operations records ─────────────────────────────────────────
+    function opsCreators(col) {
+      return col == 'deliveries' ? ['owner', 'coo', 'manager', 'driver']
+        : col == 'expenses'      ? ['owner', 'coo', 'manager']
+        : col == 'inspections'   ? ['owner', 'coo', 'manager', 'attendant']
+        : col == 'dips'          ? ['owner', 'coo', 'manager', 'attendant']
+        : col == 'cashups'       ? ['owner', 'coo', 'manager', 'cashier']
+        : col == 'shiftNotes'    ? ['owner', 'coo', 'manager', 'cashier', 'attendant', 'driver', 'secretary']
+        : [];
+    }
+    match /{col}/{id} {
+      allow read: if col in ['deliveries', 'expenses', 'inspections', 'dips', 'cashups', 'shiftNotes']
+                  && (isHQ() || (isStaff() && resource.data.outlet == me().outlet));
+      allow create: if col in ['deliveries', 'expenses', 'inspections', 'dips', 'cashups', 'shiftNotes']
+                    && hasRole(opsCreators(col))
+                    && atOutlet(request.resource.data.outlet)
+                    && request.resource.data.by == request.auth.uid
+                    && request.resource.data.day is string;
+      allow update, delete: if col in ['deliveries', 'expenses', 'inspections', 'dips', 'cashups', 'shiftNotes']
+                    && (isHQ() || (hasRole(['manager']) && resource.data.outlet == me().outlet));
+    }
+
+    // ── payroll (HQ only) ──────────────────────────────────────────────────
+    match /payroll/{id} {
+      allow read, write: if isHQ();
+    }
+
+    // ── audit trail: append-only ───────────────────────────────────────────
+    match /audit/{id} {
+      allow read: if isHQ();
+      allow create: if isStaff() && request.resource.data.by == request.auth.uid
+                    && request.resource.data.at == request.time;
+      allow update, delete: if false;
+    }
+
+    // ── public enquiries (contact form) ────────────────────────────────────
+    match /enquiries/{id} {
+      allow create: if request.resource.data.size() <= 20
+                    && request.resource.data.get('notes', '').size() <= 2000
+                    && request.resource.data.get('reviewed', false) == false;
+      allow read: if hasRole(['owner', 'coo', 'secretary', 'manager']);
+      allow update: if hasRole(['owner', 'coo', 'secretary', 'manager'])
+                    && changed().hasOnly(['reviewed', 'reviewedAt', 'reviewedBy']);
+    }
+  }
+}

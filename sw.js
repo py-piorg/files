@@ -1,64 +1,51 @@
-/* Triple A Gas Service Worker — PWA & Offline Support */
-const CACHE_NAME = 'triple-a-gas-v2';
+/* Triple A Gas Service Worker — offline fallback only.
+   Network first for our own files so price, order and portal updates show
+   immediately; the cache is only used when there is no connection. */
+const CACHE_NAME = 'triple-a-gas-v3';
 const ASSETS = [
   '/',
   '/index.html',
-  '/admin.html',
+  '/order.html',
   '/products.html',
   '/contact.html',
   '/about.html',
   '/find-us.html',
   '/safety.html',
-  '/accra.html',
-  '/antoa.html',
-  '/bonwire.html',
-  '/bogoso.html',
-  '/prestea.html',
   '/site-polish.css',
   '/apple-design.css',
   '/modern-pages.css',
   '/public-luxury.css',
-  '/firebase-db.js',
+  '/js/tag-common.js',
+  '/js/order-form.js',
   '/images/offical_logo.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => console.warn('PWA Cache prefetch warning:', err));
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(err => console.warn('PWA cache prefetch warning:', err)))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      );
-    })
+    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  // Only cache GET requests, skip Firestore / API requests for dynamic handling
-  if (event.request.method !== 'GET' || event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('/api/')) {
-    return;
-  }
+  const url = new URL(event.request.url);
+  // Only handle our own GET requests; Firebase, CDNs and the staff portal always go to the network.
+  if (event.request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/admin')) return;
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const fetchPromise = fetch(event.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-        }
-        return networkResponse;
-      }).catch(() => cached);
-
-      return cached || fetchPromise;
-    })
+    fetch(event.request).then(res => {
+      if (res && res.status === 200 && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      }
+      return res;
+    }).catch(() => caches.match(event.request).then(c => c || caches.match('/index.html')))
   );
 });
